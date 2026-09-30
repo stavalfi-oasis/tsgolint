@@ -39,6 +39,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_misused_spread"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_mixed_enums"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_redundant_type_constituents"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_string_error"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unnecessary_boolean_literal_compare"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unnecessary_condition"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unnecessary_qualifier"
@@ -179,6 +180,7 @@ var allRules = []rule.Rule{
 	no_misused_spread.NoMisusedSpreadRule,
 	no_mixed_enums.NoMixedEnumsRule,
 	no_redundant_type_constituents.NoRedundantTypeConstituentsRule,
+	no_string_error.NoStringErrorRule,
 	no_unnecessary_boolean_literal_compare.NoUnnecessaryBooleanLiteralCompareRule,
 	no_unnecessary_condition.NoUnnecessaryConditionRule,
 	no_unnecessary_qualifier.NoUnnecessaryQualifierRule,
