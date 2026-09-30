@@ -28,7 +28,15 @@ func IsZodSchemaType(typeChecker *checker.Checker, node *ast.Node) bool {
 // ExtendsDisposable walks the base-class chain, so a class extending a subclass
 // of ADisposable is covered. The JS rules compared `superClass.name` to the
 // literal string, so they only ever saw direct subclasses spelled that way.
+// Types only ever *add* coverage here: the syntactic check below is what the JS
+// rules did, and it still answers in files where the base class cannot be
+// resolved — an untyped or `@ts-nocheck` file, or a synthesized snippet. The
+// type walk adds the transitive and aliased cases on top.
 func ExtendsDisposable(typeChecker *checker.Checker, class *ast.Node) bool {
+	if extendsDisposableByName(class) {
+		return true
+	}
+
 	t := typeChecker.GetTypeAtLocation(class)
 	if t == nil {
 		return false
@@ -55,6 +63,28 @@ func ExtendsDisposable(typeChecker *checker.Checker, class *ast.Node) bool {
 	for _, base := range checker.Checker_getBaseTypes(typeChecker, t) {
 		if walk(base) {
 			return true
+		}
+	}
+	return false
+}
+
+// The heritage clause spelled literally, which is all the JS rules ever checked.
+func extendsDisposableByName(class *ast.Node) bool {
+	clauses := class.ClassLikeData().HeritageClauses
+	if clauses == nil {
+		return false
+	}
+	for _, heritage := range clauses.Nodes {
+		clause := heritage.AsHeritageClause()
+		if clause.Token != ast.KindExtendsKeyword {
+			continue
+		}
+		for _, typeNode := range clause.Types.Nodes {
+			expression := typeNode.Expression()
+			if expression != nil && ast.IsIdentifier(expression) &&
+				expression.Text() == DisposableBaseName {
+				return true
+			}
 		}
 	}
 	return false
