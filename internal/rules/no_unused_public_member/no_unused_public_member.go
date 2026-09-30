@@ -67,8 +67,13 @@ func enclosingClass(node *ast.Node) *ast.Node {
 }
 
 type usage struct {
-	// Members referenced from outside their own class body, anywhere in the program.
-	external map[*ast.Symbol]bool
+	// Member *declarations* referenced from outside their own class body,
+	// anywhere in the program. Keyed by declaration node, never by symbol: each
+	// linter worker runs its own checker and those hand back distinct
+	// *ast.Symbol values for the same member, so a symbol-keyed index silently
+	// misses every lookup made by a different worker than the one that built it.
+	// The AST is shared, so declaration nodes are not.
+	external map[*ast.Node]bool
 }
 
 // One index per program. Every file's run needs program-wide answers, so
@@ -106,7 +111,7 @@ func programUsage(typeChecker *checker.Checker, program *compiler.Program) *usag
 		collect(sourceFile.AsNode())
 	}
 
-	found := &usage{external: map[*ast.Symbol]bool{}}
+	found := &usage{external: map[*ast.Node]bool{}}
 	for _, sourceFile := range program.SourceFiles() {
 		var walk func(node *ast.Node) bool
 		walk = func(node *ast.Node) bool {
@@ -117,7 +122,9 @@ func programUsage(typeChecker *checker.Checker, program *compiler.Program) *usag
 					// The declaration itself is not a use, and neither is a
 					// reference from inside the very class that declares it.
 					if owner != nil && enclosingClass(node) != owner {
-						found.external[symbol] = true
+						for _, declaration := range symbol.Declarations {
+							found.external[declaration] = true
+						}
 					}
 				}
 			}
@@ -160,11 +167,7 @@ var NoUnusedPublicMemberRule = rule.Rule{
 				if satisfiesHeritage(ctx.TypeChecker, node, name.Text()) {
 					continue
 				}
-				symbol := ctx.TypeChecker.GetSymbolAtLocation(name)
-				if symbol == nil {
-					continue
-				}
-				if programUsage(ctx.TypeChecker, ctx.Program).external[symbol] {
+				if programUsage(ctx.TypeChecker, ctx.Program).external[member] {
 					continue
 				}
 
