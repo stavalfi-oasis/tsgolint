@@ -110,7 +110,8 @@ func localTarget(typeChecker *checker.Checker, call *ast.CallExpression) (*ast.N
 		// (`this.#send`). The member is in the enclosing class by definition, so
 		// resolve it there — dropping the case would silently lose coverage.
 		if ast.IsPrivateIdentifier(nameNode) {
-			if member := privateMember(nameNode); member != nil {
+			member := privateMember(nameNode)
+			if member != nil {
 				return member, nameNode.Text()
 			}
 		}
