@@ -144,6 +144,27 @@ func inImplementingClass(node *ast.Node) bool {
 	return false
 }
 
+// A single `this.track(<call>)` layer, returning the inner call.
+func unwrapTracked(call *ast.Node) *ast.Node {
+	callee := call.AsCallExpression().Expression
+	if !ast.IsPropertyAccessExpression(callee) {
+		return nil
+	}
+	access := callee.AsPropertyAccessExpression()
+	if access.Expression.Kind != ast.KindThisKeyword || access.Name().Text() != "track" {
+		return nil
+	}
+	args := call.AsCallExpression().Arguments
+	if args == nil || len(args.Nodes) != 1 {
+		return nil
+	}
+	inner := unwrap(args.Nodes[0])
+	if !ast.IsCallExpression(inner) {
+		return nil
+	}
+	return inner
+}
+
 type forwarder struct {
 	node   *ast.Node
 	target string
@@ -171,6 +192,12 @@ var NoPassthroughFunctionsRule = rule.Rule{
 			call := unwrap(expression)
 			if !ast.IsCallExpression(call) {
 				return
+			}
+
+			// `return this.track(this.send(args))` still forwards to `send` —
+			// track only registers the promise, it is not the destination.
+			if inner := unwrapTracked(call); inner != nil {
+				call = inner
 			}
 
 			parameters := parameterNames(node.Parameters())

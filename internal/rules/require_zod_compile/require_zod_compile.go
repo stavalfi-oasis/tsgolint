@@ -79,18 +79,41 @@ var RequireZodCompileRule = rule.Rule{
 
 				// Only the outermost schema expression is reported — everything
 				// inside it is covered by the same compile() call.
+				// A schema nested in an object or array literal is a member of
+				// the enclosing schema, which carries the compile() for all of
+				// them — so the walk has to pass through those containers, not
+				// stop at them.
 				for parent := node.Parent; parent != nil; parent = parent.Parent {
 					if calleeMethod(parent) == "compile" {
 						return
 					}
-					if !ast.IsPropertyAccessExpression(parent) &&
+					switch {
+					case ast.IsPropertyAssignment(parent),
+						ast.IsShorthandPropertyAssignment(parent),
+						ast.IsObjectLiteralExpression(parent),
+						ast.IsArrayLiteralExpression(parent),
+						ast.IsSpreadElement(parent):
+						continue
+					case ast.IsPropertyAccessExpression(parent),
+						ast.IsParenthesizedExpression(parent),
+						ast.IsCallExpression(parent),
+						parent.Kind == ast.KindNonNullExpression:
+						if oasis.IsZodSchemaType(ctx.TypeChecker, parent) {
+							return
+						}
+					default:
+						// Reached a statement or declaration: this is the root.
+					}
+					if !ast.IsPropertyAssignment(parent) &&
+						!ast.IsShorthandPropertyAssignment(parent) &&
+						!ast.IsObjectLiteralExpression(parent) &&
+						!ast.IsArrayLiteralExpression(parent) &&
+						!ast.IsSpreadElement(parent) &&
+						!ast.IsPropertyAccessExpression(parent) &&
 						!ast.IsParenthesizedExpression(parent) &&
 						!ast.IsCallExpression(parent) &&
 						parent.Kind != ast.KindNonNullExpression {
 						break
-					}
-					if oasis.IsZodSchemaType(ctx.TypeChecker, parent) {
-						return
 					}
 				}
 
