@@ -1,6 +1,6 @@
 {
   "name": "oxlint-tsgolint",
-  "version": "0.0.0-set-by-publish-sh",
+  "version": "0.0.0-set-by-publish-sh-at-pack-time",
   "description": "Oasis fork of tsgolint — bundles every supported platform binary.",
   "license": "MIT",
   "repository": "github:stavalfi-oasis/tsgolint",

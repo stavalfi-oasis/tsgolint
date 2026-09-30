@@ -24,7 +24,7 @@ if [[ ! -f typescript-go/go.mod ]]; then
     -exec cp {} internal/collections/ \;
 fi
 
-version="$(git describe --tags --abbrev=0 --match 'v*' | sed 's/^v//')-poc-$(git rev-parse HEAD)"
+version="$(git describe --tags --abbrev=0 --match 'v*' | sed 's/^v//')-$(git rev-parse HEAD)"
 tarball="oxlint-tsgolint-${version}.tgz"
 
 stage="$(mktemp -d)/package"
