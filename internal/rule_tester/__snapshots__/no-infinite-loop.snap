@@ -1,0 +1,16 @@
+
+[TestNoInfiniteLoop/invalid-0 - 1]
+Diagnostic 1: infiniteLoop (1:1 - 1:19)
+Message: `for (;;)` / `while (true)` is banned.
+Help: Write `while (!signal.aborted)` so Ctrl-C ends the loop, and keep the real stop conditions as `break`s inside. A `for` that still counts (`for (let i = 0; ; i += n)`) is fine.
+   1 | for (;;) { break; }
+     | ~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoInfiniteLoop/invalid-1 - 1]
+Diagnostic 1: infiniteLoop (1:1 - 1:23)
+Message: `for (;;)` / `while (true)` is banned.
+Help: Write `while (!signal.aborted)` so Ctrl-C ends the loop, and keep the real stop conditions as `break`s inside. A `for` that still counts (`for (let i = 0; ; i += n)`) is fine.
+   1 | while (true) { break; }
+     | ~~~~~~~~~~~~~~~~~~~~~~~
+---

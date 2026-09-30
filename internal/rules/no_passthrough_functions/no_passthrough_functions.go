@@ -106,6 +106,12 @@ func localTargetSymbol(typeChecker *checker.Checker, sourceFile *ast.SourceFile,
 
 	symbol := typeChecker.GetSymbolAtLocation(nameNode)
 	if symbol == nil || len(symbol.Declarations) == 0 {
+		// The checker does not hand back a symbol for a private identifier
+		// (`this.#send`). The member is in the enclosing class by definition, so
+		// resolve it there — dropping the case would silently lose coverage.
+		if ast.IsPrivateIdentifier(nameNode) {
+			return privateMemberSymbol(nameNode)
+		}
 		return nil
 	}
 	for _, declaration := range symbol.Declarations {
@@ -121,6 +127,24 @@ func localTargetSymbol(typeChecker *checker.Checker, sourceFile *ast.SourceFile,
 		}
 	}
 	return symbol
+}
+
+// Finds the class member a `this.#name` access refers to, and returns its
+// symbol. A private name can only resolve within its own class body.
+func privateMemberSymbol(nameNode *ast.Node) *ast.Symbol {
+	for current := nameNode.Parent; current != nil; current = current.Parent {
+		if !ast.IsClassLike(current) {
+			continue
+		}
+		for _, member := range current.Members() {
+			name := member.Name()
+			if name != nil && ast.IsPrivateIdentifier(name) && name.Text() == nameNode.Text() {
+				return member.Symbol()
+			}
+		}
+		return nil
+	}
+	return nil
 }
 
 // A class that declares `implements` is satisfying a contract, so a method that

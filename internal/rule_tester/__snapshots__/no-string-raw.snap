@@ -1,0 +1,16 @@
+
+[TestNoStringRaw/invalid-0 - 1]
+Diagnostic 1: stringRaw (1:17 - 1:31)
+Message: String.raw is banned.
+Help: Write a plain template literal and double the backslashes.
+   1 | const pattern = String.raw`\d+`;
+     |                 ~~~~~~~~~~~~~~~
+---
+
+[TestNoStringRaw/invalid-1 - 1]
+Diagnostic 1: stringRaw (1:42 - 1:61)
+Message: String.raw is banned.
+Help: Write a plain template literal and double the backslashes.
+   1 | declare const n: number; const pattern = String.raw`\d${n}\w`;
+     |                                          ~~~~~~~~~~~~~~~~~~~~
+---

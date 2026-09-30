@@ -1,0 +1,21 @@
+
+[TestNoBannedWords/invalid-0 - 1]
+Diagnostic 1: bannedWord (1:15 - 1:32)
+Message: say 'Oasis Platform', not 'app'.
+   1 | const label = "open the app now";
+     |               ~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoBannedWords/invalid-1 - 1]
+Diagnostic 1: bannedWord (1:15 - 1:31)
+Message: say 'Oasis Platform', not 'app'.
+   1 | const label = "the APP is down";
+     |               ~~~~~~~~~~~~~~~~~
+---
+
+[TestNoBannedWords/invalid-2 - 1]
+Diagnostic 1: bannedWord (1:40 - 1:57)
+Message: say 'Oasis Platform', not 'app'.
+   1 | declare const n: number; const label = `the product ${n}`;
+     |                                        ~~~~~~~~~~~~~~~~~~
+---

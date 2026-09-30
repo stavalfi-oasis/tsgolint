@@ -1,0 +1,16 @@
+
+[TestNoProtected/invalid-0 - 1]
+Diagnostic 1: protectedMember (1:11 - 1:30)
+Message: `protected` is not allowed.
+Help: Use a `#` prefix instead. A protected member is shared state between a class and everything that ever extends it.
+   1 | class A { protected value = 1; }
+     |           ~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoProtected/invalid-1 - 1]
+Diagnostic 1: protectedMember (1:11 - 1:35)
+Message: `protected` is not allowed.
+Help: Use a `#` prefix instead. A protected member is shared state between a class and everything that ever extends it.
+   1 | class A { protected read(): void {} }
+     |           ~~~~~~~~~~~~~~~~~~~~~~~~~
+---

@@ -1,0 +1,8 @@
+
+[TestRequireCatchBinding/invalid-0 - 1]
+Diagnostic 1: missingCatchBinding (1:8 - 1:15)
+Message: `catch {` is banned.
+Help: Bind the caught value with `catch (error)` so the failure stays inspectable.
+   1 | try {} catch {}
+     |        ~~~~~~~~
+---

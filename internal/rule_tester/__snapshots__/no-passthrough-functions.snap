@@ -1,4 +1,14 @@
 
+[TestExactRepro/invalid-0 - 1]
+Diagnostic 1: passthroughFunction (3:10 - 3:32)
+Message: This function only forwards its arguments to 'þ#1@#sendTwo'.
+Help: Call 'þ#1@#sendTwo' directly at the call sites and delete this wrapper.
+   2 | export class Uploader {
+   3 |   public wrappedByInheritedTrack(args: { readonly key: string }): Promise<void> {
+     |          ~~~~~~~~~~~~~~~~~~~~~~~
+   4 |     return this.track(this.#sendTwo(args));
+---
+
 [TestNoPassthroughFunctions/invalid-0 - 1]
 Diagnostic 1: passthroughFunction (3:10 - 3:16)
 Message: This function only forwards its arguments to 'target'.

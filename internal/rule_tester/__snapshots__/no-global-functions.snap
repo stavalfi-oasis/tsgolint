@@ -1,0 +1,32 @@
+
+[TestNoGlobalFunctions/invalid-0 - 1]
+Diagnostic 1: globalFunction (1:1 - 1:23)
+Message: Global functions are banned.
+Help: Use a class with static methods instead, so the file has one exported name.
+   1 | function run(): void {}
+     | ~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoGlobalFunctions/invalid-1 - 1]
+Diagnostic 1: globalFunction (1:1 - 1:30)
+Message: Global functions are banned.
+Help: Use a class with static methods instead, so the file has one exported name.
+   1 | export function run(): void {}
+     | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoGlobalFunctions/invalid-2 - 1]
+Diagnostic 1: globalFunction (1:13 - 1:26)
+Message: Global arrow functions are banned.
+Help: Use a class with static methods instead, so the file has one exported name.
+   1 | const run = (): void => {};
+     |             ~~~~~~~~~~~~~~
+---
+
+[TestNoGlobalFunctions/invalid-3 - 1]
+Diagnostic 1: globalFunction (1:20 - 1:39)
+Message: Global function expressions are banned.
+Help: Use a class with static methods instead, so the file has one exported name.
+   1 | export const run = function (): void {};
+     |                    ~~~~~~~~~~~~~~~~~~~~
+---

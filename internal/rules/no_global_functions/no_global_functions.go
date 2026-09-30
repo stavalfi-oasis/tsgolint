@@ -33,6 +33,12 @@ var NoGlobalFunctionsRule = rule.Rule{
 				for _, statement := range node.AsSourceFile().Statements.Nodes {
 					switch statement.Kind {
 					case ast.KindFunctionDeclaration:
+						// `declare function f(): void` and an overload signature
+						// introduce no runtime function; estree models both as
+						// TSDeclareFunction, which the JS rule never looked at.
+						if statement.Body() == nil {
+							continue
+						}
 						ctx.ReportNode(statement, buildGlobalFunctionMessage("Global functions"))
 					case ast.KindVariableStatement:
 						declarationList := statement.AsVariableStatement().DeclarationList

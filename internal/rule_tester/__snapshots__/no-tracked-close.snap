@@ -1,0 +1,18 @@
+
+[TestNoTrackedClose/invalid-0 - 1]
+Diagnostic 1: trackedClose (7:59 - 7:82)
+Message: 'close()' drains the in-flight set, so tracking it deadlocks the wait.
+Help: Await it directly: 'await this.close()'.
+   6 | }
+   7 | class A extends Base { async run(): Promise<void> { await this.track(this.close()); } }
+     |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoTrackedClose/invalid-1 - 1]
+Diagnostic 1: trackedClose (7:59 - 7:83)
+Message: 'close()' drains the in-flight set, so tracking it deadlocks the wait.
+Help: Await it directly: 'await this.close()'.
+   6 | }
+   7 | class A extends Base { async run(): Promise<void> { await this.track(super.close()); } }
+     |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~
+---

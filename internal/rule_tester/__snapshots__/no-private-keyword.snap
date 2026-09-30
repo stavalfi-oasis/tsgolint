@@ -1,0 +1,16 @@
+
+[TestNoPrivateKeyword/invalid-0 - 1]
+Diagnostic 1: privateKeyword (1:11 - 1:28)
+Message: `private` keyword is not allowed.
+Help: Use a `#` prefix instead, so the field is private at runtime and not only to the type checker.
+   1 | class A { private value = 1; }
+     |           ~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoPrivateKeyword/invalid-1 - 1]
+Diagnostic 1: privateKeyword (1:11 - 1:33)
+Message: `private` keyword is not allowed.
+Help: Use a `#` prefix instead, so the field is private at runtime and not only to the type checker.
+   1 | class A { private read(): void {} }
+     |           ~~~~~~~~~~~~~~~~~~~~~~~
+---

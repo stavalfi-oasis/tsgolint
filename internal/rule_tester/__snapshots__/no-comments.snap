@@ -1,0 +1,51 @@
+
+[TestNoComments/invalid-0 - 1]
+Diagnostic 1: comment (1:1 - 1:26)
+Message: Comments are banned.
+Help: Delete it, or put what it says into a name the code already reads.
+   1 | // explains the next line
+     | ~~~~~~~~~~~~~~~~~~~~~~~~~
+   2 | const value = 1;
+   3 | 
+---
+
+[TestNoComments/invalid-1 - 1]
+Diagnostic 1: comment (1:18 - 1:28)
+Message: Comments are banned.
+Help: Delete it, or put what it says into a name the code already reads.
+   1 | const value = 1; // trailing
+     |                  ~~~~~~~~~~~
+   2 | 
+---
+
+[TestNoComments/invalid-2 - 1]
+Diagnostic 1: comment (1:1 - 1:14)
+Message: Comments are banned.
+Help: Delete it, or put what it says into a name the code already reads.
+   1 | /* a block */
+     | ~~~~~~~~~~~~~
+   2 | const value = 1;
+   3 | 
+---
+
+[TestNoComments/invalid-3 - 1]
+Diagnostic 1: comment (1:1 - 2:10)
+Message: Comments are banned.
+Help: Delete it, or put what it says into a name the code already reads.
+   1 | // first
+     | ~~~~~~~~
+   2 | // second
+     | ~~~~~~~~~
+   3 | const value = 1;
+   4 | 
+---
+
+[TestNoComments/invalid-4 - 1]
+Diagnostic 1: comment (2:1 - 2:12)
+Message: Comments are banned.
+Help: Delete it, or put what it says into a name the code already reads.
+   1 | const value = 1;
+   2 | // dangling
+     | ~~~~~~~~~~~
+   3 | 
+---

@@ -95,7 +95,7 @@ func appendClose(sourceFile *ast.SourceFile, body *ast.Node, statements []*ast.N
 	indent := indentOf(sourceFile, scanner.SkipTrivia(sourceFile.Text(), body.Pos()))
 	return rule.RuleFixReplaceRange(
 		core.NewTextRange(body.End()-1, body.End()-1),
-		indent+"  "+text+"\n"+indent,
+		"\n"+indent+"  "+text+"\n"+indent,
 	)
 }
 

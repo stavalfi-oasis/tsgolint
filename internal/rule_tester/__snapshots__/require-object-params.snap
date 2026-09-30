@@ -1,0 +1,32 @@
+
+[TestRequireObjectParams/invalid-0 - 1]
+Diagnostic 1: tooManyParams (1:1 - 1:60)
+Message: Function 'two' has 2 parameters.
+Help: Use a single object parameter instead, so every call site names what it passes.
+   1 | function two(a: number, b: number): number { return a + b; }
+     | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireObjectParams/invalid-1 - 1]
+Diagnostic 1: tooManyParams (1:13 - 1:51)
+Message: Function 'two' has 2 parameters.
+Help: Use a single object parameter instead, so every call site names what it passes.
+   1 | const two = (a: number, b: number): number => a + b;
+     |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireObjectParams/invalid-2 - 1]
+Diagnostic 1: tooManyParams (1:11 - 1:68)
+Message: Method has 2 parameters.
+Help: Use a single object parameter instead, so every call site names what it passes.
+   1 | class A { public two(a: number, b: number): number { return a + b; } }
+     |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireObjectParams/invalid-3 - 1]
+Diagnostic 1: tooManyParams (1:11 - 1:53)
+Message: Constructor has 2 parameters.
+Help: Use a single object parameter instead, so every call site names what it passes.
+   1 | class A { public constructor(a: number, b: number) {} }
+     |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---

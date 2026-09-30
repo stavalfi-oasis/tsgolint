@@ -1,0 +1,24 @@
+
+[TestNoCurl/invalid-0 - 1]
+Diagnostic 1: bannedCommand (5:10 - 5:15)
+Message: Shelling out to curl/wget is banned.
+   4 | declare const child: { execFile(command: string, args?: string[]): void };
+   5 | execFile("curl", ["https://example.com"]);
+     |          ~~~~~~
+---
+
+[TestNoCurl/invalid-1 - 1]
+Diagnostic 1: bannedCommand (5:7 - 5:12)
+Message: Shelling out to curl/wget is banned.
+   4 | declare const child: { execFile(command: string, args?: string[]): void };
+   5 | spawn("wget");
+     |       ~~~~~~
+---
+
+[TestNoCurl/invalid-2 - 1]
+Diagnostic 1: bannedCommand (5:16 - 5:21)
+Message: Shelling out to curl/wget is banned.
+   4 | declare const child: { execFile(command: string, args?: string[]): void };
+   5 | child.execFile("curl");
+     |                ~~~~~~
+---
