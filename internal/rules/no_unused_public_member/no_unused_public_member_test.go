@@ -39,6 +39,14 @@ export class Service implements Runnable {
   public run(): void {}
 }
     `},
+		// Taken off the class by a destructuring binding, which is how the
+		// Temporal workflow entrypoints are exported.
+		{Code: `
+export class Service {
+  public static run(): void {}
+}
+export const { run } = Service;
+    `},
 		// A computed name is never referenced by that name.
 		{Code: `
 export class Service {

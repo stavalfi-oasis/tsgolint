@@ -116,7 +116,10 @@ func programUsage(typeChecker *checker.Checker, program *compiler.Program) *usag
 		var walk func(node *ast.Node) bool
 		walk = func(node *ast.Node) bool {
 			if ast.IsIdentifier(node) && names[node.Text()] {
-				symbol := typeChecker.GetSymbolAtLocation(node)
+				symbol := destructuredMember(typeChecker, node)
+				if symbol == nil {
+					symbol = typeChecker.GetSymbolAtLocation(node)
+				}
 				if symbol != nil {
 					owner := declaringClass(symbol)
 					// The declaration itself is not a use, and neither is a
@@ -136,6 +139,50 @@ func programUsage(typeChecker *checker.Checker, program *compiler.Program) *usag
 
 	indexes[program] = found
 	return found
+}
+
+// The type a destructuring pattern pulls from, so a member taken off a class by
+// `const { run } = Service` can be resolved back to the class.
+func bindingSourceType(typeChecker *checker.Checker, element *ast.Node) *checker.Type {
+	pattern := element.Parent
+	if pattern == nil || pattern.Kind != ast.KindObjectBindingPattern {
+		return nil
+	}
+	owner := pattern.Parent
+	if owner == nil {
+		return nil
+	}
+	switch owner.Kind {
+	case ast.KindVariableDeclaration:
+		if initializer := owner.Initializer(); initializer != nil {
+			return typeChecker.GetTypeAtLocation(initializer)
+		}
+	case ast.KindParameter:
+		return typeChecker.GetTypeAtLocation(owner)
+	}
+	return nil
+}
+
+// The member a destructuring binding names, or nil when this identifier is not
+// one. In `const { run } = Service` the identifier's own symbol is the new
+// variable, so counting it plainly misses that `run` was taken off the class.
+func destructuredMember(typeChecker *checker.Checker, node *ast.Node) *ast.Symbol {
+	element := node.Parent
+	if element == nil || element.Kind != ast.KindBindingElement {
+		return nil
+	}
+	binding := element.AsBindingElement()
+	if binding.PropertyName != nil && binding.PropertyName != node {
+		return nil
+	}
+	if binding.PropertyName == nil && binding.Name() != node {
+		return nil
+	}
+	source := bindingSourceType(typeChecker, element)
+	if source == nil {
+		return nil
+	}
+	return checker.Checker_getPropertyOfType(typeChecker, source, node.Text())
 }
 
 // The class node a symbol's declarations sit in, or nil when the symbol is not
