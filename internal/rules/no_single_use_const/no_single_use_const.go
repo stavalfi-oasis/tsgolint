@@ -2,6 +2,7 @@ package no_single_use_const
 
 import (
 	"github.com/microsoft/typescript-go/shim/ast"
+	"github.com/microsoft/typescript-go/shim/checker"
 	"github.com/typescript-eslint/tsgolint/internal/rule"
 )
 
@@ -64,9 +65,18 @@ var NoSingleUseConstRule = rule.Rule{
 			},
 
 			ast.KindIdentifier: func(node *ast.Node) {
+				parent := node.Parent
 				// The binding itself is a declaration, not a read.
-				if parent := node.Parent; parent != nil && ast.IsVariableDeclaration(parent) &&
-					parent.Name() == node {
+				if parent != nil && ast.IsVariableDeclaration(parent) && parent.Name() == node {
+					return
+				}
+				// In `{ language }` the identifier's symbol is the property being
+				// declared, not the variable being read, so counting it plainly
+				// makes a const used only through shorthands look unused.
+				if parent != nil && ast.IsShorthandPropertyAssignment(parent) {
+					if symbol := checker.Checker_GetShorthandAssignmentValueSymbol(ctx.TypeChecker, parent); symbol != nil {
+						reads[symbol]++
+					}
 					return
 				}
 				if symbol := ctx.TypeChecker.GetSymbolAtLocation(node); symbol != nil {

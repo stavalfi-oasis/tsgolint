@@ -16,6 +16,9 @@ func TestNoSingleUseConst(t *testing.T) {
 		// Only literals inline cleanly.
 		{Code: `declare function build(): number; const value = build(); export const a = value;`},
 		{Code: `const label = "x";`},
+		// A const read only through object shorthands is still read: the
+		// identifier's own symbol there is the property, not the variable.
+		{Code: `const label = "x"; export const a = { label }; export const b = { label };`},
 	}, []rule_tester.InvalidTestCase{
 		{
 			Code:   `const label = "x"; export const a = label;`,

@@ -109,6 +109,33 @@ func staticMemberSymbol(typeChecker *checker.Checker, call *ast.Node) *ast.Symbo
 	return symbol
 }
 
+// The class a node is written inside, or nil at module scope.
+func enclosingClass(node *ast.Node) *ast.Node {
+	for current := node.Parent; current != nil; current = current.Parent {
+		if ast.IsClassLike(current) {
+			return current
+		}
+	}
+	return nil
+}
+
+// The advice — drop `static` and read the state from `this` — is only something
+// the author can act on when the static belongs to the very class making the
+// call. `Worker.create(this.#namespace)` names a third-party factory: there is
+// no instance to move it onto, and the class cannot be edited from here.
+func declaredOnCallersClass(symbol *ast.Symbol, call *ast.Node) bool {
+	owner := enclosingClass(call)
+	if owner == nil {
+		return false
+	}
+	for _, declaration := range symbol.Declarations {
+		if declaration.Parent != owner {
+			return false
+		}
+	}
+	return true
+}
+
 func displayName(symbol *ast.Symbol) string {
 	declaration := symbol.Declarations[0]
 	if parent := declaration.Parent; parent != nil {
@@ -128,7 +155,7 @@ var NoStaticWithThisArgsRule = rule.Rule{
 		return rule.RuleListeners{
 			ast.KindCallExpression: func(node *ast.Node) {
 				symbol := staticMemberSymbol(ctx.TypeChecker, node)
-				if symbol == nil {
+				if symbol == nil || !declaredOnCallersClass(symbol, node) {
 					return
 				}
 				if _, seen := sites[symbol]; !seen {

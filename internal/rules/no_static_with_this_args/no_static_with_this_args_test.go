@@ -66,3 +66,20 @@ class Service {
 		},
 	})
 }
+
+func TestNoStaticWithThisArgsForeignClass(t *testing.T) {
+	t.Parallel()
+	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &NoStaticWithThisArgsRule, []rule_tester.ValidTestCase{
+		// A static on another class names a factory the call site cannot edit:
+		// there is no instance to move it onto.
+		{Code: `
+declare class Worker {
+  static create(options: { namespace: string }): Worker;
+}
+class Runner {
+  #namespace = "default";
+  run(): Worker { return Worker.create({ namespace: this.#namespace }); }
+}
+    `},
+	}, []rule_tester.InvalidTestCase{})
+}
