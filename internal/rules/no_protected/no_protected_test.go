@@ -8,7 +8,8 @@ import (
 )
 
 func TestNoProtected(t *testing.T) {
-	t.Parallel()
+	// Not parallel: the exempt-file case compiles under its own file name, and
+	// the fixtures tsconfig globs the whole directory.
 	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &NoProtectedRule, []rule_tester.ValidTestCase{
 		{Code: `class A { #value = 1; }`},
 		{

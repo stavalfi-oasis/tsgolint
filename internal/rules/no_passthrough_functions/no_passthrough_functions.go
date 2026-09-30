@@ -115,7 +115,8 @@ func localTargetSymbol(typeChecker *checker.Checker, sourceFile *ast.SourceFile,
 		return nil
 	}
 	for _, declaration := range symbol.Declarations {
-		if ast.GetSourceFileOfNode(declaration) != sourceFile {
+		declaredIn := ast.GetSourceFileOfNode(declaration)
+		if declaredIn == nil || declaredIn.FileName() != sourceFile.FileName() {
 			return nil
 		}
 		// An import specifier lives in this file but the function does not —

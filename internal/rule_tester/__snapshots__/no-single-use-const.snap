@@ -1,0 +1,24 @@
+
+[TestNoSingleUseConst/invalid-0 - 1]
+Diagnostic 1: singleUseConst (1:7 - 1:11)
+Message: 'label' is a constant used only once.
+Help: Inline its value at the single usage instead of introducing a single-use constant.
+   1 | const label = "x"; export const a = label;
+     |       ~~~~~
+---
+
+[TestNoSingleUseConst/invalid-1 - 1]
+Diagnostic 1: singleUseConst (1:7 - 1:10)
+Message: 'size' is a constant used only once.
+Help: Inline its value at the single usage instead of introducing a single-use constant.
+   1 | const size = 10; export const a = size;
+     |       ~~~~
+---
+
+[TestNoSingleUseConst/invalid-2 - 1]
+Diagnostic 1: singleUseConst (1:32 - 1:36)
+Message: 'label' is a constant used only once.
+Help: Inline its value at the single usage instead of introducing a single-use constant.
+   1 | declare const n: number; const label = `x${n}`; export const a = label;
+     |                                ~~~~~
+---

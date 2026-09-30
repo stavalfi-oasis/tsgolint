@@ -1,0 +1,10 @@
+
+[TestAsyncDisposeLast/invalid-0 - 1]
+Diagnostic 1: asyncDisposeNotLast (2:3 - 2:56)
+Message: '[Symbol.asyncDispose]' must be the last member of the class.
+Help: Move it below every other member, so disposal is the final thing the file declares.
+   1 | class A {
+   2 |   public async [Symbol.asyncDispose](): Promise<void> {}
+     |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   3 | 
+---

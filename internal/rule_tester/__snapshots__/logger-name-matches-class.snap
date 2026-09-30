@@ -1,0 +1,18 @@
+
+[TestLoggerNameMatchesClass/invalid-0 - 1]
+Diagnostic 1: loggerNameMismatch (4:75 - 4:83)
+Message: The logger child 'name' must be 'GatewayService.name'.
+Help: Name the logger after the class that owns it, so a log line says where it came from.
+   3 | declare const logger: { logger: Child };
+   4 | class GatewayService { public constructor() { logger.logger.child({ name: "gateway" }); } }
+     |                                                                           ~~~~~~~~~
+---
+
+[TestLoggerNameMatchesClass/invalid-1 - 1]
+Diagnostic 1: loggerNameMismatch (4:75 - 4:91)
+Message: The logger child 'name' must be 'GatewayService.name'.
+Help: Name the logger after the class that owns it, so a log line says where it came from.
+   3 | declare const logger: { logger: Child };
+   4 | class GatewayService { public constructor() { logger.logger.child({ name: OtherService.name }); } }
+     |                                                                           ~~~~~~~~~~~~~~~~~
+---

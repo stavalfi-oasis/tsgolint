@@ -1,0 +1,17 @@
+
+[TestClassNameMatchesFilename/invalid-0 - 1]
+Diagnostic 1: classNameMismatch (1:1 - 1:23)
+Message: Class 'Gateway' must be named 'GhGatewayService' to match the file 'gh-gateway.service.ts'.
+Help: Rename the class, or move it to 'gateway.ts', so an import site names the file it comes from.
+   1 | export class Gateway {}
+     | ~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestClassNameMatchesFilename/invalid-1 - 1]
+Diagnostic 1: classNameMismatch (1:1 - 1:14)
+Message: Class 'Other' must be named 'Runner' to match the file 'runner.ts'.
+Help: Rename the class, or move it to 'other.ts', so an import site names the file it comes from.
+   1 | class Other {}
+     | ~~~~~~~~~~~~~~
+   2 | export const made = new Other();
+---
