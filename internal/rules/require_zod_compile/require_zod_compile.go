@@ -77,10 +77,11 @@ func rootIdentifier(node *ast.Node) *ast.Node {
 	}
 }
 
-// The fix inserts `<root>.compile(`, which only holds when `<root>` really has
-// a compile method. A schema reached through a helper (`Storage.#schema()`)
-// roots at that helper's owner, and wrapping it in `Storage.compile(` produces
-// code that does not compile — so that case reports without a fix.
+// The local name the zod namespace is bound to, when this chain is the one that
+// builds the schema. A call that merely returns a Zod-typed value —
+// `Storage.#appliedSchema()`, which already returns `z.compile(...)` — roots at
+// something with no compile member, and is not a schema this call site can or
+// should wrap: the builder it forwards is reported where it is written.
 func compilerName(typeChecker *checker.Checker, node *ast.Node) string {
 	root := rootIdentifier(node)
 	if root == nil {
@@ -152,7 +153,6 @@ var RequireZodCompileRule = rule.Rule{
 
 				zodName := compilerName(ctx.TypeChecker, node)
 				if zodName == "" {
-					ctx.ReportNode(node, buildRequireCompileMessage())
 					return
 				}
 

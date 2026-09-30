@@ -48,3 +48,18 @@ const value = compiled.parse("x");
 		},
 	})
 }
+
+func TestRequireZodCompileHelperReturn(t *testing.T) {
+	t.Parallel()
+	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &RequireZodCompileRule, []rule_tester.ValidTestCase{
+		// A helper that already returns z.compile(...) is not a schema the call
+		// site can wrap. Reporting here produced a fix that inserted
+		// "Storage.compile(" and corrupted two poc files.
+		{Code: zodStub + `
+class Storage {
+  static schema(): ZodString { return z.compile(z.string()); }
+  static read(value: unknown): string { return Storage.schema().parse(value); }
+}
+    `},
+	}, []rule_tester.InvalidTestCase{})
+}
