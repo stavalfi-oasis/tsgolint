@@ -49,3 +49,27 @@ Help: Delete it, or put what it says into a name the code already reads.
      | ~~~~~~~~~~~
    3 | 
 ---
+
+[TestNoCommentsInEmptyBlock/invalid-0 - 1]
+Diagnostic 1: comment (2:3 - 2:26)
+Message: Comments are banned.
+Help: Delete it, or put what it says into a name the code already reads.
+   1 | export function f(): void {
+   2 |   // Intentionally empty.
+     |   ~~~~~~~~~~~~~~~~~~~~~~~
+   3 | }
+   4 | 
+---
+
+[TestNoCommentsInEmptyBlock/invalid-1 - 1]
+Diagnostic 1: comment (2:3 - 3:12)
+Message: Comments are banned.
+Help: Delete it, or put what it says into a name the code already reads.
+   1 | export function f(): void {
+   2 |   // Intentionally
+     |   ~~~~~~~~~~~~~~~~
+   3 |   // empty.
+     | ~~~~~~~~~~~
+   4 | }
+   5 | 
+---

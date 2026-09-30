@@ -45,3 +45,25 @@ func TestNoComments(t *testing.T) {
 		},
 	})
 }
+
+func TestNoCommentsInEmptyBlock(t *testing.T) {
+	t.Parallel()
+	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &NoCommentsRule, []rule_tester.ValidTestCase{
+		// The scan must never start inside a string and read its contents as a comment.
+		{Code: "export const path = \"//example.com\";\n"},
+		{Code: "export const block = \"/* not a comment */\";\n"},
+	}, []rule_tester.InvalidTestCase{
+		{
+			// A comment that is a block's whole body sits between two tokens of
+			// the same node, so no child's position reaches it.
+			Code:   "export function f(): void {\n  // Intentionally empty.\n}\n",
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "comment"}},
+			Output: []string{"export function f(): void {\n}\n"},
+		},
+		{
+			Code:   "export function f(): void {\n  // Intentionally\n  // empty.\n}\n",
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "comment"}},
+			Output: []string{"export function f(): void {\n}\n"},
+		},
+	})
+}

@@ -22,5 +22,11 @@ func TestNoInfiniteLoop(t *testing.T) {
 			Code:   `while (true) { break; }`,
 			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "infiniteLoop", Line: 1, Column: 1}},
 		},
+		{
+			// Any literal the language already knows is truthy states no stop
+			// condition, which is what the JS rule's Boolean(test.value) caught.
+			Code:   `while (1) { break; }`,
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "infiniteLoop", Line: 1, Column: 1}},
+		},
 	})
 }

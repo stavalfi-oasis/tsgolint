@@ -60,5 +60,24 @@ async function wrapper(...values: number[]): Promise<number> { return await targ
 				{MessageId: "passthroughFunction", Line: 3, Column: 16, EndLine: 3, EndColumn: 23},
 			},
 		},
+		// A private member's symbol carries TypeScript's mangled internal name
+		// ("\x00#1@#sendTwo"). A message holding that control byte is dropped
+		// before it reaches oxlint, so the report has to name the call site.
+		{
+			Code: `
+class Uploader {
+  wrappedByInheritedTrack(args: { readonly key: string }): Promise<void> {
+    return this.track(this.#sendTwo(args));
+  }
+  #sendTwo(args: { readonly key: string }): Promise<void> {
+    const body = JSON.stringify(args);
+    return Promise.resolve(body).then(() => undefined);
+  }
+}
+      `,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{MessageId: "passthroughFunction", Line: 3, Column: 3, EndLine: 3, EndColumn: 26},
+			},
+		},
 	})
 }

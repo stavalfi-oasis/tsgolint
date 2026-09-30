@@ -133,7 +133,10 @@ func localTarget(typeChecker *checker.Checker, call *ast.CallExpression) (*ast.N
 			return nil, ""
 		}
 	}
-	return symbol.Declarations[0], symbol.Name
+	// The name as written at the call site, not symbol.Name: a private member's
+	// symbol carries TypeScript's mangled internal name ("\x00#1@#sendTwo"), and
+	// a message holding that control byte is dropped before it reaches oxlint.
+	return symbol.Declarations[0], nameNode.Text()
 }
 
 // Finds the class member a `this.#name` access refers to, and returns its

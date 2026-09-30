@@ -52,6 +52,15 @@ func allComments(sourceFile *ast.SourceFile) []core.TextRange {
 	walk = func(node *ast.Node) bool {
 		collect(node.Pos())
 		collect(node.End())
+		// A comment that is a block's entire body sits between two tokens of the
+		// same node, so no child's position reaches it. Scanning from just inside
+		// an opening bracket is what finds it. Restricted to bracket openers so
+		// the scan can never start inside a string literal and read its contents
+		// as a comment.
+		inner := scanner.SkipTrivia(text, node.Pos())
+		if inner < len(text) && (text[inner] == '{' || text[inner] == '(' || text[inner] == '[') {
+			collect(inner + 1)
+		}
 		ast.ForEachChildAndJSDoc(node, sourceFile, walk)
 		return false
 	}
