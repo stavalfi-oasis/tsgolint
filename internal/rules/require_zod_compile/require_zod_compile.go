@@ -2,6 +2,7 @@ package require_zod_compile
 
 import (
 	"github.com/microsoft/typescript-go/shim/ast"
+	"github.com/microsoft/typescript-go/shim/checker"
 	"github.com/typescript-eslint/tsgolint/internal/oasis"
 	"github.com/typescript-eslint/tsgolint/internal/rule"
 )
@@ -58,7 +59,7 @@ func calleeMethod(node *ast.Node) string {
 // Walks a call/property chain back to the identifier it started from, which for
 // a zod schema is the local binding of the zod namespace (`z`, or whatever the
 // import called it).
-func rootIdentifier(node *ast.Node) string {
+func rootIdentifier(node *ast.Node) *ast.Node {
 	current := node
 	for {
 		switch {
@@ -69,11 +70,27 @@ func rootIdentifier(node *ast.Node) string {
 		case ast.IsParenthesizedExpression(current):
 			current = current.AsParenthesizedExpression().Expression
 		case ast.IsIdentifier(current):
-			return current.Text()
+			return current
 		default:
-			return ""
+			return nil
 		}
 	}
+}
+
+// The fix inserts `<root>.compile(`, which only holds when `<root>` really has
+// a compile method. A schema reached through a helper (`Storage.#schema()`)
+// roots at that helper's owner, and wrapping it in `Storage.compile(` produces
+// code that does not compile — so that case reports without a fix.
+func compilerName(typeChecker *checker.Checker, node *ast.Node) string {
+	root := rootIdentifier(node)
+	if root == nil {
+		return ""
+	}
+	t := typeChecker.GetTypeAtLocation(root)
+	if t == nil || checker.Checker_getPropertyOfType(typeChecker, t, "compile") == nil {
+		return ""
+	}
+	return root.Text()
 }
 
 var RequireZodCompileRule = rule.Rule{
@@ -133,10 +150,7 @@ var RequireZodCompileRule = rule.Rule{
 					}
 				}
 
-				// The fix needs the local name the zod namespace is bound to,
-				// which is a syntactic fact the type checker does not carry —
-				// take it from the root of this very chain.
-				zodName := rootIdentifier(node)
+				zodName := compilerName(ctx.TypeChecker, node)
 				if zodName == "" {
 					ctx.ReportNode(node, buildRequireCompileMessage())
 					return

@@ -16,3 +16,11 @@ Help: Wrap the whole schema expression in z.compile(...).
   10 | const schema = z.string().min(1);
      |                ~~~~~~~~~~~~~~~~~
 ---
+
+[TestRequireZodCompileFixSource/invalid-0 - 1]
+No diagnostics
+---
+
+[TestRequireZodCompileFixSource/invalid-1 - 1]
+No diagnostics
+---
