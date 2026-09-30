@@ -87,7 +87,7 @@ func forwardsOnlyParameters(call *ast.CallExpression, parameters map[string]bool
 // Resolves the callee to its declaration and requires it to live in this file.
 // The JS rule kept name sets of local functions and imports to approximate
 // this, so a local shadowing an import — or any indirection — fooled it.
-func localTargetName(typeChecker *checker.Checker, sourceFile *ast.SourceFile, call *ast.CallExpression) string {
+func localTargetSymbol(typeChecker *checker.Checker, sourceFile *ast.SourceFile, call *ast.CallExpression) *ast.Symbol {
 	callee := unwrap(call.Expression)
 
 	var nameNode *ast.Node
@@ -97,38 +97,73 @@ func localTargetName(typeChecker *checker.Checker, sourceFile *ast.SourceFile, c
 	case ast.IsPropertyAccessExpression(callee):
 		access := callee.AsPropertyAccessExpression()
 		if access.Expression.Kind != ast.KindThisKeyword {
-			return ""
+			return nil
 		}
 		nameNode = access.Name()
 	default:
-		return ""
+		return nil
 	}
 
 	symbol := typeChecker.GetSymbolAtLocation(nameNode)
 	if symbol == nil || len(symbol.Declarations) == 0 {
-		return ""
+		return nil
 	}
 	for _, declaration := range symbol.Declarations {
 		if ast.GetSourceFileOfNode(declaration) != sourceFile {
-			return ""
+			return nil
 		}
 		// An import specifier lives in this file but the function does not —
 		// wrapping an import is the local seam, which is the point.
 		switch declaration.Kind {
 		case ast.KindImportSpecifier, ast.KindImportClause, ast.KindNamespaceImport,
 			ast.KindImportEqualsDeclaration:
-			return ""
+			return nil
 		}
 	}
-	return symbol.Name
+	return symbol
+}
+
+// A class that declares `implements` is satisfying a contract, so a method that
+// only forwards is the contract's shape rather than a redundant wrapper.
+func inImplementingClass(node *ast.Node) bool {
+	for current := node.Parent; current != nil; current = current.Parent {
+		if !ast.IsClassLike(current) {
+			continue
+		}
+		clauses := current.ClassLikeData().HeritageClauses
+		if clauses == nil {
+			return false
+		}
+		for _, heritage := range clauses.Nodes {
+			if heritage.AsHeritageClause().Token == ast.KindImplementsKeyword {
+				return true
+			}
+		}
+		return false
+	}
+	return false
+}
+
+type forwarder struct {
+	node   *ast.Node
+	target string
 }
 
 var NoPassthroughFunctionsRule = rule.Rule{
 	Name: "no-passthrough-functions",
 	Run: func(ctx rule.RuleContext, options any) rule.RuleListeners {
+		// Keyed by the resolved target symbol: two wrappers onto the same target
+		// are a deliberate fan-in (putText/putBinary -> write), not a redundant
+		// hop. Only a sole forwarder is a passthrough.
+		forwarders := map[*ast.Symbol][]forwarder{}
+		order := []*ast.Symbol{}
+
 		check := func(node *ast.Node) {
-			body := node.Body()
-			expression := soleExpression(body)
+			if inImplementingClass(node) {
+				return
+			}
+
+			expression := soleExpression(node.Body())
 			if expression == nil {
 				return
 			}
@@ -146,8 +181,8 @@ var NoPassthroughFunctionsRule = rule.Rule{
 				return
 			}
 
-			target := localTargetName(ctx.TypeChecker, ctx.SourceFile, call.AsCallExpression())
-			if target == "" {
+			symbol := localTargetSymbol(ctx.TypeChecker, ctx.SourceFile, call.AsCallExpression())
+			if symbol == nil {
 				return
 			}
 
@@ -155,7 +190,10 @@ var NoPassthroughFunctionsRule = rule.Rule{
 			if reported == nil {
 				reported = node
 			}
-			ctx.ReportNode(reported, buildPassthroughMessage(target))
+			if _, seen := forwarders[symbol]; !seen {
+				order = append(order, symbol)
+			}
+			forwarders[symbol] = append(forwarders[symbol], forwarder{node: reported, target: symbol.Name})
 		}
 
 		return rule.RuleListeners{
@@ -163,6 +201,16 @@ var NoPassthroughFunctionsRule = rule.Rule{
 			ast.KindFunctionExpression:  check,
 			ast.KindArrowFunction:       check,
 			ast.KindMethodDeclaration:   check,
+
+			rule.ListenerOnExit(ast.KindSourceFile): func(node *ast.Node) {
+				for _, symbol := range order {
+					found := forwarders[symbol]
+					if len(found) != 1 {
+						continue
+					}
+					ctx.ReportNode(found[0].node, buildPassthroughMessage(found[0].target))
+				}
+			},
 		}
 	},
 }
