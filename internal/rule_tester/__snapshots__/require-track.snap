@@ -1,0 +1,30 @@
+
+[TestRequireTrack/invalid-0 - 1]
+Diagnostic 1: requireTrack (10:5 - 10:16)
+Message: This promise is not in the in-flight set, so 'close()' will not wait for it.
+Help: Wrap it in 'this.track(...)'. Allowed bare: 'this.track()', 'this.close()', 'super.close()', and 'await using'.
+   9 |   async run(): Promise<void> {
+  10 |     await work();
+     |     ~~~~~~~~~~~~
+  11 |   }
+---
+
+[TestRequireTrack/invalid-1 - 1]
+Diagnostic 1: requireTrack (10:5 - 10:11)
+Message: This promise is not in the in-flight set, so 'close()' will not wait for it.
+Help: Wrap it in 'this.track(...)'. Allowed bare: 'this.track()', 'this.close()', 'super.close()', and 'await using'.
+   9 |   run(): void {
+  10 |     work();
+     |     ~~~~~~~
+  11 |   }
+---
+
+[TestRequireTrack/invalid-2 - 1]
+Diagnostic 1: requireTrack (11:5 - 11:16)
+Message: This promise is not in the in-flight set, so 'close()' will not wait for it.
+Help: Wrap it in 'this.track(...)'. Allowed bare: 'this.track()', 'this.close()', 'super.close()', and 'await using'.
+  10 |   async run(): Promise<void> {
+  11 |     await work();
+     |     ~~~~~~~~~~~~
+  12 |   }
+---

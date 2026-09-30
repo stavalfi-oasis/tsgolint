@@ -1,0 +1,40 @@
+
+[TestNoVoidPromise/invalid-0 - 1]
+Diagnostic 1: voidPromise (3:1 - 3:12)
+Message: `void` on a promise is banned.
+Help: Await it, or attach an explicit .catch() handler.
+   2 | declare const promise: Promise<number>;
+   3 | void promise;
+     | ~~~~~~~~~~~~
+   4 |       
+---
+
+[TestNoVoidPromise/invalid-1 - 1]
+Diagnostic 1: voidPromise (3:1 - 3:11)
+Message: `void` on a promise is banned.
+Help: Await it, or attach an explicit .catch() handler.
+   2 | async function work(): Promise<void> {}
+   3 | void work();
+     | ~~~~~~~~~~~
+   4 |       
+---
+
+[TestNoVoidPromise/invalid-2 - 1]
+Diagnostic 1: voidPromise (4:1 - 4:12)
+Message: `void` on a promise is banned.
+Help: Await it, or attach an explicit .catch() handler.
+   3 | const alias = work;
+   4 | void alias();
+     | ~~~~~~~~~~~~
+   5 |       
+---
+
+[TestNoVoidPromise/invalid-3 - 1]
+Diagnostic 1: voidPromise (3:1 - 3:13)
+Message: `void` on a promise is banned.
+Help: Await it, or attach an explicit .catch() handler.
+   2 | declare const thenable: { then(onfulfilled: () => void): void };
+   3 | void thenable;
+     | ~~~~~~~~~~~~~
+   4 |       
+---

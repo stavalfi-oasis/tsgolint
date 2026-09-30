@@ -1,0 +1,18 @@
+
+[TestRequireAbortSignal/invalid-0 - 1]
+Diagnostic 1: requireAbortSignal (5:1 - 5:18)
+Message: Pass a signal so this is cancellable.
+Help: Add `signal` to the options object.
+   4 | declare const signal: AbortSignal;
+   5 | fetch("https://x");
+     | ~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireAbortSignal/invalid-1 - 1]
+Diagnostic 1: requireAbortSignal (5:1 - 5:22)
+Message: Pass a signal so this is cancellable.
+Help: Add `signal` to the options object.
+   4 | declare const signal: AbortSignal;
+   5 | fetch("https://x", {});
+     | ~~~~~~~~~~~~~~~~~~~~~~
+---

@@ -1,0 +1,9 @@
+
+[TestNoZodPassthrough/invalid-0 - 1]
+Diagnostic 1: zodPassthrough (7:1 - 7:24)
+Message: ZodObject.passthrough() is deprecated in zod v4.
+Help: Use z.looseObject({...}) or .loose() instead.
+   6 | declare const z: { object(): ZodObject };
+   7 | z.object().passthrough();
+     | ~~~~~~~~~~~~~~~~~~~~~~~~
+---

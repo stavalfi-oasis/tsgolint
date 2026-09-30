@@ -1,0 +1,28 @@
+
+[TestNoZodDefaults/invalid-0 - 1]
+Diagnostic 1: zodDefault (8:1 - 8:23)
+Message: zod .default() is banned: a schema must not invent a value.
+Help: Make the field required and inject it (env var, CLI option), so a missing one fails loudly instead of silently falling back.
+   7 | declare const z: { string(): ZodString };
+   8 | z.string().default("x");
+     | ~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoZodDefaults/invalid-1 - 1]
+Diagnostic 1: zodDefault (8:1 - 8:24)
+Message: zod .prefault() is banned: a schema must not invent a value.
+Help: Make the field required and inject it (env var, CLI option), so a missing one fails loudly instead of silently falling back.
+   7 | declare const z: { string(): ZodString };
+   8 | z.string().prefault("x");
+     | ~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoZodDefaults/invalid-2 - 1]
+Diagnostic 1: zodDefault (10:1 - 10:19)
+Message: zod .default() is banned: a schema must not invent a value.
+Help: Make the field required and inject it (env var, CLI option), so a missing one fails loudly instead of silently falling back.
+   9 | const schema = z.string();
+  10 | schema.default("x");
+     | ~~~~~~~~~~~~~~~~~~~
+  11 |       
+---

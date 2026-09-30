@@ -1,0 +1,18 @@
+
+[TestNoProcessStreamWrite/invalid-0 - 1]
+Diagnostic 1: streamWrite (5:1 - 5:25)
+Message: Use console.log instead of process.stdout.write.
+Help: console methods format values; a raw stream write does not.
+   4 | declare const process: Process;
+   5 | process.stdout.write("x");
+     | ~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoProcessStreamWrite/invalid-1 - 1]
+Diagnostic 1: streamWrite (5:1 - 5:25)
+Message: Use console.error instead of process.stderr.write.
+Help: console methods format values; a raw stream write does not.
+   4 | declare const process: Process;
+   5 | process.stderr.write("x");
+     | ~~~~~~~~~~~~~~~~~~~~~~~~~
+---

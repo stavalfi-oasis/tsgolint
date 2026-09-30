@@ -1,0 +1,24 @@
+
+[TestDbg/invalid-0 - 1]
+No diagnostics
+---
+
+[TestNoStaticWithThisArgs/invalid-0 - 1]
+Diagnostic 1: staticWithThisArgs (5:26 - 5:50)
+Message: 'Service.build' is static but every call hands it the same instance state (this.#port).
+Help: A static that always needs instance state is just an instance method whose receiver is passed by hand — drop 'static' and read the state from 'this' inside it.
+   4 |   static build(port: number): string { return String(port); }
+   5 |   run(): string { return Service.build(this.#port); }
+     |                          ~~~~~~~~~~~~~~~~~~~~~~~~~
+   6 | }
+---
+
+[TestNoStaticWithThisArgs/invalid-1 - 1]
+Diagnostic 1: staticWithThisArgs (7:12 - 7:34)
+Message: 'Service.build' is static but every call hands it the same instance state (this.#port).
+Help: A static that always needs instance state is just an instance method whose receiver is passed by hand — drop 'static' and read the state from 'this' inside it.
+   6 |     const Alias = Service;
+   7 |     return Alias.build(this.#port);
+     |            ~~~~~~~~~~~~~~~~~~~~~~~
+   8 |   }
+---

@@ -40,6 +40,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_mixed_enums"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_process_stream_write"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_redundant_type_constituents"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_static_with_this_args"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_string_error"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unnecessary_boolean_literal_compare"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unnecessary_condition"
@@ -76,9 +77,12 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/prefer_string_starts_ends_with"
 	"github.com/typescript-eslint/tsgolint/internal/rules/promise_function_async"
 	"github.com/typescript-eslint/tsgolint/internal/rules/related_getter_setter_pairs"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_abort_signal"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_array_sort_compare"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_async_disposable"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_await"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_fs_utf8"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_track"
 	"github.com/typescript-eslint/tsgolint/internal/rules/restrict_plus_operands"
 	"github.com/typescript-eslint/tsgolint/internal/rules/restrict_template_expressions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/return_await"
@@ -87,6 +91,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/switch_exhaustiveness_check"
 	"github.com/typescript-eslint/tsgolint/internal/rules/unbound_method"
 	"github.com/typescript-eslint/tsgolint/internal/rules/use_unknown_in_catch_callback_variable"
+	"github.com/typescript-eslint/tsgolint/internal/rules/zod_schemas_file_only"
 
 	"github.com/microsoft/typescript-go/shim/ast"
 	"github.com/microsoft/typescript-go/shim/bundled"
@@ -185,12 +190,14 @@ var allRules = []rule.Rule{
 	no_misused_spread.NoMisusedSpreadRule,
 	no_mixed_enums.NoMixedEnumsRule,
 	no_redundant_type_constituents.NoRedundantTypeConstituentsRule,
+	no_static_with_this_args.NoStaticWithThisArgsRule,
 	no_string_error.NoStringErrorRule,
 	no_process_stream_write.NoProcessStreamWriteRule,
 	no_void_promise.NoVoidPromiseRule,
 	no_zod_defaults.NoZodDefaultsRule,
 	no_zod_passthrough.NoZodPassthroughRule,
 	require_fs_utf8.RequireFsUtf8Rule,
+	require_track.RequireTrackRule,
 	no_unnecessary_boolean_literal_compare.NoUnnecessaryBooleanLiteralCompareRule,
 	no_unnecessary_condition.NoUnnecessaryConditionRule,
 	no_unnecessary_qualifier.NoUnnecessaryQualifierRule,
@@ -223,7 +230,9 @@ var allRules = []rule.Rule{
 	prefer_string_starts_ends_with.PreferStringStartsEndsWithRule,
 	promise_function_async.PromiseFunctionAsyncRule,
 	related_getter_setter_pairs.RelatedGetterSetterPairsRule,
+	require_abort_signal.RequireAbortSignalRule,
 	require_array_sort_compare.RequireArraySortCompareRule,
+	require_async_disposable.RequireAsyncDisposableRule,
 	require_await.RequireAwaitRule,
 	restrict_plus_operands.RestrictPlusOperandsRule,
 	restrict_template_expressions.RestrictTemplateExpressionsRule,
@@ -233,6 +242,7 @@ var allRules = []rule.Rule{
 	switch_exhaustiveness_check.SwitchExhaustivenessCheckRule,
 	unbound_method.UnboundMethodRule,
 	use_unknown_in_catch_callback_variable.UseUnknownInCatchCallbackVariableRule,
+	zod_schemas_file_only.ZodSchemasFileOnlyRule,
 }
 
 var allRulesByName = make(map[string]rule.Rule, len(allRules))

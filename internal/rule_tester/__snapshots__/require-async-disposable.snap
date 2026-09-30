@@ -1,0 +1,34 @@
+
+[TestRequireAsyncDisposable/invalid-0 - 1]
+Diagnostic 1: mustExtend (8:7 - 8:13)
+Message: Class must extend ADisposable: it owns the AbortController and the in-flight set.
+Help: Extend ADisposable, or a class that already does.
+   7 | 
+   8 | class Service {
+     |       ~~~~~~~
+   9 |   run(): void {}
+---
+
+[TestRequireAsyncDisposable/invalid-1 - 1]
+Diagnostic 1: mustClose (9:3 - 11:3)
+Message: '[Symbol.asyncDispose]' must 'await this.close()' so the AbortController is aborted and in-flight work settles.
+Help: Add 'await this.close();' as the last statement.
+   8 | class Service extends ADisposable {
+   9 |   async [Symbol.asyncDispose](): Promise<void> {
+     |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  10 |     await work();
+     | ~~~~~~~~~~~~~~~~~
+  11 |   }
+     | ~~~
+  12 | }
+---
+
+[TestRequireAsyncDisposable/invalid-2 - 1]
+Diagnostic 1: mustCloseLast (10:5 - 10:23)
+Message: 'await this.close()' must be the last statement of '[Symbol.asyncDispose]' so the AbortController is aborted only after everything else settled.
+Help: Move it to the end of the method.
+   9 |   async [Symbol.asyncDispose](): Promise<void> {
+  10 |     await this.close();
+     |     ~~~~~~~~~~~~~~~~~~~
+  11 |     await work();
+---

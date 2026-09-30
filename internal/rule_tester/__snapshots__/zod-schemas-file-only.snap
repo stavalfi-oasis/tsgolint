@@ -1,0 +1,28 @@
+
+[TestZodSchemasFileOnly/invalid-0 - 1]
+Diagnostic 1: schemaOutsideSchemasFile (7:7 - 7:12)
+Message: Zod schema 'schema' is declared outside zod-schemas.ts.
+Help: Move it to the package's zod-schemas.ts and import it, so every schema in a package has one home.
+   6 | declare const z: { string(): ZodString; object(): ZodObject };
+   7 | const schema = z.string();
+     |       ~~~~~~
+---
+
+[TestZodSchemasFileOnly/invalid-1 - 1]
+Diagnostic 1: schemaOutsideSchemasFile (7:14 - 7:17)
+Message: Zod schema 'body' is declared outside zod-schemas.ts.
+Help: Move it to the package's zod-schemas.ts and import it, so every schema in a package has one home.
+   6 | declare const z: { string(): ZodString; object(): ZodObject };
+   7 | export const body = z.object();
+     |              ~~~~
+---
+
+[TestZodSchemasFileOnly/invalid-2 - 1]
+Diagnostic 1: schemaOutsideSchemasFile (9:7 - 9:15)
+Message: Zod schema 'viaHelper' is declared outside zod-schemas.ts.
+Help: Move it to the package's zod-schemas.ts and import it, so every schema in a package has one home.
+   8 | function make(): ZodString { return z.string(); }
+   9 | const viaHelper = make();
+     |       ~~~~~~~~~
+  10 |       
+---

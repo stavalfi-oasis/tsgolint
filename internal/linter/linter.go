@@ -424,7 +424,12 @@ func visitLintNodes(file *ast.SourceFile, runListeners func(kind ast.Kind, node 
 
 		return false
 	}
+	// The walk starts at the SourceFile's children, so without these the file
+	// node itself is never dispatched and rules that aggregate across a whole
+	// file have nowhere to report from.
+	runListeners(ast.KindSourceFile, &file.Node)
 	file.Node.ForEachChild(childVisitor)
+	runListeners(rule.ListenerOnExit(ast.KindSourceFile), &file.Node)
 }
 
 // RunLinterOnProgram requires exclusive use of the program's checkers until it returns.
