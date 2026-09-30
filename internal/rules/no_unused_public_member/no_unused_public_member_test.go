@@ -11,21 +11,21 @@ func TestNoUnusedPublicMember(t *testing.T) {
 	t.Parallel()
 	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &NoUnusedPublicMemberRule, []rule_tester.ValidTestCase{
 		{Code: `
-export class Service {
+class Service {
   public run(): void {}
 }
 const service = new Service();
 service.run();
     `},
 		{Code: `
-export class Service {
+class Service {
   public static make(): Service { return new Service(); }
 }
 const service = Service.make();
     `},
 		// Already private: the rule has nothing to say.
 		{Code: `
-export class Service {
+class Service {
   #run(): void {}
   public start(): void { this.#run(); }
 }
@@ -35,29 +35,38 @@ service.start();
 		// The member is the contract's shape, not a free choice.
 		{Code: `
 interface Runnable { run(): void }
-export class Service implements Runnable {
+class Service implements Runnable {
   public run(): void {}
 }
     `},
 		// Taken off the class by a destructuring binding, which is how the
 		// Temporal workflow entrypoints are exported.
 		{Code: `
-export class Service {
+class Service {
   public static run(): void {}
 }
-export const { run } = Service;
+const { run } = Service;
+void run;
     `},
 		// A computed name is never referenced by that name.
 		{Code: `
-export class Service {
+class Service {
   public async [Symbol.asyncDispose](): Promise<void> {}
+}
+    `},
+		// An exported class can be used from a file this program does not
+		// contain, so absence of a use proves nothing.
+		{Code: `
+export class Service {
+  public helper(): number { return 1; }
+  public run(): number { return this.helper(); }
 }
     `},
 	}, []rule_tester.InvalidTestCase{
 		{
 			// Called only through `this`, from inside its own class.
 			Code: `
-export class Service {
+class Service {
   public helper(): number { return 1; }
   public run(): number { return this.helper(); }
 }
@@ -69,7 +78,7 @@ service.run();
 		{
 			// Nothing calls it at all.
 			Code: `
-export class Service {
+class Service {
   public dead(): void {}
 }
       `,
@@ -77,7 +86,7 @@ export class Service {
 		},
 		{
 			Code: `
-export class Service {
+class Service {
   public static helper(): number { return 1; }
   public run(): number { return Service.helper(); }
 }

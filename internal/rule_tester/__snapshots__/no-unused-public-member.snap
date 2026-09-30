@@ -3,7 +3,7 @@
 Diagnostic 1: unusedPublicMember (3:10 - 3:15)
 Message: 'helper' is public but nothing outside the class uses it.
 Help: Make it '#helper' so the class states its real surface, or delete it if nothing calls it at all.
-   2 | export class Service {
+   2 | class Service {
    3 |   public helper(): number { return 1; }
      |          ~~~~~~
    4 |   public run(): number { return this.helper(); }
@@ -13,7 +13,7 @@ Help: Make it '#helper' so the class states its real surface, or delete it if no
 Diagnostic 1: unusedPublicMember (3:10 - 3:13)
 Message: 'dead' is public but nothing outside the class uses it.
 Help: Make it '#dead' so the class states its real surface, or delete it if nothing calls it at all.
-   2 | export class Service {
+   2 | class Service {
    3 |   public dead(): void {}
      |          ~~~~
    4 | }
@@ -23,7 +23,7 @@ Help: Make it '#dead' so the class states its real surface, or delete it if noth
 Diagnostic 1: unusedPublicMember (3:17 - 3:22)
 Message: 'helper' is public and static but nothing outside the class uses it.
 Help: Make it '#helper' so the class states its real surface, or delete it if nothing calls it at all.
-   2 | export class Service {
+   2 | class Service {
    3 |   public static helper(): number { return 1; }
      |                 ~~~~~~
    4 |   public run(): number { return Service.helper(); }

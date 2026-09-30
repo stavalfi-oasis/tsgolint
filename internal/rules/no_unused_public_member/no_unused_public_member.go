@@ -185,6 +185,35 @@ func destructuredMember(typeChecker *checker.Checker, node *ast.Node) *ast.Symbo
 	return checker.Checker_getPropertyOfType(typeChecker, source, node.Text())
 }
 
+// `class X {}` followed by `export { X }` leaves no export modifier on the
+// class, so the modifier check alone would call it local.
+func isNamedExport(sourceFile *ast.SourceFile, class *ast.Node) bool {
+	name := class.Name()
+	if name == nil {
+		return false
+	}
+	for _, statement := range sourceFile.Statements.Nodes {
+		if statement.Kind != ast.KindExportDeclaration {
+			continue
+		}
+		clause := statement.AsExportDeclaration().ExportClause
+		if clause == nil || clause.Kind != ast.KindNamedExports {
+			continue
+		}
+		for _, element := range clause.AsNamedExports().Elements.Nodes {
+			specifier := element.AsExportSpecifier()
+			local := specifier.PropertyName
+			if local == nil {
+				local = specifier.Name()
+			}
+			if local != nil && local.Text() == name.Text() {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // The class node a symbol's declarations sit in, or nil when the symbol is not
 // a class member at all.
 func declaringClass(symbol *ast.Symbol) *ast.Node {
@@ -206,6 +235,13 @@ var NoUnusedPublicMemberRule = rule.Rule{
 	Name: "no-unused-public-member",
 	Run: func(ctx rule.RuleContext, options any) rule.RuleListeners {
 		check := func(node *ast.Node) {
+			// An exported class can be used from a file this program does not
+			// contain — oxlint builds one program per tsconfig project, so a
+			// shared library never sees the apps that consume it. Absence of a
+			// use is only evidence when every possible user is in view.
+			if ast.HasSyntacticModifier(node, ast.ModifierFlagsExport) || isNamedExport(ctx.SourceFile, node) {
+				return
+			}
 			for _, member := range node.Members() {
 				if !isCandidate(member) {
 					continue
