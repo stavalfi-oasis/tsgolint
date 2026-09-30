@@ -23,5 +23,11 @@ func TestNoStringRaw(t *testing.T) {
 			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "stringRaw"}},
 			Output: []string{"declare const n: number; const pattern = `\\\\d${n}\\\\w`;"},
 		},
+		{
+			// A space between the tag and the template must not eat the backtick.
+			Code:   "const pattern = String.raw `\\d+`;",
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "stringRaw"}},
+			Output: []string{"const pattern = `\\\\d+`;"},
+		},
 	})
 }

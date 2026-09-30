@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/microsoft/typescript-go/shim/ast"
+	"github.com/microsoft/typescript-go/shim/core"
 	"github.com/typescript-eslint/tsgolint/internal/rule"
 	"github.com/typescript-eslint/tsgolint/internal/utils"
 )
@@ -92,18 +93,25 @@ var RequireOsEolRule = rule.Rule{
 			return text[trimmed.Pos():trimmed.End()]
 		}
 
-		// The literal text of a template part, with the delimiters the scanner
-		// swallowed (`` ` ``, `${`, `}`) stripped back off.
-		rawChunk := func(node *ast.Node) string {
-			start := node.Pos() + 1
+		// The span of a template part's literal text, with the delimiters the
+		// scanner swallowed (`` ` ``, `${`, `}`) stripped back off. It starts from
+		// the trimmed token position, not node.Pos(), which points at the leading
+		// trivia and would keep the opening backtick in the chunk.
+		chunkRange := func(node *ast.Node) core.TextRange {
+			start := utils.TrimNodeTextRange(ctx.SourceFile, node).Pos() + 1
 			end := node.End() - 1
 			if node.Kind == ast.KindTemplateHead || node.Kind == ast.KindTemplateMiddle {
 				end = node.End() - 2
 			}
 			if start > end || start < 0 || end > len(text) {
-				return ""
+				return core.NewTextRange(0, 0)
 			}
-			return text[start:end]
+			return core.NewTextRange(start, end)
+		}
+
+		rawChunk := func(node *ast.Node) string {
+			span := chunkRange(node)
+			return text[span.Pos():span.End()]
 		}
 
 		// One import fix per file, whatever shape the existing `node:os` import has.
@@ -223,7 +231,7 @@ var RequireOsEolRule = rule.Rule{
 				ctx.ReportNodeWithFixes(node, buildHardcodedNewlineMessage(), func() []rule.RuleFix {
 					replaced := replaceEscapes(chunk, "${"+eolLocalName+"}")
 					return append(
-						[]rule.RuleFix{rule.RuleFixReplace(ctx.SourceFile, node, "`"+replaced+"`")},
+						[]rule.RuleFix{rule.RuleFixReplaceRange(chunkRange(node), replaced)},
 						importFix()...,
 					)
 				})
@@ -256,10 +264,7 @@ var RequireOsEolRule = rule.Rule{
 					fixes := []rule.RuleFix{}
 					for _, part := range dirty {
 						replaced := replaceEscapes(rawChunk(part), "${"+eolLocalName+"}")
-						fixes = append(fixes, rule.RuleFixReplaceRange(
-							ctx.SourceFile.Loc.WithPos(part.Pos()+1).WithEnd(part.End()-1),
-							replaced,
-						))
+						fixes = append(fixes, rule.RuleFixReplaceRange(chunkRange(part), replaced))
 					}
 					return append(fixes, importFix()...)
 				})

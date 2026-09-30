@@ -27,10 +27,13 @@ func isStringRawTag(tag *ast.Node) bool {
 }
 
 // The literal text of one template part, with the delimiters the scanner
-// swallowed (`` ` ``, `${`, `}`) stripped back off. Working from the source text
-// rather than the cooked value is what keeps the escapes raw.
-func rawChunk(text string, node *ast.Node) string {
-	start := node.Pos() + 1
+// swallowed (“ ` “, `${`, `}`) stripped back off. Working from the source text
+// rather than the cooked value is what keeps the escapes raw. The start comes
+// from the trimmed token position, not node.Pos(), which points at the leading
+// trivia and would keep the opening backtick in the chunk.
+func rawChunk(sourceFile *ast.SourceFile, node *ast.Node) string {
+	text := sourceFile.Text()
+	start := utils.TrimNodeTextRange(sourceFile, node).Pos() + 1
 	end := node.End() - 1
 	if node.Kind == ast.KindTemplateHead || node.Kind == ast.KindTemplateMiddle {
 		end = node.End() - 2
@@ -61,16 +64,16 @@ var NoStringRawRule = rule.Rule{
 				var rebuilt strings.Builder
 				template := tagged.Template
 				if ast.IsNoSubstitutionTemplateLiteral(template) {
-					rebuilt.WriteString(rawChunk(text, template))
+					rebuilt.WriteString(rawChunk(ctx.SourceFile, template))
 				} else {
 					expression := template.AsTemplateExpression()
-					rebuilt.WriteString(rawChunk(text, expression.Head))
+					rebuilt.WriteString(rawChunk(ctx.SourceFile, expression.Head))
 					for _, span := range expression.TemplateSpans.Nodes {
 						templateSpan := span.AsTemplateSpan()
 						rebuilt.WriteString("${")
 						rebuilt.WriteString(sourceOf(templateSpan.Expression))
 						rebuilt.WriteString("}")
-						rebuilt.WriteString(rawChunk(text, templateSpan.Literal))
+						rebuilt.WriteString(rawChunk(ctx.SourceFile, templateSpan.Literal))
 					}
 				}
 

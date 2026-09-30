@@ -87,7 +87,7 @@ func forwardsOnlyParameters(call *ast.CallExpression, parameters map[string]bool
 // Resolves the callee to its declaration and requires it to live in this file.
 // The JS rule kept name sets of local functions and imports to approximate
 // this, so a local shadowing an import — or any indirection — fooled it.
-func localTarget(typeChecker *checker.Checker, sourceFile *ast.SourceFile, call *ast.CallExpression) (*ast.Node, string) {
+func localTarget(typeChecker *checker.Checker, call *ast.CallExpression) (*ast.Node, string) {
 	callee := unwrap(call.Expression)
 
 	var nameNode *ast.Node
@@ -116,9 +116,12 @@ func localTarget(typeChecker *checker.Checker, sourceFile *ast.SourceFile, call 
 		}
 		return nil, ""
 	}
+	// Compare against the call's own source file rather than ctx.SourceFile:
+	// oxlint and the rule tester hand the rule differently-normalised paths, so
+	// only nodes from the same tree compare reliably.
+	callFile := ast.GetSourceFileOfNode(call.Expression)
 	for _, declaration := range symbol.Declarations {
-		declaredIn := ast.GetSourceFileOfNode(declaration)
-		if declaredIn == nil || declaredIn.FileName() != sourceFile.FileName() {
+		if ast.GetSourceFileOfNode(declaration) != callFile {
 			return nil, ""
 		}
 		// An import specifier lives in this file but the function does not —
@@ -250,7 +253,7 @@ var NoPassthroughFunctionsRule = rule.Rule{
 				return
 			}
 
-			target, targetName := localTarget(ctx.TypeChecker, ctx.SourceFile, call.AsCallExpression())
+			target, targetName := localTarget(ctx.TypeChecker, call.AsCallExpression())
 			if target == nil {
 				return
 			}

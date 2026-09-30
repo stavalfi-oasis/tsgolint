@@ -42,5 +42,11 @@ func TestRequireOsEol(t *testing.T) {
 			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "hardcodedNewline"}},
 			Output: []string{"import { EOL } from \"node:os\";\nexport const carriage = `a${EOL}b`;"},
 		},
+		{
+			// A template with a substitution keeps its holes; only the escape moves.
+			Code:   "declare const n: number;\nexport const joined = `a\\n${n}b\\nc`;",
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "hardcodedNewline"}},
+			Output: []string{"import { EOL } from \"node:os\";\ndeclare const n: number;\nexport const joined = `a${EOL}${n}b${EOL}c`;"},
+		},
 	})
 }

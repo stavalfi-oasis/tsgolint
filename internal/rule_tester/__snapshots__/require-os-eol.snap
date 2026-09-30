@@ -39,3 +39,12 @@ Help: Import { EOL } from "node:os" and use EOL instead.
    1 | export const carriage = "a\r\nb";
      |                         ~~~~~~~~
 ---
+
+[TestRequireOsEol/invalid-5 - 1]
+Diagnostic 1: hardcodedNewline (2:23 - 2:35)
+Message: Hardcoded "\n" is not portable.
+Help: Import { EOL } from "node:os" and use EOL instead.
+   1 | declare const n: number;
+   2 | export const joined = `a\n${n}b\nc`;
+     |                       ~~~~~~~~~~~~~
+---
