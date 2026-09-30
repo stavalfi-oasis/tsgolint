@@ -1,0 +1,30 @@
+
+[TestNoPassthroughFunctions/invalid-0 - 1]
+Diagnostic 1: passthroughFunction (3:10 - 3:16)
+Message: This function only forwards its arguments to 'target'.
+Help: Call 'target' directly at the call sites and delete this wrapper.
+   2 | function target(value: number): number { return value; }
+   3 | function wrapper(value: number): number { return target(value); }
+     |          ~~~~~~~
+   4 |       
+---
+
+[TestNoPassthroughFunctions/invalid-1 - 1]
+Diagnostic 1: passthroughFunction (4:3 - 4:9)
+Message: This function only forwards its arguments to 'target'.
+Help: Call 'target' directly at the call sites and delete this wrapper.
+   3 |   target(value: number): number { return value; }
+   4 |   wrapper(value: number): number { return this.target(value); }
+     |   ~~~~~~~
+   5 | }
+---
+
+[TestNoPassthroughFunctions/invalid-2 - 1]
+Diagnostic 1: passthroughFunction (3:16 - 3:22)
+Message: This function only forwards its arguments to 'target'.
+Help: Call 'target' directly at the call sites and delete this wrapper.
+   2 | async function target(...values: number[]): Promise<number> { return values.length; }
+   3 | async function wrapper(...values: number[]): Promise<number> { return await target(...values); }
+     |                ~~~~~~~
+   4 |       
+---

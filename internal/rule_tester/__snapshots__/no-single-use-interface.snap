@@ -1,0 +1,10 @@
+
+[TestNoSingleUseInterface/invalid-0 - 1]
+Diagnostic 1: singleUseInterface (2:11 - 2:17)
+Message: Interface 'Options' is used only once.
+Help: Inline its members at the single usage instead of introducing a single-use interface.
+   1 | 
+   2 | interface Options { port: number }
+     |           ~~~~~~~
+   3 | declare const a: Options;
+---

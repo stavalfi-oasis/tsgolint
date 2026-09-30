@@ -1,0 +1,18 @@
+
+[TestRequireZodCompile/invalid-0 - 1]
+Diagnostic 1: requireZodCompile (10:16 - 10:25)
+Message: Every zod schema must be AOT-compiled.
+Help: Wrap the whole schema expression in z.compile(...).
+   9 | };
+  10 | const schema = z.string();
+     |                ~~~~~~~~~~
+---
+
+[TestRequireZodCompile/invalid-1 - 1]
+Diagnostic 1: requireZodCompile (10:16 - 10:32)
+Message: Every zod schema must be AOT-compiled.
+Help: Wrap the whole schema expression in z.compile(...).
+   9 | };
+  10 | const schema = z.string().min(1);
+     |                ~~~~~~~~~~~~~~~~~
+---

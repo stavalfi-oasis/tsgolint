@@ -38,8 +38,10 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_misused_promises"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_misused_spread"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_mixed_enums"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_passthrough_functions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_process_stream_write"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_redundant_type_constituents"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_single_use_interface"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_static_with_this_args"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_string_error"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unnecessary_boolean_literal_compare"
@@ -83,6 +85,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_await"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_fs_utf8"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_track"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_zod_compile"
 	"github.com/typescript-eslint/tsgolint/internal/rules/restrict_plus_operands"
 	"github.com/typescript-eslint/tsgolint/internal/rules/restrict_template_expressions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/return_await"
@@ -192,7 +195,9 @@ var allRules = []rule.Rule{
 	no_redundant_type_constituents.NoRedundantTypeConstituentsRule,
 	no_static_with_this_args.NoStaticWithThisArgsRule,
 	no_string_error.NoStringErrorRule,
+	no_passthrough_functions.NoPassthroughFunctionsRule,
 	no_process_stream_write.NoProcessStreamWriteRule,
+	no_single_use_interface.NoSingleUseInterfaceRule,
 	no_void_promise.NoVoidPromiseRule,
 	no_zod_defaults.NoZodDefaultsRule,
 	no_zod_passthrough.NoZodPassthroughRule,
@@ -234,6 +239,7 @@ var allRules = []rule.Rule{
 	require_array_sort_compare.RequireArraySortCompareRule,
 	require_async_disposable.RequireAsyncDisposableRule,
 	require_await.RequireAwaitRule,
+	require_zod_compile.RequireZodCompileRule,
 	restrict_plus_operands.RestrictPlusOperandsRule,
 	restrict_template_expressions.RestrictTemplateExpressionsRule,
 	return_await.ReturnAwaitRule,
