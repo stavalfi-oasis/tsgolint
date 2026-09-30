@@ -39,6 +39,27 @@ func calleeMethod(node *ast.Node) string {
 	return ""
 }
 
+// Walks a call/property chain back to the identifier it started from, which for
+// a zod schema is the local binding of the zod namespace (`z`, or whatever the
+// import called it).
+func rootIdentifier(node *ast.Node) string {
+	current := node
+	for {
+		switch {
+		case ast.IsCallExpression(current):
+			current = current.AsCallExpression().Expression
+		case ast.IsPropertyAccessExpression(current):
+			current = current.AsPropertyAccessExpression().Expression
+		case ast.IsParenthesizedExpression(current):
+			current = current.AsParenthesizedExpression().Expression
+		case ast.IsIdentifier(current):
+			return current.Text()
+		default:
+			return ""
+		}
+	}
+}
+
 var RequireZodCompileRule = rule.Rule{
 	Name: "require-zod-compile",
 	Run: func(ctx rule.RuleContext, options any) rule.RuleListeners {
@@ -73,7 +94,21 @@ var RequireZodCompileRule = rule.Rule{
 					}
 				}
 
-				ctx.ReportNode(node, buildRequireCompileMessage())
+				// The fix needs the local name the zod namespace is bound to,
+				// which is a syntactic fact the type checker does not carry —
+				// take it from the root of this very chain.
+				zodName := rootIdentifier(node)
+				if zodName == "" {
+					ctx.ReportNode(node, buildRequireCompileMessage())
+					return
+				}
+
+				ctx.ReportNodeWithFixes(node, buildRequireCompileMessage(), func() []rule.RuleFix {
+					return []rule.RuleFix{
+						rule.RuleFixInsertBefore(ctx.SourceFile, node, zodName+".compile("),
+						rule.RuleFixInsertAfter(node, ")"),
+					}
+				})
 			},
 		}
 	},

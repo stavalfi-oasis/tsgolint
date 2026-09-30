@@ -1,7 +1,11 @@
 package require_async_disposable
 
 import (
+	"strings"
+
 	"github.com/microsoft/typescript-go/shim/ast"
+	"github.com/microsoft/typescript-go/shim/core"
+	"github.com/microsoft/typescript-go/shim/scanner"
 	"github.com/typescript-eslint/tsgolint/internal/oasis"
 	"github.com/typescript-eslint/tsgolint/internal/rule"
 )
@@ -65,6 +69,47 @@ func isCloseStatement(statement *ast.Node) bool {
 		access.Name().Text() == "close"
 }
 
+// The leading whitespace on the line an offset sits on, so inserted statements
+// line up with their neighbours.
+func indentOf(sourceFile *ast.SourceFile, offset int) string {
+	text := sourceFile.Text()
+	start := offset
+	for start > 0 && text[start-1] != '\n' {
+		start--
+	}
+	end := start
+	for end < offset && (text[end] == ' ' || text[end] == '\t') {
+		end++
+	}
+	return text[start:end]
+}
+
+// Places `text` as the final statement of the block, whether or not the block
+// already has one.
+func appendClose(sourceFile *ast.SourceFile, body *ast.Node, statements []*ast.Node, text string) rule.RuleFix {
+	if len(statements) > 0 {
+		last := statements[len(statements)-1]
+		start := scanner.SkipTrivia(sourceFile.Text(), last.Pos())
+		return rule.RuleFixInsertAfter(last, "\n"+indentOf(sourceFile, start)+text)
+	}
+	indent := indentOf(sourceFile, scanner.SkipTrivia(sourceFile.Text(), body.Pos()))
+	return rule.RuleFixReplaceRange(
+		core.NewTextRange(body.End()-1, body.End()-1),
+		indent+"  "+text+"\n"+indent,
+	)
+}
+
+// The span to delete when moving a statement: from the end of the previous
+// statement (or the block's opening brace) through the end of this one, so the
+// line it occupied goes with it.
+func cutRange(sourceFile *ast.SourceFile, body *ast.Node, statements []*ast.Node, index int) core.TextRange {
+	from := scanner.SkipTrivia(sourceFile.Text(), body.Pos()) + 1
+	if index > 0 {
+		from = statements[index-1].End()
+	}
+	return core.NewTextRange(from, statements[index].End())
+}
+
 var RequireAsyncDisposableRule = rule.Rule{
 	Name: "require-async-disposable",
 	Run: func(ctx rule.RuleContext, options any) rule.RuleListeners {
@@ -110,11 +155,20 @@ var RequireAsyncDisposableRule = rule.Rule{
 				}
 			}
 			if index == -1 {
-				ctx.ReportNode(member, buildMustCloseMessage())
+				ctx.ReportNodeWithFixes(member, buildMustCloseMessage(), func() []rule.RuleFix {
+					return []rule.RuleFix{appendClose(ctx.SourceFile, body, statements, "await this.close();")}
+				})
 				return
 			}
 			if index != len(statements)-1 {
-				ctx.ReportNode(statements[index], buildMustCloseLastMessage())
+				statement := statements[index]
+				text := strings.TrimSpace(ctx.SourceFile.Text()[statement.Pos():statement.End()])
+				ctx.ReportNodeWithFixes(statement, buildMustCloseLastMessage(), func() []rule.RuleFix {
+					return []rule.RuleFix{
+						rule.RuleFixRemoveRange(cutRange(ctx.SourceFile, body, statements, index)),
+						appendClose(ctx.SourceFile, body, statements, text),
+					}
+				})
 			}
 		}
 

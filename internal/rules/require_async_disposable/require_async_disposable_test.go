@@ -71,6 +71,14 @@ class Service extends ADisposable {
 			Errors: []rule_tester.InvalidTestCaseError{
 				{MessageId: "mustClose", Line: 9, Column: 3, EndLine: 11, EndColumn: 4},
 			},
+			Output: []string{disposableStub + `
+class Service extends ADisposable {
+  async [Symbol.asyncDispose](): Promise<void> {
+    await work();
+    await this.close();
+  }
+}
+      `},
 		},
 		{
 			Code: disposableStub + `
@@ -84,6 +92,14 @@ class Service extends ADisposable {
 			Errors: []rule_tester.InvalidTestCaseError{
 				{MessageId: "mustCloseLast", Line: 10, Column: 5, EndLine: 10, EndColumn: 24},
 			},
+			Output: []string{disposableStub + `
+class Service extends ADisposable {
+  async [Symbol.asyncDispose](): Promise<void> {
+    await work();
+    await this.close();
+  }
+}
+      `},
 		},
 	})
 }

@@ -35,6 +35,7 @@ const value = compiled.parse("x");
 			Errors: []rule_tester.InvalidTestCaseError{
 				{MessageId: "requireZodCompile", Line: 10, Column: 16, EndLine: 10, EndColumn: 26},
 			},
+			Output: []string{zodStub + `const schema = z.compile(z.string());`},
 		},
 		// Reported once, on the outermost expression — not on every link in the
 		// chain.
@@ -43,6 +44,7 @@ const value = compiled.parse("x");
 			Errors: []rule_tester.InvalidTestCaseError{
 				{MessageId: "requireZodCompile", Line: 10, Column: 16, EndLine: 10, EndColumn: 33},
 			},
+			Output: []string{zodStub + `const schema = z.compile(z.string().min(1));`},
 		},
 	})
 }

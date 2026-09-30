@@ -52,22 +52,31 @@ func calleeName(expression *ast.Node) string {
 	return ""
 }
 
-// The parameter at optionsIndex must actually be an options bag carrying the
-// signal property. That is what separates node's `fetch(url, { signal })` from
-// an unrelated local `fetch(a, b)`, which no name match can do.
+// Whether the parameter at optionsIndex is an options bag carrying the signal
+// property. That is what separates node's `fetch(url, { signal })` from an
+// unrelated local `fetch(a, b)`, which no name match can do.
+//
+// Types only ever *narrow* here. When the signature cannot be resolved — an
+// untyped or `@ts-nocheck` file, an undeclared global — there is nothing to
+// narrow with, so the name match stands and coverage is unchanged. Suppressing
+// on unresolved types would make the rule quietly weaker on exactly the loose
+// code that needs it most.
 func acceptsSignalOption(typeChecker *checker.Checker, call *ast.Node, index int, optionName string) bool {
 	signature := checker.Checker_getResolvedSignature(typeChecker, call, nil, checker.CheckModeNormal)
 	if signature == nil {
-		return false
+		return true
 	}
 	parameters := checker.Signature_parameters(signature)
 	if index >= len(parameters) {
-		return false
+		// A resolved signature that is simply shorter than the options index is
+		// real evidence this is not the API we mean.
+		return len(parameters) == 0
 	}
 
 	parameterType := typeChecker.GetTypeOfSymbolAtLocation(parameters[index], call)
-	if parameterType == nil {
-		return false
+	if parameterType == nil || utils.IsIntrinsicErrorType(parameterType) ||
+		utils.IsTypeFlagSet(parameterType, checker.TypeFlagsAny|checker.TypeFlagsUnknown) {
+		return true
 	}
 	return utils.SomeUnionTypePart(parameterType, func(part *checker.Type) bool {
 		return checker.Checker_getPropertyOfType(typeChecker, part, optionName) != nil
