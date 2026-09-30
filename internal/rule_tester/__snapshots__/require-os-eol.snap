@@ -1,0 +1,41 @@
+
+[TestRequireOsEol/invalid-0 - 1]
+Diagnostic 1: hardcodedNewline (1:23 - 1:28)
+Message: Hardcoded "\n" is not portable.
+Help: Import { EOL } from "node:os" and use EOL instead.
+   1 | export const joined = "a\nb";
+     |                       ~~~~~~
+---
+
+[TestRequireOsEol/invalid-1 - 1]
+Diagnostic 1: hardcodedNewline (1:24 - 1:27)
+Message: Hardcoded "\n" is not portable.
+Help: Import { EOL } from "node:os" and use EOL instead.
+   1 | export const newline = "\n";
+     |                        ~~~~
+---
+
+[TestRequireOsEol/invalid-2 - 1]
+Diagnostic 1: hardcodedNewline (2:34 - 2:39)
+Message: Hardcoded "\n" is not portable.
+Help: Import { EOL } from "node:os" and use EOL instead.
+   1 | import { tmpdir } from "node:os";
+   2 | export const joined = tmpdir() + "a\nb";
+     |                                  ~~~~~~
+---
+
+[TestRequireOsEol/invalid-3 - 1]
+Diagnostic 1: hardcodedNewline (1:23 - 1:28)
+Message: Hardcoded "\n" is not portable.
+Help: Import { EOL } from "node:os" and use EOL instead.
+   1 | export const joined = `a\nb`;
+     |                       ~~~~~~
+---
+
+[TestRequireOsEol/invalid-4 - 1]
+Diagnostic 1: hardcodedNewline (1:25 - 1:32)
+Message: Hardcoded "\n" is not portable.
+Help: Import { EOL } from "node:os" and use EOL instead.
+   1 | export const carriage = "a\r\nb";
+     |                         ~~~~~~~~
+---

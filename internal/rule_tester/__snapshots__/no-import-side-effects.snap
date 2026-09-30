@@ -1,0 +1,48 @@
+
+[TestNoImportSideEffects/invalid-0 - 1]
+Diagnostic 1: runsAtImport (1:49 - 1:55)
+Message: This runs when the module is imported.
+Help: Move it into a class static method the entrypoint calls.
+   1 | declare function build(): number; const value = build();
+     |                                                 ~~~~~~~
+---
+
+[TestNoImportSideEffects/invalid-1 - 1]
+Diagnostic 1: runsAtImport (1:38 - 1:48)
+Message: This runs when the module is imported.
+Help: Move it into a class static method the entrypoint calls.
+   1 | declare class Thing {}; const made = new Thing();
+     |                                      ~~~~~~~~~~~
+---
+
+[TestNoImportSideEffects/invalid-2 - 1]
+Diagnostic 1: runsAtImport (1:58 - 1:70)
+Message: This runs when the module is imported.
+Help: Move it into a class static method the entrypoint calls.
+   1 | declare function build(): Promise<number>; const value = await build();
+     |                                                          ~~~~~~~~~~~~~
+---
+
+[TestNoImportSideEffects/invalid-3 - 1]
+Diagnostic 1: runsAtImport (1:39 - 1:50)
+Message: This runs when the module is imported.
+Help: Move it into a class static method the entrypoint calls.
+   1 | declare const thing: { run(): void }; thing.run();
+     |                                       ~~~~~~~~~~~~
+---
+
+[TestNoImportSideEffects/invalid-4 - 1]
+Diagnostic 1: sideEffectImport (1:1 - 1:15)
+Message: Side-effect-only imports are banned.
+Help: Import a value and call it explicitly.
+   1 | import "./foo";
+     | ~~~~~~~~~~~~~~~
+---
+
+[TestNoImportSideEffects/invalid-5 - 1]
+Diagnostic 1: staticProperty (1:52 - 1:81)
+Message: Static class properties are initialized when the module is imported.
+Help: Return the value from a class static method instead.
+   1 | declare function build(): number; export class A { public static value = build(); }
+     |                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---

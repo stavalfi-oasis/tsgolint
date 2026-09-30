@@ -87,7 +87,7 @@ func forwardsOnlyParameters(call *ast.CallExpression, parameters map[string]bool
 // Resolves the callee to its declaration and requires it to live in this file.
 // The JS rule kept name sets of local functions and imports to approximate
 // this, so a local shadowing an import — or any indirection — fooled it.
-func localTargetSymbol(typeChecker *checker.Checker, sourceFile *ast.SourceFile, call *ast.CallExpression) *ast.Symbol {
+func localTarget(typeChecker *checker.Checker, sourceFile *ast.SourceFile, call *ast.CallExpression) (*ast.Node, string) {
 	callee := unwrap(call.Expression)
 
 	var nameNode *ast.Node
@@ -97,11 +97,11 @@ func localTargetSymbol(typeChecker *checker.Checker, sourceFile *ast.SourceFile,
 	case ast.IsPropertyAccessExpression(callee):
 		access := callee.AsPropertyAccessExpression()
 		if access.Expression.Kind != ast.KindThisKeyword {
-			return nil
+			return nil, ""
 		}
 		nameNode = access.Name()
 	default:
-		return nil
+		return nil, ""
 	}
 
 	symbol := typeChecker.GetSymbolAtLocation(nameNode)
@@ -110,29 +110,31 @@ func localTargetSymbol(typeChecker *checker.Checker, sourceFile *ast.SourceFile,
 		// (`this.#send`). The member is in the enclosing class by definition, so
 		// resolve it there — dropping the case would silently lose coverage.
 		if ast.IsPrivateIdentifier(nameNode) {
-			return privateMemberSymbol(nameNode)
+			if member := privateMember(nameNode); member != nil {
+				return member, nameNode.Text()
+			}
 		}
-		return nil
+		return nil, ""
 	}
 	for _, declaration := range symbol.Declarations {
 		declaredIn := ast.GetSourceFileOfNode(declaration)
 		if declaredIn == nil || declaredIn.FileName() != sourceFile.FileName() {
-			return nil
+			return nil, ""
 		}
 		// An import specifier lives in this file but the function does not —
 		// wrapping an import is the local seam, which is the point.
 		switch declaration.Kind {
 		case ast.KindImportSpecifier, ast.KindImportClause, ast.KindNamespaceImport,
 			ast.KindImportEqualsDeclaration:
-			return nil
+			return nil, ""
 		}
 	}
-	return symbol
+	return symbol.Declarations[0], symbol.Name
 }
 
 // Finds the class member a `this.#name` access refers to, and returns its
 // symbol. A private name can only resolve within its own class body.
-func privateMemberSymbol(nameNode *ast.Node) *ast.Symbol {
+func privateMember(nameNode *ast.Node) *ast.Node {
 	for current := nameNode.Parent; current != nil; current = current.Parent {
 		if !ast.IsClassLike(current) {
 			continue
@@ -140,7 +142,7 @@ func privateMemberSymbol(nameNode *ast.Node) *ast.Symbol {
 		for _, member := range current.Members() {
 			name := member.Name()
 			if name != nil && ast.IsPrivateIdentifier(name) && name.Text() == nameNode.Text() {
-				return member.Symbol()
+				return member
 			}
 		}
 		return nil
@@ -216,8 +218,8 @@ var NoPassthroughFunctionsRule = rule.Rule{
 		// Keyed by the resolved target symbol: two wrappers onto the same target
 		// are a deliberate fan-in (putText/putBinary -> write), not a redundant
 		// hop. Only a sole forwarder is a passthrough.
-		forwarders := map[*ast.Symbol][]forwarder{}
-		order := []*ast.Symbol{}
+		forwarders := map[*ast.Node][]forwarder{}
+		order := []*ast.Node{}
 
 		check := func(node *ast.Node) {
 			if inImplementingClass(node) || inObjectLiteral(node) {
@@ -248,8 +250,8 @@ var NoPassthroughFunctionsRule = rule.Rule{
 				return
 			}
 
-			symbol := localTargetSymbol(ctx.TypeChecker, ctx.SourceFile, call.AsCallExpression())
-			if symbol == nil {
+			target, targetName := localTarget(ctx.TypeChecker, ctx.SourceFile, call.AsCallExpression())
+			if target == nil {
 				return
 			}
 
@@ -257,10 +259,10 @@ var NoPassthroughFunctionsRule = rule.Rule{
 			if reported == nil {
 				reported = node
 			}
-			if _, seen := forwarders[symbol]; !seen {
-				order = append(order, symbol)
+			if _, seen := forwarders[target]; !seen {
+				order = append(order, target)
 			}
-			forwarders[symbol] = append(forwarders[symbol], forwarder{node: reported, target: symbol.Name})
+			forwarders[target] = append(forwarders[target], forwarder{node: reported, target: targetName})
 		}
 
 		return rule.RuleListeners{
@@ -270,8 +272,8 @@ var NoPassthroughFunctionsRule = rule.Rule{
 			ast.KindMethodDeclaration:   check,
 
 			rule.ListenerOnExit(ast.KindSourceFile): func(node *ast.Node) {
-				for _, symbol := range order {
-					found := forwarders[symbol]
+				for _, target := range order {
+					found := forwarders[target]
 					if len(found) != 1 {
 						continue
 					}
