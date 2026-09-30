@@ -165,6 +165,21 @@ func unwrapTracked(call *ast.Node) *ast.Node {
 	return inner
 }
 
+// The JS rule only ever collected function declarations, variable initialisers
+// and class members, so a method defined inside an object literal was never a
+// candidate. Visitor-style literals rely on that.
+func inObjectLiteral(node *ast.Node) bool {
+	parent := node.Parent
+	if parent == nil {
+		return false
+	}
+	if ast.IsObjectLiteralExpression(parent) {
+		return true
+	}
+	return ast.IsPropertyAssignment(parent) && parent.Parent != nil &&
+		ast.IsObjectLiteralExpression(parent.Parent)
+}
+
 type forwarder struct {
 	node   *ast.Node
 	target string
@@ -180,7 +195,7 @@ var NoPassthroughFunctionsRule = rule.Rule{
 		order := []*ast.Symbol{}
 
 		check := func(node *ast.Node) {
-			if inImplementingClass(node) {
+			if inImplementingClass(node) || inObjectLiteral(node) {
 				return
 			}
 

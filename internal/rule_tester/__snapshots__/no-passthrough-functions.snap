@@ -28,3 +28,13 @@ Help: Call 'target' directly at the call sites and delete this wrapper.
      |                ~~~~~~~
    4 |       
 ---
+
+[TestTracked/invalid-0 - 1]
+Diagnostic 1: passthroughFunction (3:3 - 3:9)
+Message: This function only forwards its arguments to 'þ#1@#sendTwo'.
+Help: Call 'þ#1@#sendTwo' directly at the call sites and delete this wrapper.
+   2 | class Uploader {
+   3 |   wrapped(args: { key: string }): Promise<void> {
+     |   ~~~~~~~
+   4 |     return this.track(this.#sendTwo(args));
+---

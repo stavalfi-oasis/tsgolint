@@ -21,6 +21,22 @@ var terminalMethods = map[string]bool{
 	"safeParseAsync": true,
 }
 
+// zod helpers that take or describe a schema rather than building one. Their
+// results can carry a Zod-ish type, so the type check alone does not exclude
+// them.
+var nonSchemaRoots = map[string]bool{
+	"clone":         true,
+	"compile":       true,
+	"config":        true,
+	"flattenError":  true,
+	"formatError":   true,
+	"prettifyError": true,
+	"registry":      true,
+	"toJSONSchema":  true,
+	"treeifyError":  true,
+	"withParser":    true,
+}
+
 func buildRequireCompileMessage() rule.RuleMessage {
 	return rule.RuleMessage{
 		Id:          "requireZodCompile",
@@ -66,7 +82,7 @@ var RequireZodCompileRule = rule.Rule{
 		return rule.RuleListeners{
 			ast.KindCallExpression: func(node *ast.Node) {
 				method := calleeMethod(node)
-				if method == "compile" || terminalMethods[method] {
+				if nonSchemaRoots[method] || terminalMethods[method] {
 					return
 				}
 
