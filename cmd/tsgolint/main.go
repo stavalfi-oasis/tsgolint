@@ -38,6 +38,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_misused_promises"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_misused_spread"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_mixed_enums"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_process_stream_write"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_redundant_type_constituents"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_string_error"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unnecessary_boolean_literal_compare"
@@ -57,6 +58,9 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unsafe_type_assertion"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unsafe_unary_minus"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_useless_default_assignment"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_void_promise"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_zod_defaults"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_zod_passthrough"
 	"github.com/typescript-eslint/tsgolint/internal/rules/non_nullable_type_assertion_style"
 	"github.com/typescript-eslint/tsgolint/internal/rules/only_throw_error"
 	"github.com/typescript-eslint/tsgolint/internal/rules/prefer_find"
@@ -74,6 +78,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/related_getter_setter_pairs"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_array_sort_compare"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_await"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_fs_utf8"
 	"github.com/typescript-eslint/tsgolint/internal/rules/restrict_plus_operands"
 	"github.com/typescript-eslint/tsgolint/internal/rules/restrict_template_expressions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/return_await"
@@ -181,6 +186,11 @@ var allRules = []rule.Rule{
 	no_mixed_enums.NoMixedEnumsRule,
 	no_redundant_type_constituents.NoRedundantTypeConstituentsRule,
 	no_string_error.NoStringErrorRule,
+	no_process_stream_write.NoProcessStreamWriteRule,
+	no_void_promise.NoVoidPromiseRule,
+	no_zod_defaults.NoZodDefaultsRule,
+	no_zod_passthrough.NoZodPassthroughRule,
+	require_fs_utf8.RequireFsUtf8Rule,
 	no_unnecessary_boolean_literal_compare.NoUnnecessaryBooleanLiteralCompareRule,
 	no_unnecessary_condition.NoUnnecessaryConditionRule,
 	no_unnecessary_qualifier.NoUnnecessaryQualifierRule,
