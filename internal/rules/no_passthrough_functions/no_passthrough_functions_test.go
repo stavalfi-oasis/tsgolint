@@ -29,6 +29,21 @@ function wrapper(value: number): number {
 import { target } from "./foo";
 export function wrapper(value: number): number { return target(value); }
     `},
+		// unicorn/no-array-callback-reference forbids the bare reference an array
+		// iterator would otherwise take, so the wrapper arrow there is forced.
+		{Code: `
+class Service {
+  run(values: readonly number[]): number[] {
+    return values.map((value) => this.double(value));
+  }
+  double(value: number): number { return value * 2; }
+}
+    `},
+		{Code: `
+declare function matches(file: string): boolean;
+declare const files: readonly string[];
+export const chosen = files.filter((file) => matches(file));
+    `},
 	}, []rule_tester.InvalidTestCase{
 		{
 			Code: `

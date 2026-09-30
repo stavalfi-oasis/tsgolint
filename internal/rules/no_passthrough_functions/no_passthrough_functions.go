@@ -214,6 +214,41 @@ func inObjectLiteral(node *ast.Node) bool {
 		ast.IsObjectLiteralExpression(parent.Parent)
 }
 
+// unicorn/no-array-callback-reference forbids handing a bare function reference
+// to an array iterator, so the wrapper arrow there is not the author's choice to
+// remove: reporting it leaves the code with no spelling that satisfies both rules.
+var arrayCallbackMethods = map[string]bool{
+	"every": true, "filter": true, "find": true, "findIndex": true,
+	"findLast": true, "findLastIndex": true, "flatMap": true, "forEach": true,
+	"map": true, "reduce": true, "reduceRight": true, "some": true, "sort": true,
+}
+
+func inArrayCallback(node *ast.Node) bool {
+	parent := node.Parent
+	if parent == nil || !ast.IsCallExpression(parent) {
+		return false
+	}
+	call := parent.AsCallExpression()
+	if call.Arguments == nil {
+		return false
+	}
+	argument := false
+	for _, candidate := range call.Arguments.Nodes {
+		if candidate == node {
+			argument = true
+			break
+		}
+	}
+	if !argument {
+		return false
+	}
+	callee := unwrap(call.Expression)
+	if !ast.IsPropertyAccessExpression(callee) {
+		return false
+	}
+	return arrayCallbackMethods[callee.AsPropertyAccessExpression().Name().Text()]
+}
+
 type forwarder struct {
 	node   *ast.Node
 	target string
@@ -229,7 +264,7 @@ var NoPassthroughFunctionsRule = rule.Rule{
 		order := []*ast.Node{}
 
 		check := func(node *ast.Node) {
-			if inImplementingClass(node) || inObjectLiteral(node) {
+			if inImplementingClass(node) || inObjectLiteral(node) || inArrayCallback(node) {
 				return
 			}
 

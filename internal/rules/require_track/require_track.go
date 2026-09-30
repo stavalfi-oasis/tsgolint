@@ -75,6 +75,29 @@ func isAllowedCall(node *ast.Node) bool {
 	return method == "track" || method == "close"
 }
 
+// `this.#work = <promise>` keeps the promise on the instance, so it is not
+// fire-and-forget: whoever consumes the field decides whether to track it
+// (`await this.track(this.#work)`). Reporting the assignment also mis-read
+// `this.#work = this.track(...)`, which already is tracked, as untracked.
+func isAssignmentToThisProperty(expression *ast.Node) bool {
+	if expression.Kind != ast.KindBinaryExpression {
+		return false
+	}
+	binary := expression.AsBinaryExpression()
+	if binary.OperatorToken.Kind != ast.KindEqualsToken {
+		return false
+	}
+	target := ast.SkipParentheses(binary.Left)
+	switch {
+	case ast.IsPropertyAccessExpression(target):
+		return target.AsPropertyAccessExpression().Expression.Kind == ast.KindThisKeyword
+	case ast.IsElementAccessExpression(target):
+		return target.AsElementAccessExpression().Expression.Kind == ast.KindThisKeyword
+	default:
+		return false
+	}
+}
+
 func enclosingClass(node *ast.Node) *ast.Node {
 	for current := node.Parent; current != nil; current = current.Parent {
 		if ast.IsClassLike(current) {
@@ -104,7 +127,7 @@ var RequireTrackRule = rule.Rule{
 		// what makes that possible: without `await` there is no other signal
 		// that the value is a promise.
 		check := func(node *ast.Node, expression *ast.Node) {
-			if expression == nil || isAllowedCall(expression) {
+			if expression == nil || isAllowedCall(expression) || isAssignmentToThisProperty(expression) {
 				return
 			}
 			class := enclosingClass(node)

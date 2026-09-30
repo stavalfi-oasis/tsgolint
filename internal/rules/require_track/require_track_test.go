@@ -32,6 +32,28 @@ class Service extends ADisposable {
   }
 }
     `},
+		// Storing the promise on the instance is not fire-and-forget: the field's
+		// consumer decides whether to track it, and the assignment itself was
+		// being mis-read as an untracked call.
+		{Code: disposableStub + `
+class Service extends ADisposable {
+  #drained: Promise<void> | undefined;
+  start(): void {
+    this.#drained = this.track(work());
+  }
+}
+    `},
+		{Code: disposableStub + `
+class Service extends ADisposable {
+  #drained: Promise<void> | undefined;
+  start(): void {
+    this.#drained = work();
+  }
+  async drained(): Promise<void> {
+    await this.track(this.#drained);
+  }
+}
+    `},
 		// Not an ADisposable, so the rule has nothing to say.
 		{Code: disposableStub + `
 class Plain {
