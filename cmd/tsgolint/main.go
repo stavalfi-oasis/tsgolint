@@ -21,29 +21,44 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rule"
 	"github.com/typescript-eslint/tsgolint/internal/utils"
 
+	"github.com/typescript-eslint/tsgolint/internal/rules/async_dispose_last"
 	"github.com/typescript-eslint/tsgolint/internal/rules/await_thenable"
+	"github.com/typescript-eslint/tsgolint/internal/rules/class_name_matches_filename"
 	"github.com/typescript-eslint/tsgolint/internal/rules/consistent_return"
 	"github.com/typescript-eslint/tsgolint/internal/rules/consistent_type_exports"
 	"github.com/typescript-eslint/tsgolint/internal/rules/dot_notation"
+	"github.com/typescript-eslint/tsgolint/internal/rules/logger_name_matches_class"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_anonymous_functions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_delete"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_banned_words"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_base_to_string"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_comments"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_confusing_void_expression"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_curl"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_deprecated"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_duplicate_type_constituents"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_floating_promises"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_for_in_array"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_generated_empty_object_type"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_global_functions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_implied_eval"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_import_side_effects"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_infinite_loop"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_meaningless_void_operator"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_misused_promises"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_misused_spread"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_mixed_enums"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_passthrough_functions"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_private_keyword"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_process_stream_write"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_protected"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_redundant_type_constituents"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_single_use_const"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_single_use_interface"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_static_with_this_args"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_string_error"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_string_raw"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_tracked_close"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unnecessary_boolean_literal_compare"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unnecessary_condition"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unnecessary_qualifier"
@@ -80,10 +95,14 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/promise_function_async"
 	"github.com/typescript-eslint/tsgolint/internal/rules/related_getter_setter_pairs"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_abort_signal"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_access_modifiers"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_array_sort_compare"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_async_disposable"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_await"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_catch_binding"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_fs_utf8"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_object_params"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_os_eol"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_track"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_zod_compile"
 	"github.com/typescript-eslint/tsgolint/internal/rules/restrict_plus_operands"
@@ -175,6 +194,25 @@ func setupProfiling(opts *headlessOptions) (func(), error) {
 }
 
 var allRules = []rule.Rule{
+	async_dispose_last.AsyncDisposeLastRule,
+	class_name_matches_filename.ClassNameMatchesFilenameRule,
+	logger_name_matches_class.LoggerNameMatchesClassRule,
+	no_anonymous_functions.NoAnonymousFunctionsRule,
+	no_banned_words.NoBannedWordsRule,
+	no_comments.NoCommentsRule,
+	no_curl.NoCurlRule,
+	no_global_functions.NoGlobalFunctionsRule,
+	no_import_side_effects.NoImportSideEffectsRule,
+	no_infinite_loop.NoInfiniteLoopRule,
+	no_private_keyword.NoPrivateKeywordRule,
+	no_protected.NoProtectedRule,
+	no_single_use_const.NoSingleUseConstRule,
+	no_string_raw.NoStringRawRule,
+	no_tracked_close.NoTrackedCloseRule,
+	require_access_modifiers.RequireAccessModifiersRule,
+	require_catch_binding.RequireCatchBindingRule,
+	require_object_params.RequireObjectParamsRule,
+	require_os_eol.RequireOsEolRule,
 	await_thenable.AwaitThenableRule,
 	consistent_return.ConsistentReturnRule,
 	consistent_type_exports.ConsistentTypeExportsRule,
