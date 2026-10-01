@@ -4,10 +4,12 @@ import (
 	"strings"
 
 	"github.com/microsoft/typescript-go/shim/ast"
+	"github.com/microsoft/typescript-go/shim/checker"
 	"github.com/microsoft/typescript-go/shim/core"
 	"github.com/microsoft/typescript-go/shim/scanner"
 	"github.com/typescript-eslint/tsgolint/internal/oasis"
 	"github.com/typescript-eslint/tsgolint/internal/rule"
+	"github.com/typescript-eslint/tsgolint/internal/utils"
 )
 
 const optionName = "asyncQueue"
@@ -104,6 +106,16 @@ func bindingHasElement(pattern *ast.Node, name string) bool {
 		}
 	}
 	return false
+}
+
+// Reports whether the options parameter's type carries the option, however it
+// is written: an inline literal, a named interface, or an intersection of both.
+func typeHasOption(typeChecker *checker.Checker, parameter *ast.Node) bool {
+	t := utils.GetConstrainedTypeAtLocation(typeChecker, parameter)
+	if t == nil {
+		return false
+	}
+	return checker.Checker_getPropertyOfType(typeChecker, t, optionName) != nil
 }
 
 // Reports whether the class already declares `readonly #asyncQueue`.
@@ -249,15 +261,17 @@ var RequireAsyncQueueRule = rule.Rule{
 				return
 			}
 
-			typeLiteral := typeLiteralOf(parameter)
-			if typeLiteral == nil {
-				// A named options interface: report, but leave the edit to a
-				// human — the interface is shared and may be used elsewhere.
-				ctx.ReportNode(parameter, buildMissingOptionMessage())
-				return
-			}
-
-			if !hasMember(typeLiteral, optionName) {
+			// Asking the checker rather than reading the annotation is what
+			// covers a named options interface and an intersection — both of
+			// which carry the property without spelling it on the parameter.
+			if !typeHasOption(ctx.TypeChecker, parameter) {
+				typeLiteral := typeLiteralOf(parameter)
+				if typeLiteral == nil {
+					// A named interface is shared with other declarations, so
+					// adding the option to it would reach past this class.
+					ctx.ReportNode(parameter, buildMissingOptionMessage())
+					return
+				}
 				ctx.ReportNodeWithFixes(parameter, buildMissingOptionMessage(), func() []rule.RuleFix {
 					fixes := []rule.RuleFix{insertTypeMemberFix(ctx.SourceFile, typeLiteral)}
 					name := parameter.Name()

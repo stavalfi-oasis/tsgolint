@@ -107,6 +107,36 @@ const Service = class extends ADisposable {
   run(): AsyncQueue { return this.#asyncQueue; }
 };
     `},
+		// The option arrives through a named interface. The annotation does not
+		// spell it, so only the checker can see it.
+		{Code: stub + `
+interface ToolArgs {
+  readonly asyncQueue: AsyncQueue;
+  readonly logger: Logger;
+}
+class Service extends ADisposable {
+  readonly #asyncQueue: AsyncQueue;
+  constructor({ asyncQueue }: ToolArgs) {
+    super();
+    this.#asyncQueue = asyncQueue;
+  }
+  run(): AsyncQueue { return this.#asyncQueue; }
+}
+    `},
+		// Same, through an intersection: the property sits on one side of it.
+		{Code: stub + `
+interface Tuning {
+  readonly asyncQueue: AsyncQueue;
+}
+class Service extends ADisposable {
+  readonly #asyncQueue: AsyncQueue;
+  constructor(options: Tuning & { readonly logger: Logger }) {
+    super();
+    this.#asyncQueue = options.asyncQueue;
+  }
+  run(): AsyncQueue { return this.#asyncQueue; }
+}
+    `},
 		// A class that does not extend ADisposable is none of this rule's business.
 		{Code: stub + `
 class Plain {
