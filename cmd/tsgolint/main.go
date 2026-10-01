@@ -98,6 +98,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_access_modifiers"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_array_sort_compare"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_async_disposable"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_async_queue"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_await"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_catch_binding"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_fs_utf8"
@@ -276,6 +277,7 @@ var allRules = []rule.Rule{
 	require_abort_signal.RequireAbortSignalRule,
 	require_array_sort_compare.RequireArraySortCompareRule,
 	require_async_disposable.RequireAsyncDisposableRule,
+	require_async_queue.RequireAsyncQueueRule,
 	require_await.RequireAwaitRule,
 	require_zod_compile.RequireZodCompileRule,
 	restrict_plus_operands.RestrictPlusOperandsRule,
