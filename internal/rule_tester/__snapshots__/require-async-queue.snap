@@ -34,7 +34,7 @@ Help: Add 'readonly #asyncQueue: AsyncQueue;' and assign it in the constructor.
      | ~~~~~~~~~~~~
   10 |   }
      | ~~~
-  11 |   run(): AsyncQueue { return this.#asyncQueue; }
+  11 | }
 ---
 
 [TestRequireAsyncQueue/invalid-3 - 1]
@@ -106,7 +106,7 @@ Help: Add 'readonly #asyncQueue: AsyncQueue;' and assign it in the constructor.
    7 |   readonly #asyncQueue: AsyncQueue;
    8 |   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {}
      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   9 |   run(): AsyncQueue { return this.#asyncQueue; }
+   9 | }
 ---
 
 [TestRequireAsyncQueue/invalid-9 - 1]
@@ -150,13 +150,13 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
 ---
 
 [TestRequireAsyncQueue/invalid-13 - 1]
-Diagnostic 1: missingOption (14:15 - 14:53)
+Diagnostic 1: missingOption (13:15 - 13:53)
 Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
 Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
-  13 | class Service extends Middle {
-  14 |   constructor({ logger }: { readonly logger: Logger }) {
+  12 | class Service extends Middle {
+  13 |   constructor({ logger }: { readonly logger: Logger }) {
      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  15 |     super({ asyncQueue: null as unknown as AsyncQueue });
+  14 |     super({ asyncQueue: null as unknown as AsyncQueue });
 ---
 
 [TestRequireAsyncQueue/invalid-14 - 1]

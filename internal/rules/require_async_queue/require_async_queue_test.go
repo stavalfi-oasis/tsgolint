@@ -24,7 +24,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
     `},
 		// Alongside other options.
@@ -41,7 +40,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
     `},
 		// Assigned from a renamed binding.
@@ -52,7 +50,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = queue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
     `},
 		// Reached through a whole options object rather than destructured.
@@ -63,7 +60,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = options.asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
     `},
 		// A `this` parameter is a type annotation, not the options object.
@@ -74,7 +70,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
     `},
 		// Extends a subclass of ADisposable, which already satisfies the rule.
@@ -85,7 +80,6 @@ class Middle extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
 class Service extends Middle {
   readonly #asyncQueue: AsyncQueue;
@@ -93,7 +87,6 @@ class Service extends Middle {
     super({ asyncQueue });
     this.#asyncQueue = asyncQueue;
   }
-  go(): AsyncQueue { return this.#asyncQueue; }
 }
     `},
 		// A class expression, which the JS rules never visited.
@@ -104,7 +97,6 @@ const Service = class extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 };
     `},
 		// The option arrives through a named interface. The annotation does not
@@ -120,7 +112,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
     `},
 		// Same, through an intersection: the property sits on one side of it.
@@ -134,7 +125,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = options.asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
     `},
 		// An optional options parameter is a union with undefined, so the type
@@ -146,7 +136,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = args?.asyncQueue ?? (undefined as unknown as AsyncQueue);
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
     `},
 		// A class that does not extend ADisposable is none of this rule's business.
@@ -187,10 +176,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
-  }
 }
       `},
 		},
@@ -217,10 +202,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
-  }
 }
       `},
 		},
@@ -233,7 +214,6 @@ class Service extends ADisposable {
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
     super();
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
       `,
 			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingField"}},
@@ -249,7 +229,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
       `},
 		},
@@ -263,7 +242,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
       `,
 			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingOption"}},
@@ -281,7 +259,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
       `},
 		},
@@ -309,10 +286,6 @@ class Service extends ADisposable {
   constructor(options: { readonly asyncQueue: AsyncQueue }) {
     super();
     this.#asyncQueue = options.asyncQueue;
-  }
-
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
   }
 }
       `},
@@ -350,10 +323,6 @@ class Service extends ADisposable {
   logger }: ToolArgs) {
     super();
     this.#asyncQueue = asyncQueue;
-  }
-
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
   }
 }
       `},
@@ -393,10 +362,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
-  }
 }
       `},
 		},
@@ -423,10 +388,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
-  }
 }
       `},
 		},
@@ -436,7 +397,6 @@ class Service extends ADisposable {
 class Service extends ADisposable {
   readonly #asyncQueue: AsyncQueue;
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {}
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
       `,
 			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingField"}},
@@ -452,7 +412,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
       `},
 		},
@@ -482,10 +441,6 @@ class Service extends ADisposable {
     this.#asyncQueue = asyncQueue;
   }
 
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
-  }
-
   run(): void {}
 }
       `},
@@ -512,10 +467,6 @@ class Service extends ADisposable {
   }) {
     super();
     this.#asyncQueue = asyncQueue;
-  }
-
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
   }
 }
       `},
@@ -560,10 +511,6 @@ const Service = class extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
-  }
 };
       `},
 		},
@@ -583,7 +530,6 @@ class Middle extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
 class Service extends Middle {
   constructor({ logger }: { readonly logger: Logger }) {
@@ -602,7 +548,6 @@ class Middle extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-  run(): AsyncQueue { return this.#asyncQueue; }
 }
 class Service extends Middle {
   readonly #asyncQueue: AsyncQueue;
@@ -612,10 +557,6 @@ class Service extends Middle {
   readonly logger: Logger }) {
     super({ asyncQueue: null as unknown as AsyncQueue });
     this.#asyncQueue = asyncQueue;
-  }
-
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
   }
 }
       `},
@@ -646,10 +587,6 @@ class Service extends ADisposable {
     super();
     this.#asyncQueue = asyncQueue;
   }
-
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
-  }
 }
       `},
 		},
@@ -679,10 +616,6 @@ class Service extends ADisposable {
   readonly logger: Logger }) {
     super();
     this.#asyncQueue = asyncQueue;
-  }
-
-  public get asyncQueue(): AsyncQueue {
-    return this.#asyncQueue;
   }
 }
       `},

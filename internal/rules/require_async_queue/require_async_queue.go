@@ -313,10 +313,8 @@ var RequireAsyncQueueRule = rule.Rule{
 	},
 }
 
-// Declares the field, assigns it, and exposes it. The getter is not decoration:
-// `no-unused-private-class-members` takes no options, so a class that stores the
-// queue and has no use for it yet would otherwise be reported for the field the
-// fix just added.
+// Declares the field and assigns it. Nothing reads it until the class has a use
+// for the queue, which is why `no-unused-private-class-members` is off.
 func storeFixes(sourceFile *ast.SourceFile, class *ast.Node, constructorNode *ast.Node) []rule.RuleFix {
 	source := optionName
 	if parameter := firstRealParam(constructorNode); parameter != nil {
@@ -339,11 +337,6 @@ func storeFixes(sourceFile *ast.SourceFile, class *ast.Node, constructorNode *as
 				"readonly "+fieldName+": "+optionType+";\n\n"+indentOf(sourceFile, start),
 			))
 		}
-		fixes = append(fixes, rule.RuleFixInsertAfter(constructorNode,
-			"\n\n"+indent+"public get "+optionName+"(): "+optionType+" {\n"+
-				indent+"  return this."+fieldName+";\n"+
-				indent+"}",
-		))
 	}
 
 	body := constructorNode.Body()
@@ -428,9 +421,6 @@ func insertConstructorFix(sourceFile *ast.SourceFile, class *ast.Node) []rule.Ru
 		inner + "}) {\n" +
 		inner + "  super();\n" +
 		inner + "  this." + fieldName + " = " + optionName + ";\n" +
-		inner + "}\n\n" +
-		inner + "public get " + optionName + "(): " + optionType + " {\n" +
-		inner + "  return this." + fieldName + ";\n" +
 		inner + "}"
 	if len(members) == 0 {
 		return []rule.RuleFix{
