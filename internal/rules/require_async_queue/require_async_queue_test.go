@@ -273,6 +273,38 @@ class Service extends ADisposable {
 }
       `},
 		},
+		// A whole options object rather than a destructuring pattern: the
+		// assignment has to reach through the parameter, not name a binding
+		// that does not exist.
+		{
+			Code: stub + `
+class Service extends ADisposable {
+  constructor(options: { readonly asyncQueue: AsyncQueue }) {
+    super();
+  }
+}
+      `,
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingField"}},
+			Output: []string{`
+import { ADisposable } from "./a-disposable.ts";
+import type { AsyncQueue } from "./async-queue.ts";
+declare class AsyncQueue {}
+declare class Logger {}
+
+class Service extends ADisposable {
+  readonly #asyncQueue: AsyncQueue;
+
+  constructor(options: { readonly asyncQueue: AsyncQueue }) {
+    super();
+    this.#asyncQueue = options.asyncQueue;
+  }
+
+  public get asyncQueue(): AsyncQueue {
+    return this.#asyncQueue;
+  }
+}
+      `},
+		},
 		// A constructor with no parameters at all gets the whole options object.
 		{
 			Code: stub + `

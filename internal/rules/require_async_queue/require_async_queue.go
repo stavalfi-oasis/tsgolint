@@ -305,6 +305,14 @@ var RequireAsyncQueueRule = rule.Rule{
 // queue and has no use for it yet would otherwise be reported for the field the
 // fix just added.
 func storeFixes(sourceFile *ast.SourceFile, class *ast.Node, constructorNode *ast.Node) []rule.RuleFix {
+	source := optionName
+	if parameter := firstRealParam(constructorNode); parameter != nil {
+		if name := parameter.Name(); name != nil && ast.IsIdentifier(name) {
+			// Not destructured, so the option is only reachable through the
+			// parameter it arrived on.
+			source = name.Text() + "." + optionName
+		}
+	}
 	fixes := []rule.RuleFix{}
 	indent := indentOf(sourceFile, scanner.SkipTrivia(sourceFile.Text(), class.Pos())) + "  "
 
@@ -327,7 +335,7 @@ func storeFixes(sourceFile *ast.SourceFile, class *ast.Node, constructorNode *as
 
 	body := constructorNode.Body()
 	if !assignsQueueField(body) && body != nil && ast.IsBlock(body) {
-		assignment := "this." + fieldName + " = " + optionName + ";"
+		assignment := "this." + fieldName + " = " + source + ";"
 		statements := body.AsBlock().Statements.Nodes
 		if len(statements) > 0 {
 			first := statements[0]
