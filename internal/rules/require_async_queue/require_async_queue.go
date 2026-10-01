@@ -22,6 +22,16 @@ func buildMissingOptionMessage() rule.RuleMessage {
 	}
 }
 
+const fieldName = "#" + optionName
+
+func buildMissingFieldMessage() rule.RuleMessage {
+	return rule.RuleMessage{
+		Id:          "missingField",
+		Description: "The '" + optionName + "' option must be kept on the instance as '" + fieldName + "': a queue that is accepted and dropped is the same as not having one.",
+		Help:        "Add 'readonly " + fieldName + ": " + optionType + ";' and assign it in the constructor.",
+	}
+}
+
 // The leading whitespace on the line an offset sits on, so inserted code lines
 // up with its neighbours.
 func indentOf(sourceFile *ast.SourceFile, offset int) string {
@@ -96,6 +106,48 @@ func bindingHasElement(pattern *ast.Node, name string) bool {
 	return false
 }
 
+// Reports whether the class already declares `readonly #asyncQueue`.
+func hasQueueField(class *ast.Node) bool {
+	for _, member := range class.Members() {
+		if !ast.IsPropertyDeclaration(member) {
+			continue
+		}
+		name := member.Name()
+		if name != nil && ast.IsPrivateIdentifier(name) && name.Text() == fieldName {
+			return true
+		}
+	}
+	return false
+}
+
+// Reports whether the constructor body assigns the option to that field.
+func assignsQueueField(body *ast.Node) bool {
+	if body == nil || !ast.IsBlock(body) {
+		return false
+	}
+	for _, statement := range body.AsBlock().Statements.Nodes {
+		if !ast.IsExpressionStatement(statement) {
+			continue
+		}
+		expression := ast.SkipParentheses(statement.AsExpressionStatement().Expression)
+		if !ast.IsBinaryExpression(expression) {
+			continue
+		}
+		binary := expression.AsBinaryExpression()
+		if binary.OperatorToken.Kind != ast.KindEqualsToken {
+			continue
+		}
+		left := ast.SkipParentheses(binary.Left)
+		if !ast.IsPropertyAccessExpression(left) {
+			continue
+		}
+		access := left.AsPropertyAccessExpression()
+		if access.Expression.Kind == ast.KindThisKeyword && access.Name().Text() == fieldName {
+			return true
+		}
+	}
+	return false
+}
 
 // The module specifier this file already uses for ADisposable, rewritten to
 // point at async-queue.ts. Every class the rule fires on imports ADisposable
@@ -168,7 +220,6 @@ func importFixes(sourceFile *ast.SourceFile) []rule.RuleFix {
 	return nil
 }
 
-
 var RequireAsyncQueueRule = rule.Rule{
 	Name: "require-async-queue",
 	Run: func(ctx rule.RuleContext, options any) rule.RuleListeners {
@@ -205,17 +256,26 @@ var RequireAsyncQueueRule = rule.Rule{
 				ctx.ReportNode(parameter, buildMissingOptionMessage())
 				return
 			}
-			if hasMember(typeLiteral, optionName) {
+
+			if !hasMember(typeLiteral, optionName) {
+				ctx.ReportNodeWithFixes(parameter, buildMissingOptionMessage(), func() []rule.RuleFix {
+					fixes := []rule.RuleFix{insertTypeMemberFix(ctx.SourceFile, typeLiteral)}
+					name := parameter.Name()
+					if name != nil && ast.IsObjectBindingPattern(name) && !bindingHasElement(name, optionName) {
+						fixes = append(fixes, insertBindingElementFix(ctx.SourceFile, name))
+					}
+					fixes = append(fixes, storeFixes(ctx.SourceFile, node, constructorNode)...)
+					return append(fixes, importFixes(ctx.SourceFile)...)
+				})
 				return
 			}
 
-			ctx.ReportNodeWithFixes(parameter, buildMissingOptionMessage(), func() []rule.RuleFix {
-				fixes := []rule.RuleFix{insertTypeMemberFix(ctx.SourceFile, typeLiteral)}
-				name := parameter.Name()
-				if name != nil && ast.IsObjectBindingPattern(name) && !bindingHasElement(name, optionName) {
-					fixes = append(fixes, insertBindingElementFix(ctx.SourceFile, name))
-				}
-				return append(fixes, importFixes(ctx.SourceFile)...)
+			// The option is accepted; it still has to be kept.
+			if hasQueueField(node) && assignsQueueField(constructorNode.Body()) {
+				return
+			}
+			ctx.ReportNodeWithFixes(constructorNode, buildMissingFieldMessage(), func() []rule.RuleFix {
+				return append(storeFixes(ctx.SourceFile, node, constructorNode), importFixes(ctx.SourceFile)...)
 			})
 		}
 
@@ -224,6 +284,51 @@ var RequireAsyncQueueRule = rule.Rule{
 			ast.KindClassExpression:  check,
 		}
 	},
+}
+
+// Declares the field, assigns it, and exposes it. The getter is not decoration:
+// `no-unused-private-class-members` takes no options, so a class that stores the
+// queue and has no use for it yet would otherwise be reported for the field the
+// fix just added.
+func storeFixes(sourceFile *ast.SourceFile, class *ast.Node, constructorNode *ast.Node) []rule.RuleFix {
+	fixes := []rule.RuleFix{}
+	indent := indentOf(sourceFile, scanner.SkipTrivia(sourceFile.Text(), class.Pos())) + "  "
+
+	if !hasQueueField(class) {
+		members := class.Members()
+		if len(members) > 0 {
+			first := members[0]
+			start := scanner.SkipTrivia(sourceFile.Text(), first.Pos())
+			fixes = append(fixes, rule.RuleFixInsertBefore(
+				sourceFile, first,
+				"readonly "+fieldName+": "+optionType+";\n\n"+indentOf(sourceFile, start),
+			))
+		}
+		fixes = append(fixes, rule.RuleFixInsertAfter(constructorNode,
+			"\n\n"+indent+"public get "+optionName+"(): "+optionType+" {\n"+
+				indent+"  return this."+fieldName+";\n"+
+				indent+"}",
+		))
+	}
+
+	body := constructorNode.Body()
+	if !assignsQueueField(body) && body != nil && ast.IsBlock(body) {
+		assignment := "this." + fieldName + " = " + optionName + ";"
+		statements := body.AsBlock().Statements.Nodes
+		if len(statements) > 0 {
+			first := statements[0]
+			start := scanner.SkipTrivia(sourceFile.Text(), first.Pos())
+			fixes = append(fixes, rule.RuleFixInsertAfter(first, "\n"+indentOf(sourceFile, start)+assignment))
+		} else {
+			// An empty derived-class body has no super() to assign after, and
+			// touching `this` before one is a hard error — so write both.
+			fixes = append(fixes, rule.RuleFixReplaceRange(
+				core.NewTextRange(body.End()-1, body.End()-1),
+				"\n"+indent+"  super();\n"+indent+"  "+assignment+"\n"+indent,
+			))
+		}
+	}
+	return fixes
 }
 
 // Adds `readonly asyncQueue: AsyncQueue;` as the first member of the options
@@ -274,18 +379,23 @@ func insertParameterFix(sourceFile *ast.SourceFile, constructorNode *ast.Node) [
 	}
 }
 
-// Gives a class with no constructor at all one that accepts the queue and hands
-// it straight to ADisposable, which is where it is stored.
+// Gives a class with no constructor at all one that accepts the queue, together
+// with the field it is kept in and the getter that reads it.
 func insertConstructorFix(sourceFile *ast.SourceFile, class *ast.Node) []rule.RuleFix {
 	members := class.Members()
 	indent := indentOf(sourceFile, scanner.SkipTrivia(sourceFile.Text(), class.Pos()))
 	inner := indent + "  "
-	text := "public constructor({\n" +
+	text := "readonly " + fieldName + ": " + optionType + ";\n\n" +
+		inner + "public constructor({\n" +
 		inner + "  " + optionName + ",\n" +
 		inner + "}: {\n" +
 		inner + "  readonly " + optionName + ": " + optionType + ";\n" +
 		inner + "}) {\n" +
 		inner + "  super();\n" +
+		inner + "  this." + fieldName + " = " + optionName + ";\n" +
+		inner + "}\n\n" +
+		inner + "public get " + optionName + "(): " + optionType + " {\n" +
+		inner + "  return this." + fieldName + ";\n" +
 		inner + "}"
 	if len(members) == 0 {
 		return []rule.RuleFix{
