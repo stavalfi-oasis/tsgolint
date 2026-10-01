@@ -137,6 +137,18 @@ class Service extends ADisposable {
   run(): AsyncQueue { return this.#asyncQueue; }
 }
     `},
+		// An optional options parameter is a union with undefined, so the type
+		// carries no properties and only the annotation answers.
+		{Code: stub + `
+class Service extends ADisposable {
+  readonly #asyncQueue: AsyncQueue;
+  constructor(args?: { readonly asyncQueue: AsyncQueue; readonly logger?: Logger }) {
+    super();
+    this.#asyncQueue = args?.asyncQueue ?? (undefined as unknown as AsyncQueue);
+  }
+  run(): AsyncQueue { return this.#asyncQueue; }
+}
+    `},
 		// A class that does not extend ADisposable is none of this rule's business.
 		{Code: stub + `
 class Plain {

@@ -264,8 +264,13 @@ var RequireAsyncQueueRule = rule.Rule{
 			// Asking the checker rather than reading the annotation is what
 			// covers a named options interface and an intersection — both of
 			// which carry the property without spelling it on the parameter.
-			if !typeHasOption(ctx.TypeChecker, parameter) {
-				typeLiteral := typeLiteralOf(parameter)
+			typeLiteral := typeLiteralOf(parameter)
+			// The annotation is checked as well as the type: an optional
+			// parameter is a union with undefined, which carries no properties
+			// of its own, and reading the annotation is what still answers.
+			spelled := typeLiteral != nil && hasMember(typeLiteral, optionName)
+
+			if !spelled && !typeHasOption(ctx.TypeChecker, parameter) {
 				if typeLiteral == nil {
 					// A named interface is shared with other declarations, so
 					// adding the option to it would reach past this class.
