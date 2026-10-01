@@ -62,6 +62,20 @@ Help: Add 'readonly #asyncQueue: AsyncQueue;' and assign it in the constructor.
 ---
 
 [TestRequireAsyncQueue/invalid-5 - 1]
+Diagnostic 1: missingField (11:3 - 13:3)
+Message: The 'asyncQueue' option must be kept on the instance as '#asyncQueue': a queue that is accepted and dropped is the same as not having one.
+Help: Add 'readonly #asyncQueue: AsyncQueue;' and assign it in the constructor.
+  10 | class Service extends ADisposable {
+  11 |   constructor({ logger }: ToolArgs) {
+     |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  12 |     super();
+     | ~~~~~~~~~~~~
+  13 |   }
+     | ~~~
+  14 | }
+---
+
+[TestRequireAsyncQueue/invalid-6 - 1]
 Diagnostic 1: missingOption (7:3 - 9:3)
 Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
 Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
@@ -75,7 +89,7 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
   10 | }
 ---
 
-[TestRequireAsyncQueue/invalid-6 - 1]
+[TestRequireAsyncQueue/invalid-7 - 1]
 Diagnostic 1: missingOption (7:15 - 7:20)
 Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
 Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
@@ -85,7 +99,7 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
    8 |     super();
 ---
 
-[TestRequireAsyncQueue/invalid-7 - 1]
+[TestRequireAsyncQueue/invalid-8 - 1]
 Diagnostic 1: missingField (8:3 - 8:69)
 Message: The 'asyncQueue' option must be kept on the instance as '#asyncQueue': a queue that is accepted and dropped is the same as not having one.
 Help: Add 'readonly #asyncQueue: AsyncQueue;' and assign it in the constructor.
@@ -95,7 +109,7 @@ Help: Add 'readonly #asyncQueue: AsyncQueue;' and assign it in the constructor.
    9 |   run(): AsyncQueue { return this.#asyncQueue; }
 ---
 
-[TestRequireAsyncQueue/invalid-8 - 1]
+[TestRequireAsyncQueue/invalid-9 - 1]
 Diagnostic 1: missingOption (6:7 - 6:13)
 Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
 Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
@@ -105,7 +119,7 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
    7 |   run(): void {}
 ---
 
-[TestRequireAsyncQueue/invalid-9 - 1]
+[TestRequireAsyncQueue/invalid-10 - 1]
 Diagnostic 1: missingOption (6:7 - 6:13)
 Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
 Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
@@ -115,7 +129,7 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
    7 |       
 ---
 
-[TestRequireAsyncQueue/invalid-10 - 1]
+[TestRequireAsyncQueue/invalid-11 - 1]
 Diagnostic 1: missingOption (10:15 - 10:37)
 Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
 Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
@@ -125,7 +139,7 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
   11 |     super();
 ---
 
-[TestRequireAsyncQueue/invalid-11 - 1]
+[TestRequireAsyncQueue/invalid-12 - 1]
 Diagnostic 1: missingOption (7:15 - 7:53)
 Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
 Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
@@ -135,7 +149,7 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
    8 |     super();
 ---
 
-[TestRequireAsyncQueue/invalid-12 - 1]
+[TestRequireAsyncQueue/invalid-13 - 1]
 Diagnostic 1: missingOption (14:15 - 14:53)
 Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
 Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
@@ -145,7 +159,7 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
   15 |     super({ asyncQueue: null as unknown as AsyncQueue });
 ---
 
-[TestRequireAsyncQueue/invalid-13 - 1]
+[TestRequireAsyncQueue/invalid-14 - 1]
 Diagnostic 1: missingOption (6:15 - 6:53)
 Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
 Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
@@ -155,7 +169,7 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
    7 |     super();
 ---
 
-[TestRequireAsyncQueue/invalid-14 - 1]
+[TestRequireAsyncQueue/invalid-15 - 1]
 Diagnostic 1: missingOption (6:15 - 6:53)
 Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
 Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.

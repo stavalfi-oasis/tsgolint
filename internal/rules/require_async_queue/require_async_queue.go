@@ -289,7 +289,15 @@ var RequireAsyncQueueRule = rule.Rule{
 				return
 			}
 			ctx.ReportNodeWithFixes(constructorNode, buildMissingFieldMessage(), func() []rule.RuleFix {
-				return append(storeFixes(ctx.SourceFile, node, constructorNode), importFixes(ctx.SourceFile)...)
+				fixes := []rule.RuleFix{}
+				// The type carries the option but the pattern may not destructure
+				// it — which it must, or the assignment names nothing.
+				if name := parameter.Name(); name != nil && ast.IsObjectBindingPattern(name) &&
+					!bindingHasElement(name, optionName) {
+					fixes = append(fixes, insertBindingElementFix(ctx.SourceFile, name))
+				}
+				fixes = append(fixes, storeFixes(ctx.SourceFile, node, constructorNode)...)
+				return append(fixes, importFixes(ctx.SourceFile)...)
 			})
 		}
 

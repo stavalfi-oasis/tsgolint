@@ -305,6 +305,47 @@ class Service extends ADisposable {
 }
       `},
 		},
+		// The named interface carries the option but the pattern does not bind
+		// it: the fix has to destructure it too, or the assignment it writes
+		// names something that does not exist.
+		{
+			Code: stub + `
+interface ToolArgs {
+  readonly asyncQueue: AsyncQueue;
+  readonly logger: Logger;
+}
+class Service extends ADisposable {
+  constructor({ logger }: ToolArgs) {
+    super();
+  }
+}
+      `,
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingField"}},
+			Output: []string{`
+import { ADisposable } from "./a-disposable.ts";
+import type { AsyncQueue } from "./async-queue.ts";
+declare class AsyncQueue {}
+declare class Logger {}
+
+interface ToolArgs {
+  readonly asyncQueue: AsyncQueue;
+  readonly logger: Logger;
+}
+class Service extends ADisposable {
+  readonly #asyncQueue: AsyncQueue;
+
+  constructor({ asyncQueue,
+  logger }: ToolArgs) {
+    super();
+    this.#asyncQueue = asyncQueue;
+  }
+
+  public get asyncQueue(): AsyncQueue {
+    return this.#asyncQueue;
+  }
+}
+      `},
+		},
 		// A constructor with no parameters at all gets the whole options object.
 		{
 			Code: stub + `
