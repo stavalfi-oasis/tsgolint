@@ -26,7 +26,7 @@ func TestRequireAsyncQueue(t *testing.T) {
 		{Code: stub + `
 class Service extends ADisposable {
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super({ asyncQueue });
+    super();
   }
 }
     `},
@@ -39,7 +39,7 @@ class Service extends ADisposable {
     readonly asyncQueue: AsyncQueue;
     readonly logger: Logger;
   }) {
-    super({ asyncQueue });
+    super();
   }
 }
     `},
@@ -69,7 +69,7 @@ class Service extends ADisposable {
   constructor({ asyncQueue,
   logger }: { readonly asyncQueue: AsyncQueue;
   readonly logger: Logger }) {
-    super({ asyncQueue });
+    super();
   }
 }
       `},
@@ -89,7 +89,7 @@ class Service extends ADisposable {
 			Output: []string{fixedStub + `
 class Service extends ADisposable {
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super({ asyncQueue });
+    super();
   }
 }
       `},
@@ -111,7 +111,7 @@ class Service extends ADisposable {
   }: {
     readonly asyncQueue: AsyncQueue;
   }) {
-    super({ asyncQueue });
+    super();
   }
 
   run(): void {}

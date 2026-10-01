@@ -17,8 +17,8 @@ const optionType = "AsyncQueue"
 func buildMissingOptionMessage() rule.RuleMessage {
 	return rule.RuleMessage{
 		Id:          "missingOption",
-		Description: "A class extending " + oasis.DisposableBaseName + " must accept '" + optionName + ": " + optionType + "' in its constructor options and pass it to super(): an app owns one queue and hands it to everything it builds.",
-		Help:        "Add 'readonly " + optionName + ": " + optionType + ";' to the constructor's options object and call 'super({ " + optionName + " })'.",
+		Description: "A class extending " + oasis.DisposableBaseName + " must accept '" + optionName + ": " + optionType + "' in its constructor options: an app owns one queue and hands it to everything it builds.",
+		Help:        "Add 'readonly " + optionName + ": " + optionType + ";' to the constructor's options object.",
 	}
 }
 
@@ -96,24 +96,6 @@ func bindingHasElement(pattern *ast.Node, name string) bool {
 	return false
 }
 
-// The `super(...)` call of a constructor body, which the fix has to widen so
-// the queue reaches ADisposable itself.
-func superCallOf(body *ast.Node) *ast.Node {
-	if body == nil || !ast.IsBlock(body) {
-		return nil
-	}
-	for _, statement := range body.AsBlock().Statements.Nodes {
-		if !ast.IsExpressionStatement(statement) {
-			continue
-		}
-		expression := ast.SkipParentheses(statement.AsExpressionStatement().Expression)
-		if ast.IsCallExpression(expression) &&
-			expression.AsCallExpression().Expression.Kind == ast.KindSuperKeyword {
-			return expression
-		}
-	}
-	return nil
-}
 
 // The module specifier this file already uses for ADisposable, rewritten to
 // point at async-queue.ts. Every class the rule fires on imports ADisposable
@@ -186,23 +168,6 @@ func importFixes(sourceFile *ast.SourceFile) []rule.RuleFix {
 	return nil
 }
 
-// Widens `super()` to `super({ asyncQueue })`. A super() that already passes
-// something is left alone: the fix cannot know what the extra argument means.
-func superFixes(superCall *ast.Node) []rule.RuleFix {
-	if superCall == nil {
-		return nil
-	}
-	arguments := superCall.AsCallExpression().Arguments
-	if arguments != nil && len(arguments.Nodes) > 0 {
-		return nil
-	}
-	return []rule.RuleFix{
-		rule.RuleFixReplaceRange(
-			core.NewTextRange(superCall.End()-2, superCall.End()),
-			"({ "+optionName+" })",
-		),
-	}
-}
 
 var RequireAsyncQueueRule = rule.Rule{
 	Name: "require-async-queue",
@@ -228,9 +193,7 @@ var RequireAsyncQueueRule = rule.Rule{
 			parameter := firstRealParam(constructorNode)
 			if parameter == nil {
 				ctx.ReportNodeWithFixes(constructorNode, buildMissingOptionMessage(), func() []rule.RuleFix {
-					fixes := insertParameterFix(ctx.SourceFile, constructorNode)
-					fixes = append(fixes, superFixes(superCallOf(constructorNode.Body()))...)
-					return append(fixes, importFixes(ctx.SourceFile)...)
+					return append(insertParameterFix(ctx.SourceFile, constructorNode), importFixes(ctx.SourceFile)...)
 				})
 				return
 			}
@@ -252,7 +215,6 @@ var RequireAsyncQueueRule = rule.Rule{
 				if name != nil && ast.IsObjectBindingPattern(name) && !bindingHasElement(name, optionName) {
 					fixes = append(fixes, insertBindingElementFix(ctx.SourceFile, name))
 				}
-				fixes = append(fixes, superFixes(superCallOf(constructorNode.Body()))...)
 				return append(fixes, importFixes(ctx.SourceFile)...)
 			})
 		}
@@ -323,7 +285,7 @@ func insertConstructorFix(sourceFile *ast.SourceFile, class *ast.Node) []rule.Ru
 		inner + "}: {\n" +
 		inner + "  readonly " + optionName + ": " + optionType + ";\n" +
 		inner + "}) {\n" +
-		inner + "  super({ " + optionName + " });\n" +
+		inner + "  super();\n" +
 		inner + "}"
 	if len(members) == 0 {
 		return []rule.RuleFix{

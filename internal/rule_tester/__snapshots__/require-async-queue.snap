@@ -1,8 +1,8 @@
 
 [TestRequireAsyncQueue/invalid-0 - 1]
 Diagnostic 1: missingOption (7:15 - 7:53)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and pass it to super(): an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and call 'super({ asyncQueue })'.
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
    6 | class Service extends ADisposable {
    7 |   constructor({ logger }: { readonly logger: Logger }) {
      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -11,8 +11,8 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
 
 [TestRequireAsyncQueue/invalid-1 - 1]
 Diagnostic 1: missingOption (7:3 - 9:3)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and pass it to super(): an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and call 'super({ asyncQueue })'.
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
    6 | class Service extends ADisposable {
    7 |   constructor() {
      |   ~~~~~~~~~~~~~~~
@@ -25,8 +25,8 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
 
 [TestRequireAsyncQueue/invalid-2 - 1]
 Diagnostic 1: missingOption (6:7 - 6:13)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and pass it to super(): an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and call 'super({ asyncQueue })'.
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
    5 | 
    6 | class Service extends ADisposable {
      |       ~~~~~~~
