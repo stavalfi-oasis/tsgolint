@@ -29,6 +29,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/dot_notation"
 	"github.com/typescript-eslint/tsgolint/internal/rules/logger_name_matches_class"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_anonymous_functions"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_length_assignment"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_delete"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_banned_words"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_base_to_string"
@@ -200,6 +201,7 @@ var allRules = []rule.Rule{
 	class_name_matches_filename.ClassNameMatchesFilenameRule,
 	logger_name_matches_class.LoggerNameMatchesClassRule,
 	no_anonymous_functions.NoAnonymousFunctionsRule,
+	no_array_length_assignment.NoArrayLengthAssignmentRule,
 	no_banned_words.NoBannedWordsRule,
 	no_comments.NoCommentsRule,
 	no_curl.NoCurlRule,

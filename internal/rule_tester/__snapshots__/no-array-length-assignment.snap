@@ -1,0 +1,40 @@
+
+[TestNoArrayLengthAssignment/invalid-0 - 1]
+Diagnostic 1: lengthAssignment (3:1 - 3:18)
+Message: Don't assign to `.length`.
+Help: Truncating in place mutates an array every other holder still sees. Assign a fresh array instead: `this.#workers = []`.
+   2 | declare const workers: string[];
+   3 | workers.length = 0;
+     | ~~~~~~~~~~~~~~~~~~
+   4 |       
+---
+
+[TestNoArrayLengthAssignment/invalid-1 - 1]
+Diagnostic 1: lengthAssignment (5:5 - 5:28)
+Message: Don't assign to `.length`.
+Help: Truncating in place mutates an array every other holder still sees. Assign a fresh array instead: `this.#workers = []`.
+   4 |   public clear(): void {
+   5 |     this.#workers.length = 0;
+     |     ~~~~~~~~~~~~~~~~~~~~~~~~
+   6 |   }
+---
+
+[TestNoArrayLengthAssignment/invalid-2 - 1]
+Diagnostic 1: lengthAssignment (3:1 - 3:19)
+Message: Don't assign to `.length`.
+Help: Truncating in place mutates an array every other holder still sees. Assign a fresh array instead: `this.#workers = []`.
+   2 | declare const workers: string[];
+   3 | workers.length -= 1;
+     | ~~~~~~~~~~~~~~~~~~~
+   4 |       
+---
+
+[TestNoArrayLengthAssignment/invalid-3 - 1]
+Diagnostic 1: lengthAssignment (3:1 - 3:21)
+Message: Don't assign to `.length`.
+Help: Truncating in place mutates an array every other holder still sees. Assign a fresh array instead: `this.#workers = []`.
+   2 | declare const workers: string[];
+   3 | workers['length'] = 0;
+     | ~~~~~~~~~~~~~~~~~~~~~
+   4 |       
+---
