@@ -16,20 +16,18 @@ declare class Logger {}
 func TestRequireAsyncQueue(t *testing.T) {
 	t.Parallel()
 	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &RequireAsyncQueueRule, []rule_tester.ValidTestCase{
-		// The shape the rule is asking for.
+		// The shape the rule is asking for: accepted and handed to the base,
+		// which is the one place the queue is now kept.
 		{Code: stub + `
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 }
     `},
 		// Alongside other options.
 		{Code: stub + `
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor({
     asyncQueue,
     logger,
@@ -37,65 +35,53 @@ class Service extends ADisposable {
     readonly asyncQueue: AsyncQueue;
     readonly logger: Logger;
   }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 }
     `},
-		// Assigned from a renamed binding.
+		// Renamed binding: the option is what the rule asks for, not the name it
+		// is destructured under.
 		{Code: stub + `
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor({ asyncQueue: queue }: { readonly asyncQueue: AsyncQueue }) {
-    super();
-    this.#asyncQueue = queue;
+    super({ asyncQueue: queue });
   }
 }
     `},
 		// Reached through a whole options object rather than destructured.
 		{Code: stub + `
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor(options: { readonly asyncQueue: AsyncQueue }) {
-    super();
-    this.#asyncQueue = options.asyncQueue;
+    super(options);
   }
 }
     `},
 		// A `this` parameter is a type annotation, not the options object.
 		{Code: stub + `
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor(this: Service, { asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 }
     `},
 		// Extends a subclass of ADisposable, which already satisfies the rule.
 		{Code: stub + `
 class Middle extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 }
 class Service extends Middle {
-  readonly #asyncQueue: AsyncQueue;
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
     super({ asyncQueue });
-    this.#asyncQueue = asyncQueue;
   }
 }
     `},
 		// A class expression, which the JS rules never visited.
 		{Code: stub + `
 const Service = class extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 };
     `},
@@ -107,10 +93,8 @@ interface ToolArgs {
   readonly logger: Logger;
 }
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor({ asyncQueue }: ToolArgs) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 }
     `},
@@ -120,10 +104,8 @@ interface Tuning {
   readonly asyncQueue: AsyncQueue;
 }
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor(options: Tuning & { readonly logger: Logger }) {
-    super();
-    this.#asyncQueue = options.asyncQueue;
+    super(options);
   }
 }
     `},
@@ -131,11 +113,16 @@ class Service extends ADisposable {
 		// carries no properties and only the annotation answers.
 		{Code: stub + `
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor(args?: { readonly asyncQueue: AsyncQueue; readonly logger?: Logger }) {
-    super();
-    this.#asyncQueue = args?.asyncQueue ?? (undefined as unknown as AsyncQueue);
+    super({ asyncQueue: args?.asyncQueue as unknown as AsyncQueue });
   }
+}
+    `},
+		// No constructor at all: the implicit one forwards to ADisposable's,
+		// which already demands the queue, so there is nothing to add.
+		{Code: stub + `
+class Service extends ADisposable {
+  run(): void {}
 }
     `},
 		// A class that does not extend ADisposable is none of this rule's business.
@@ -144,7 +131,7 @@ class Plain {
   constructor({ logger }: { readonly logger: Logger }) {}
 }
     `},
-		// ADisposable itself is exempt: it has no super to accept a queue from.
+		// ADisposable itself is exempt: it is the class that holds the queue.
 		{Code: `
 class ADisposable {
   run(): void {}
@@ -168,79 +155,21 @@ declare class AsyncQueue {}
 declare class Logger {}
 
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-
   constructor({ asyncQueue,
   logger }: { readonly asyncQueue: AsyncQueue;
   readonly logger: Logger }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 }
       `},
 		},
-		// Accepted and dropped on the floor: only the storing half is missing.
+		// A whole options object rather than a destructuring pattern: the
+		// super call takes the object it already has.
 		{
 			Code: stub + `
 class Service extends ADisposable {
-  constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
+  constructor(options: { readonly logger: Logger }) {
     super();
-  }
-}
-      `,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingField"}},
-			Output: []string{`
-import { ADisposable } from "./a-disposable.ts";
-import type { AsyncQueue } from "./async-queue.ts";
-declare class AsyncQueue {}
-declare class Logger {}
-
-class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-
-  constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super();
-    this.#asyncQueue = asyncQueue;
-  }
-}
-      `},
-		},
-		// The field is already declared and read: the fix adds the assignment it
-		// is missing and nothing else — no second field, no second getter.
-		{
-			Code: stub + `
-class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-  constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super();
-  }
-}
-      `,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingField"}},
-			Output: []string{`
-import { ADisposable } from "./a-disposable.ts";
-import type { AsyncQueue } from "./async-queue.ts";
-declare class AsyncQueue {}
-declare class Logger {}
-
-class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-  constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super();
-    this.#asyncQueue = asyncQueue;
-  }
-}
-      `},
-		},
-		// From the other direction: field and assignment are already there, only
-		// the option is missing. Neither may be declared a second time.
-		{
-			Code: stub + `
-class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-  constructor({ logger }: { readonly logger: Logger }) {
-    super();
-    this.#asyncQueue = asyncQueue;
   }
 }
       `,
@@ -252,77 +181,9 @@ declare class AsyncQueue {}
 declare class Logger {}
 
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-  constructor({ asyncQueue,
-  logger }: { readonly asyncQueue: AsyncQueue;
+  constructor(options: { readonly asyncQueue: AsyncQueue;
   readonly logger: Logger }) {
-    super();
-    this.#asyncQueue = asyncQueue;
-  }
-}
-      `},
-		},
-		// A whole options object rather than a destructuring pattern: the
-		// assignment has to reach through the parameter, not name a binding
-		// that does not exist.
-		{
-			Code: stub + `
-class Service extends ADisposable {
-  constructor(options: { readonly asyncQueue: AsyncQueue }) {
-    super();
-  }
-}
-      `,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingField"}},
-			Output: []string{`
-import { ADisposable } from "./a-disposable.ts";
-import type { AsyncQueue } from "./async-queue.ts";
-declare class AsyncQueue {}
-declare class Logger {}
-
-class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-
-  constructor(options: { readonly asyncQueue: AsyncQueue }) {
-    super();
-    this.#asyncQueue = options.asyncQueue;
-  }
-}
-      `},
-		},
-		// The named interface carries the option but the pattern does not bind
-		// it: the fix has to destructure it too, or the assignment it writes
-		// names something that does not exist.
-		{
-			Code: stub + `
-interface ToolArgs {
-  readonly asyncQueue: AsyncQueue;
-  readonly logger: Logger;
-}
-class Service extends ADisposable {
-  constructor({ logger }: ToolArgs) {
-    super();
-  }
-}
-      `,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingField"}},
-			Output: []string{`
-import { ADisposable } from "./a-disposable.ts";
-import type { AsyncQueue } from "./async-queue.ts";
-declare class AsyncQueue {}
-declare class Logger {}
-
-interface ToolArgs {
-  readonly asyncQueue: AsyncQueue;
-  readonly logger: Logger;
-}
-class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-
-  constructor({ asyncQueue,
-  logger }: ToolArgs) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 }
       `},
@@ -345,22 +206,7 @@ declare class Logger {}
 
 class Service extends ADisposable {
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super();
-  }
-}
-      `,
-				`
-import { ADisposable } from "./a-disposable.ts";
-import type { AsyncQueue } from "./async-queue.ts";
-declare class AsyncQueue {}
-declare class Logger {}
-
-class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-
-  constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 }
       `},
@@ -382,44 +228,17 @@ declare class AsyncQueue {}
 declare class Logger {}
 
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue; }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 }
       `},
 		},
-		// An empty constructor body, so the assignment has nothing to follow.
+		// An empty constructor body, so the super call has nothing to follow.
 		{
 			Code: stub + `
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-  constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {}
-}
-      `,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingField"}},
-			Output: []string{`
-import { ADisposable } from "./a-disposable.ts";
-import type { AsyncQueue } from "./async-queue.ts";
-declare class AsyncQueue {}
-declare class Logger {}
-
-class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-  constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-    super();
-    this.#asyncQueue = asyncQueue;
-  }
-}
-      `},
-		},
-		// No constructor at all, with members to insert ahead of.
-		{
-			Code: stub + `
-class Service extends ADisposable {
-  run(): void {}
+  constructor({ logger }: { readonly logger: Logger }) {}
 }
       `,
 			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingOption"}},
@@ -430,43 +249,10 @@ declare class AsyncQueue {}
 declare class Logger {}
 
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-
-  public constructor({
-    asyncQueue,
-  }: {
-    readonly asyncQueue: AsyncQueue;
-  }) {
-    super();
-    this.#asyncQueue = asyncQueue;
-  }
-
-  run(): void {}
-}
-      `},
-		},
-		// No constructor and no members at all: the whole body is written.
-		{
-			Code: stub + `
-class Service extends ADisposable {}
-      `,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "missingOption"}},
-			Output: []string{`
-import { ADisposable } from "./a-disposable.ts";
-import type { AsyncQueue } from "./async-queue.ts";
-declare class AsyncQueue {}
-declare class Logger {}
-
-class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-
-  public constructor({
-    asyncQueue,
-  }: {
-    readonly asyncQueue: AsyncQueue;
-  }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+  constructor({ asyncQueue,
+  logger }: { readonly asyncQueue: AsyncQueue;
+  readonly logger: Logger }) {
+    super({ asyncQueue });
   }
 }
       `},
@@ -503,32 +289,25 @@ declare class AsyncQueue {}
 declare class Logger {}
 
 const Service = class extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-
   constructor({ asyncQueue,
   logger }: { readonly asyncQueue: AsyncQueue;
   readonly logger: Logger }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 };
       `},
 		},
 		// Extends a subclass of ADisposable: the transitive case the name-only
-		// check the JS rules used would have missed. ADisposable is declared
-		// locally here on purpose — reached through an unresolvable import the
-		// type walk cannot see the base chain, and only the direct subclass
-		// would be reported.
+		// check the JS rules used would have missed. The super call already has
+		// an argument, so only the option is added.
 		{
 			Code: `
 declare class AsyncQueue {}
 declare class Logger {}
 class ADisposable {}
 class Middle extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
     super();
-    this.#asyncQueue = asyncQueue;
   }
 }
 class Service extends Middle {
@@ -543,20 +322,15 @@ declare class AsyncQueue {}
 declare class Logger {}
 class ADisposable {}
 class Middle extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
     super();
-    this.#asyncQueue = asyncQueue;
   }
 }
 class Service extends Middle {
-  readonly #asyncQueue: AsyncQueue;
-
   constructor({ asyncQueue,
   logger }: { readonly asyncQueue: AsyncQueue;
   readonly logger: Logger }) {
     super({ asyncQueue: null as unknown as AsyncQueue });
-    this.#asyncQueue = asyncQueue;
   }
 }
       `},
@@ -579,13 +353,10 @@ import { ADisposable } from "./a-disposable.ts";
 import type { AsyncQueue } from "./async-queue.ts";
 declare class Logger {}
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-
   constructor({ asyncQueue,
   logger }: { readonly asyncQueue: AsyncQueue;
   readonly logger: Logger }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 }
       `},
@@ -609,13 +380,10 @@ declare class ADisposable {}
 declare class AsyncQueue {}
 declare class Logger {}
 class Service extends ADisposable {
-  readonly #asyncQueue: AsyncQueue;
-
   constructor({ asyncQueue,
   logger }: { readonly asyncQueue: AsyncQueue;
   readonly logger: Logger }) {
-    super();
-    this.#asyncQueue = asyncQueue;
+    super({ asyncQueue });
   }
 }
       `},

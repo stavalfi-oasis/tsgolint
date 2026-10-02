@@ -1,8 +1,8 @@
 
 [TestRequireAsyncQueue/invalid-0 - 1]
 Diagnostic 1: missingOption (7:15 - 7:53)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and hand it to super(): an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and pass it to super({ asyncQueue }).
    6 | class Service extends ADisposable {
    7 |   constructor({ logger }: { readonly logger: Logger }) {
      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -10,75 +10,19 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
 ---
 
 [TestRequireAsyncQueue/invalid-1 - 1]
-Diagnostic 1: missingField (7:3 - 9:3)
-Message: The 'asyncQueue' option must be kept on the instance as '#asyncQueue': a queue that is accepted and dropped is the same as not having one.
-Help: Add 'readonly #asyncQueue: AsyncQueue;' and assign it in the constructor.
+Diagnostic 1: missingOption (7:15 - 7:50)
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and hand it to super(): an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and pass it to super({ asyncQueue }).
    6 | class Service extends ADisposable {
-   7 |   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-     |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   7 |   constructor(options: { readonly logger: Logger }) {
+     |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    8 |     super();
-     | ~~~~~~~~~~~~
-   9 |   }
-     | ~~~
-  10 | }
 ---
 
 [TestRequireAsyncQueue/invalid-2 - 1]
-Diagnostic 1: missingField (8:3 - 10:3)
-Message: The 'asyncQueue' option must be kept on the instance as '#asyncQueue': a queue that is accepted and dropped is the same as not having one.
-Help: Add 'readonly #asyncQueue: AsyncQueue;' and assign it in the constructor.
-   7 |   readonly #asyncQueue: AsyncQueue;
-   8 |   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {
-     |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   9 |     super();
-     | ~~~~~~~~~~~~
-  10 |   }
-     | ~~~
-  11 | }
----
-
-[TestRequireAsyncQueue/invalid-3 - 1]
-Diagnostic 1: missingOption (8:15 - 8:53)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
-   7 |   readonly #asyncQueue: AsyncQueue;
-   8 |   constructor({ logger }: { readonly logger: Logger }) {
-     |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   9 |     super();
----
-
-[TestRequireAsyncQueue/invalid-4 - 1]
-Diagnostic 1: missingField (7:3 - 9:3)
-Message: The 'asyncQueue' option must be kept on the instance as '#asyncQueue': a queue that is accepted and dropped is the same as not having one.
-Help: Add 'readonly #asyncQueue: AsyncQueue;' and assign it in the constructor.
-   6 | class Service extends ADisposable {
-   7 |   constructor(options: { readonly asyncQueue: AsyncQueue }) {
-     |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   8 |     super();
-     | ~~~~~~~~~~~~
-   9 |   }
-     | ~~~
-  10 | }
----
-
-[TestRequireAsyncQueue/invalid-5 - 1]
-Diagnostic 1: missingField (11:3 - 13:3)
-Message: The 'asyncQueue' option must be kept on the instance as '#asyncQueue': a queue that is accepted and dropped is the same as not having one.
-Help: Add 'readonly #asyncQueue: AsyncQueue;' and assign it in the constructor.
-  10 | class Service extends ADisposable {
-  11 |   constructor({ logger }: ToolArgs) {
-     |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  12 |     super();
-     | ~~~~~~~~~~~~
-  13 |   }
-     | ~~~
-  14 | }
----
-
-[TestRequireAsyncQueue/invalid-6 - 1]
 Diagnostic 1: missingOption (7:3 - 9:3)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and hand it to super(): an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and pass it to super({ asyncQueue }).
    6 | class Service extends ADisposable {
    7 |   constructor() {
      |   ~~~~~~~~~~~~~~~
@@ -89,90 +33,70 @@ Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object
   10 | }
 ---
 
-[TestRequireAsyncQueue/invalid-7 - 1]
+[TestRequireAsyncQueue/invalid-3 - 1]
 Diagnostic 1: missingOption (7:15 - 7:20)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and hand it to super(): an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and pass it to super({ asyncQueue }).
    6 | class Service extends ADisposable {
    7 |   constructor({}: {}) {
      |               ~~~~~~
    8 |     super();
 ---
 
-[TestRequireAsyncQueue/invalid-8 - 1]
-Diagnostic 1: missingField (8:3 - 8:69)
-Message: The 'asyncQueue' option must be kept on the instance as '#asyncQueue': a queue that is accepted and dropped is the same as not having one.
-Help: Add 'readonly #asyncQueue: AsyncQueue;' and assign it in the constructor.
-   7 |   readonly #asyncQueue: AsyncQueue;
-   8 |   constructor({ asyncQueue }: { readonly asyncQueue: AsyncQueue }) {}
-     |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   9 | }
----
-
-[TestRequireAsyncQueue/invalid-9 - 1]
-Diagnostic 1: missingOption (6:7 - 6:13)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
-   5 | 
+[TestRequireAsyncQueue/invalid-4 - 1]
+Diagnostic 1: missingOption (7:15 - 7:53)
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and hand it to super(): an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and pass it to super({ asyncQueue }).
    6 | class Service extends ADisposable {
-     |       ~~~~~~~
-   7 |   run(): void {}
+   7 |   constructor({ logger }: { readonly logger: Logger }) {}
+     |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   8 | }
 ---
 
-[TestRequireAsyncQueue/invalid-10 - 1]
-Diagnostic 1: missingOption (6:7 - 6:13)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
-   5 | 
-   6 | class Service extends ADisposable {}
-     |       ~~~~~~~
-   7 |       
----
-
-[TestRequireAsyncQueue/invalid-11 - 1]
+[TestRequireAsyncQueue/invalid-5 - 1]
 Diagnostic 1: missingOption (10:15 - 10:37)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and hand it to super(): an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and pass it to super({ asyncQueue }).
    9 | class Service extends ADisposable {
   10 |   constructor(options: ServiceOptions) {
      |               ~~~~~~~~~~~~~~~~~~~~~~~
   11 |     super();
 ---
 
-[TestRequireAsyncQueue/invalid-12 - 1]
+[TestRequireAsyncQueue/invalid-6 - 1]
 Diagnostic 1: missingOption (7:15 - 7:53)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and hand it to super(): an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and pass it to super({ asyncQueue }).
    6 | const Service = class extends ADisposable {
    7 |   constructor({ logger }: { readonly logger: Logger }) {
      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    8 |     super();
 ---
 
-[TestRequireAsyncQueue/invalid-13 - 1]
-Diagnostic 1: missingOption (13:15 - 13:53)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
-  12 | class Service extends Middle {
-  13 |   constructor({ logger }: { readonly logger: Logger }) {
+[TestRequireAsyncQueue/invalid-7 - 1]
+Diagnostic 1: missingOption (11:15 - 11:53)
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and hand it to super(): an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and pass it to super({ asyncQueue }).
+  10 | class Service extends Middle {
+  11 |   constructor({ logger }: { readonly logger: Logger }) {
      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  14 |     super({ asyncQueue: null as unknown as AsyncQueue });
+  12 |     super({ asyncQueue: null as unknown as AsyncQueue });
 ---
 
-[TestRequireAsyncQueue/invalid-14 - 1]
+[TestRequireAsyncQueue/invalid-8 - 1]
 Diagnostic 1: missingOption (6:15 - 6:53)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and hand it to super(): an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and pass it to super({ asyncQueue }).
    5 | class Service extends ADisposable {
    6 |   constructor({ logger }: { readonly logger: Logger }) {
      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    7 |     super();
 ---
 
-[TestRequireAsyncQueue/invalid-15 - 1]
+[TestRequireAsyncQueue/invalid-9 - 1]
 Diagnostic 1: missingOption (6:15 - 6:53)
-Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options: an app owns one queue and hands it to everything it builds.
-Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object.
+Message: A class extending ADisposable must accept 'asyncQueue: AsyncQueue' in its constructor options and hand it to super(): an app owns one queue and hands it to everything it builds.
+Help: Add 'readonly asyncQueue: AsyncQueue;' to the constructor's options object and pass it to super({ asyncQueue }).
    5 | class Service extends ADisposable {
    6 |   constructor({ logger }: { readonly logger: Logger }) {
      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
