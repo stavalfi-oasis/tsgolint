@@ -115,6 +115,17 @@ func EnclosingInstanceClass(node *ast.Node) *ast.Node {
 
 // IsAsyncDisposeMember reports whether a class member is `[Symbol.asyncDispose]`.
 func IsAsyncDisposeMember(member *ast.Node) bool {
+	return isSymbolMember(member, "asyncDispose")
+}
+
+// IsDisposeMember reports whether a class member is either half of the disposal
+// protocol — `[Symbol.dispose]` or `[Symbol.asyncDispose]`.
+func IsDisposeMember(member *ast.Node) bool {
+	return isSymbolMember(member, "dispose") || isSymbolMember(member, "asyncDispose")
+}
+
+// A method named by the computed key `[Symbol.<property>]`.
+func isSymbolMember(member *ast.Node, property string) bool {
 	if !ast.IsMethodDeclaration(member) {
 		return false
 	}
@@ -129,5 +140,5 @@ func IsAsyncDisposeMember(member *ast.Node) bool {
 	access := expression.AsPropertyAccessExpression()
 	return ast.IsIdentifier(access.Expression) &&
 		access.Expression.Text() == "Symbol" &&
-		access.Name().Text() == "asyncDispose"
+		access.Name().Text() == property
 }

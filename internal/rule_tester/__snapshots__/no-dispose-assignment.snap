@@ -1,0 +1,76 @@
+
+[TestNoDisposeAssignment/invalid-0 - 1]
+Diagnostic 1: disposeAssignment (6:5 - 6:24)
+Message: Don't write to an instance property inside `[Symbol.dispose]` / `[Symbol.asyncDispose]`.
+Help: Disposal is the end of the instance's life, so the new value is never read — it only hides use-after-dispose. Copy the field into a local and tear the local down instead.
+   5 |   public async [Symbol.asyncDispose](): Promise<void> {
+   6 |     this.#workers.length = 0;
+     |     ~~~~~~~~~~~~~~~~~~~~
+   7 |     this.#connection = undefined;
+
+Diagnostic 2: disposeAssignment (7:5 - 7:20)
+Message: Don't write to an instance property inside `[Symbol.dispose]` / `[Symbol.asyncDispose]`.
+Help: Disposal is the end of the instance's life, so the new value is never read — it only hides use-after-dispose. Copy the field into a local and tear the local down instead.
+   6 |     this.#workers.length = 0;
+   7 |     this.#connection = undefined;
+     |     ~~~~~~~~~~~~~~~~
+   8 |   }
+---
+
+[TestNoDisposeAssignment/invalid-1 - 1]
+Diagnostic 1: disposeAssignment (5:5 - 5:14)
+Message: Don't write to an instance property inside `[Symbol.dispose]` / `[Symbol.asyncDispose]`.
+Help: Disposal is the end of the instance's life, so the new value is never read — it only hides use-after-dispose. Copy the field into a local and tear the local down instead.
+   4 |   public [Symbol.dispose](): void {
+   5 |     this.#open = false;
+     |     ~~~~~~~~~~
+   6 |   }
+---
+
+[TestNoDisposeAssignment/invalid-2 - 1]
+Diagnostic 1: disposeAssignment (6:7 - 6:17)
+Message: Don't write to an instance property inside `[Symbol.dispose]` / `[Symbol.asyncDispose]`.
+Help: Disposal is the end of the instance's life, so the new value is never read — it only hides use-after-dispose. Copy the field into a local and tear the local down instead.
+   5 |     [1, 2].forEach(() => {
+   6 |       this.#count++;
+     |       ~~~~~~~~~~~
+   7 |     });
+---
+
+[TestNoDisposeAssignment/invalid-3 - 1]
+Diagnostic 1: disposeAssignment (5:12 - 5:26)
+Message: Don't write to an instance property inside `[Symbol.dispose]` / `[Symbol.asyncDispose]`.
+Help: Disposal is the end of the instance's life, so the new value is never read — it only hides use-after-dispose. Copy the field into a local and tear the local down instead.
+   4 |   public [Symbol.dispose](): void {
+   5 |     delete this.cache['a'];
+     |            ~~~~~~~~~~~~~~~
+   6 |   }
+---
+
+[TestNoDisposeAssignment/invalid-4 - 1]
+Diagnostic 1: disposeAssignment (6:11 - 6:16)
+Message: Don't write to an instance property inside `[Symbol.dispose]` / `[Symbol.asyncDispose]`.
+Help: Disposal is the end of the instance's life, so the new value is never read — it only hides use-after-dispose. Copy the field into a local and tear the local down instead.
+   5 |   public [Symbol.dispose](): void {
+   6 |     ({ a: this.a, b: this.b } = { a: '', b: '' });
+     |           ~~~~~~
+   7 |   }
+
+Diagnostic 2: disposeAssignment (6:22 - 6:27)
+Message: Don't write to an instance property inside `[Symbol.dispose]` / `[Symbol.asyncDispose]`.
+Help: Disposal is the end of the instance's life, so the new value is never read — it only hides use-after-dispose. Copy the field into a local and tear the local down instead.
+   5 |   public [Symbol.dispose](): void {
+   6 |     ({ a: this.a, b: this.b } = { a: '', b: '' });
+     |                      ~~~~~~
+   7 |   }
+---
+
+[TestNoDisposeAssignment/invalid-5 - 1]
+Diagnostic 1: disposeAssignment (5:5 - 5:15)
+Message: Don't write to an instance property inside `[Symbol.dispose]` / `[Symbol.asyncDispose]`.
+Help: Disposal is the end of the instance's life, so the new value is never read — it only hides use-after-dispose. Copy the field into a local and tear the local down instead.
+   4 |   public async [Symbol.asyncDispose](): Promise<void> {
+   5 |     this.#count += 1;
+     |     ~~~~~~~~~~~
+   6 |   }
+---
