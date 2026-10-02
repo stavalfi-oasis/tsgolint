@@ -1,0 +1,32 @@
+
+[TestRequireTypeAnnotation/invalid-0 - 1]
+Diagnostic 1: missingTypeAnnotation (1:11 - 1:30)
+Message: A declaration with no initializer must carry a type annotation.
+Help: Write the type here, or give the declaration an initializer on the same line.
+   1 | class A { public readonly app; public constructor() { this.app = 1; } }
+     |           ~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireTypeAnnotation/invalid-1 - 1]
+Diagnostic 1: missingTypeAnnotation (1:11 - 1:15)
+Message: A declaration with no initializer must carry a type annotation.
+Help: Write the type here, or give the declaration an initializer on the same line.
+   1 | class A { #app; public constructor() { this.#app = 1; } }
+     |           ~~~~~
+---
+
+[TestRequireTypeAnnotation/invalid-2 - 1]
+Diagnostic 1: missingTypeAnnotation (1:5 - 1:9)
+Message: A declaration with no initializer must carry a type annotation.
+Help: Write the type here, or give the declaration an initializer on the same line.
+   1 | let value;
+     |     ~~~~~
+---
+
+[TestRequireTypeAnnotation/invalid-3 - 1]
+Diagnostic 1: missingTypeAnnotation (1:5 - 1:9)
+Message: A declaration with no initializer must carry a type annotation.
+Help: Write the type here, or give the declaration an initializer on the same line.
+   1 | let first, second: number;
+     |     ~~~~~
+---

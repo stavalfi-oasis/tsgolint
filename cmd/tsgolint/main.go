@@ -108,6 +108,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_object_params"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_os_eol"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_track"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_type_annotation"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_zod_compile"
 	"github.com/typescript-eslint/tsgolint/internal/rules/restrict_plus_operands"
 	"github.com/typescript-eslint/tsgolint/internal/rules/restrict_template_expressions"
@@ -247,6 +248,7 @@ var allRules = []rule.Rule{
 	no_zod_passthrough.NoZodPassthroughRule,
 	require_fs_utf8.RequireFsUtf8Rule,
 	require_track.RequireTrackRule,
+	require_type_annotation.RequireTypeAnnotationRule,
 	no_unnecessary_boolean_literal_compare.NoUnnecessaryBooleanLiteralCompareRule,
 	no_unnecessary_condition.NoUnnecessaryConditionRule,
 	no_unnecessary_qualifier.NoUnnecessaryQualifierRule,
