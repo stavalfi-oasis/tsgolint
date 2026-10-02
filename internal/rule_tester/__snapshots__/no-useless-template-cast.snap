@@ -1,0 +1,50 @@
+
+[TestNoUselessTemplateCast/invalid-0 - 1]
+Diagnostic 1: uselessStringCall (3:18 - 3:30)
+Message: String(index) inside a template literal is useless: index is `number`, and a template literal already converts it to a string by itself.
+Help: Write `${index}` — the result is byte-for-byte the same string.
+   2 | declare const index: number;
+   3 | const id = `it-${String(index)}`;
+     |                  ~~~~~~~~~~~~~
+   4 |       
+---
+
+[TestNoUselessTemplateCast/invalid-1 - 1]
+Diagnostic 1: uselessStringCall (3:18 - 3:29)
+Message: String(flag) inside a template literal is useless: flag is `boolean`, and a template literal already converts it to a string by itself.
+Help: Write `${flag}` — the result is byte-for-byte the same string.
+   2 | declare const flag: boolean;
+   3 | const id = `it-${String(flag)}`;
+     |                  ~~~~~~~~~~~~
+   4 |       
+---
+
+[TestNoUselessTemplateCast/invalid-2 - 1]
+Diagnostic 1: uselessStringCall (3:18 - 3:30)
+Message: String(value) inside a template literal is useless: value is `string | number | null | undefined`, and a template literal already converts it to a string by itself.
+Help: Write `${value}` — the result is byte-for-byte the same string.
+   2 | declare const value: string | number | null | undefined;
+   3 | const id = `it-${String(value)}`;
+     |                  ~~~~~~~~~~~~~
+   4 |       
+---
+
+[TestNoUselessTemplateCast/invalid-3 - 1]
+Diagnostic 1: uselessToString (3:18 - 3:33)
+Message: index.toString() inside a template literal is useless: index is `number`, and a template literal already converts it to a string by itself.
+Help: Write `${index}` — the result is byte-for-byte the same string.
+   2 | declare const index: number;
+   3 | const id = `it-${index.toString()}`;
+     |                  ~~~~~~~~~~~~~~~~
+   4 |       
+---
+
+[TestNoUselessTemplateCast/invalid-4 - 1]
+Diagnostic 1: uselessStringCall (4:20 - 4:28)
+Message: String(b) inside a template literal is useless: b is `bigint`, and a template literal already converts it to a string by itself.
+Help: Write `${b}` — the result is byte-for-byte the same string.
+   3 | declare const b: bigint;
+   4 | const id = `${a}-${String(b)}`;
+     |                    ~~~~~~~~~
+   5 |       
+---

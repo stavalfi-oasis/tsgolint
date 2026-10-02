@@ -76,6 +76,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unsafe_type_assertion"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_unsafe_unary_minus"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_useless_default_assignment"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_useless_template_cast"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_void_promise"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_zod_defaults"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_zod_passthrough"
@@ -251,6 +252,7 @@ var allRules = []rule.Rule{
 	no_unnecessary_type_parameters.NoUnnecessaryTypeParametersRule,
 	no_unnecessary_type_assertion.NoUnnecessaryTypeAssertionRule,
 	no_useless_default_assignment.NoUselessDefaultAssignmentRule,
+	no_useless_template_cast.NoUselessTemplateCastRule,
 	no_unsafe_argument.NoUnsafeArgumentRule,
 	no_unsafe_assignment.NoUnsafeAssignmentRule,
 	no_unsafe_call.NoUnsafeCallRule,
