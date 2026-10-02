@@ -1,0 +1,48 @@
+
+[TestNoAsyncStaticMethod/invalid-0 - 1]
+Diagnostic 1: asyncStaticMethod (1:11 - 1:46)
+Message: An async `static` method has no `this`, so the promises it awaits cannot be tracked.
+Help: Drop `static` and make it an instance method, so every promise inside it can go through `this.track(...)` and be drained by `close()`.
+   1 | class A { static async run(): Promise<void> {} }
+     |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoAsyncStaticMethod/invalid-1 - 1]
+Diagnostic 1: asyncStaticMethod (1:11 - 1:54)
+Message: An async `static` method has no `this`, so the promises it awaits cannot be tracked.
+Help: Drop `static` and make it an instance method, so every promise inside it can go through `this.track(...)` and be drained by `close()`.
+   1 | class A { private static async run(): Promise<void> {} }
+     |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoAsyncStaticMethod/invalid-2 - 1]
+Diagnostic 1: asyncStaticMethod (1:11 - 1:66)
+Message: An async `static` method has no `this`, so the promises it awaits cannot be tracked.
+Help: Drop `static` and make it an instance method, so every promise inside it can go through `this.track(...)` and be drained by `close()`.
+   1 | class A { static async *run(): AsyncGenerator<number> { yield 1; } }
+     |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoAsyncStaticMethod/invalid-3 - 1]
+Diagnostic 1: asyncStaticMethod (1:11 - 1:53)
+Message: An async `static` method has no `this`, so the promises it awaits cannot be tracked.
+Help: Drop `static` and make it an instance method, so every promise inside it can go through `this.track(...)` and be drained by `close()`.
+   1 | class A { static run = async (): Promise<void> => {}; }
+     |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoAsyncStaticMethod/invalid-4 - 1]
+Diagnostic 1: asyncStaticMethod (1:11 - 1:59)
+Message: An async `static` method has no `this`, so the promises it awaits cannot be tracked.
+Help: Drop `static` and make it an instance method, so every promise inside it can go through `this.track(...)` and be drained by `close()`.
+   1 | class A { static run = async function (): Promise<void> {}; }
+     |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoAsyncStaticMethod/invalid-5 - 1]
+Diagnostic 1: asyncStaticMethod (1:19 - 1:54)
+Message: An async `static` method has no `this`, so the promises it awaits cannot be tracked.
+Help: Drop `static` and make it an instance method, so every promise inside it can go through `this.track(...)` and be drained by `close()`.
+   1 | const A = class { static async run(): Promise<void> {} };
+     |                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
