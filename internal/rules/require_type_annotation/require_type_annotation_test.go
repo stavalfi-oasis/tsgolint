@@ -20,6 +20,7 @@ func TestRequireTypeAnnotation(t *testing.T) {
 		{Code: `for (const entry of [1, 2]) { console.log(entry); }`},
 		{Code: `for (const key in { a: 1 }) { console.log(key); }`},
 		{Code: `const { a, b } = { a: 1, b: 2 };`},
+		{Code: `try { throw new Error("x"); } catch (error) { console.log(error); }`},
 	}, []rule_tester.InvalidTestCase{
 		{
 			Code:   `class A { public readonly app; public constructor() { this.app = 1; } }`,

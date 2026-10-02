@@ -31,10 +31,13 @@ var RequireTypeAnnotationRule = rule.Rule{
 				if declaration.Type != nil || declaration.Initializer != nil {
 					return
 				}
-				// `for (const x of xs)` and `catch (error)` have no initializer to
+				// `catch (error)` and `for (const x of xs)` have no initializer to
 				// annotate against, and the binding is not a declaration site a
 				// reader looks at for the type.
 				parent := node.Parent
+				if parent != nil && parent.Kind == ast.KindCatchClause {
+					return
+				}
 				if parent != nil && parent.Kind == ast.KindVariableDeclarationList {
 					grandparent := parent.Parent
 					if grandparent != nil &&
