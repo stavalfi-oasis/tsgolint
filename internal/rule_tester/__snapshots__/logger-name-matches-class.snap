@@ -16,3 +16,30 @@ Help: Name the logger after the class that owns it, so a log line says where it 
    4 | class GatewayService { public constructor() { logger.logger.child({ name: OtherService.name }); } }
      |                                                                           ~~~~~~~~~~~~~~~~~
 ---
+
+[TestLoggerNameMatchesClass/invalid-2 - 1]
+Diagnostic 1: loggerChildMissing (4:60 - 4:73)
+Message: A constructor that accepts a 'logger' must create a child logger named 'GatewayService.name'.
+Help: Call '.child({ name: GatewayService.name })' on the logger in the constructor, so every log line this class writes says where it came from.
+   3 | interface Options { readonly logger: Logger }
+   4 | class GatewayService { #logger: Logger; public constructor(logger: Logger) { this.#logger = logger; } }
+     |                                                            ~~~~~~~~~~~~~~
+---
+
+[TestLoggerNameMatchesClass/invalid-3 - 1]
+Diagnostic 1: loggerChildMissing (4:60 - 4:75)
+Message: A constructor that accepts a 'logger' must create a child logger named 'GatewayService.name'.
+Help: Call '.child({ name: GatewayService.name })' on the logger in the constructor, so every log line this class writes says where it came from.
+   3 | interface Options { readonly logger: Logger }
+   4 | class GatewayService { #logger: Logger; public constructor(options: Options) { this.#logger = options.logger; } }
+     |                                                            ~~~~~~~~~~~~~~~~
+---
+
+[TestLoggerNameMatchesClass/invalid-4 - 1]
+Diagnostic 1: loggerChildMissing (4:60 - 4:78)
+Message: A constructor that accepts a 'logger' must create a child logger named 'GatewayService.name'.
+Help: Call '.child({ name: GatewayService.name })' on the logger in the constructor, so every log line this class writes says where it came from.
+   3 | interface Options { readonly logger: Logger }
+   4 | class GatewayService { #logger: Logger; public constructor({ logger }: Options) { this.#logger = logger.child({ service: "gh-gateway" }); } }
+     |                                                            ~~~~~~~~~~~~~~~~~~~
+---

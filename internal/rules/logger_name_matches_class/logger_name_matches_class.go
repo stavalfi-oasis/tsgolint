@@ -2,11 +2,14 @@ package logger_name_matches_class
 
 import (
 	"github.com/microsoft/typescript-go/shim/ast"
+	"github.com/microsoft/typescript-go/shim/checker"
 	"github.com/typescript-eslint/tsgolint/internal/rule"
 	"github.com/typescript-eslint/tsgolint/internal/utils"
 )
 
 const nameKey = "name"
+
+const loggerKey = "logger"
 
 func buildLoggerNameMessage(expected string) rule.RuleMessage {
 	return rule.RuleMessage{
@@ -14,6 +17,46 @@ func buildLoggerNameMessage(expected string) rule.RuleMessage {
 		Description: "The logger child '" + nameKey + "' must be '" + expected + "'.",
 		Help:        "Name the logger after the class that owns it, so a log line says where it came from.",
 	}
+}
+
+func buildMissingChildMessage(expected string) rule.RuleMessage {
+	return rule.RuleMessage{
+		Id:          "loggerChildMissing",
+		Description: "A constructor that accepts a '" + loggerKey + "' must create a child logger named '" + expected + "'.",
+		Help:        "Call '.child({ " + nameKey + ": " + expected + " })' on the logger in the constructor, so every log line this class writes says where it came from.",
+	}
+}
+
+// The constructor parameter that carries a logger — either a `logger`
+// parameter of its own, or an options object with a `logger` member, the shape
+// nearly every class in the repo uses — or nil when it is handed none.
+func loggerParam(typeChecker *checker.Checker, constructor *ast.Node) *ast.Node {
+	for _, parameter := range constructor.Parameters() {
+		name := parameter.Name()
+		if name != nil && ast.IsIdentifier(name) && name.Text() == loggerKey {
+			return parameter
+		}
+		if name != nil && ast.IsObjectBindingPattern(name) {
+			for _, element := range name.AsBindingPattern().Elements.Nodes {
+				binding := element.AsBindingElement()
+				property := binding.PropertyName
+				if property == nil {
+					property = binding.Name()
+				}
+				if property != nil && ast.IsIdentifier(property) && property.Text() == loggerKey {
+					return parameter
+				}
+			}
+		}
+		// Asking the checker rather than reading the annotation is what covers a
+		// named options interface and an intersection, neither of which spells
+		// the member on the parameter.
+		t := utils.GetConstrainedTypeAtLocation(typeChecker, parameter)
+		if t != nil && checker.Checker_getPropertyOfType(typeChecker, t, loggerKey) != nil {
+			return parameter
+		}
+	}
+	return nil
 }
 
 // The `name` property of a `<logger>.child({ name: ... })` argument, or nil.
@@ -69,11 +112,13 @@ var LoggerNameMatchesClassRule = rule.Rule{
 			}
 
 			expected := className.Text() + "." + nameKey
+			named := false
 
 			var walk func(current *ast.Node) bool
 			walk = func(current *ast.Node) bool {
 				if ast.IsCallExpression(current) {
 					if property := childNameProperty(current); property != nil {
+						named = true
 						value := property.AsPropertyAssignment().Initializer
 						trimmed := utils.TrimNodeTextRange(ctx.SourceFile, value)
 						if text[trimmed.Pos():trimmed.End()] != expected {
@@ -87,6 +132,15 @@ var LoggerNameMatchesClassRule = rule.Rule{
 				return false
 			}
 			walk(constructor)
+
+			// A named child anywhere in the constructor is enough: a wrong name
+			// is already reported above, and reporting the same constructor
+			// twice for one mistake would be noise.
+			if !named {
+				if parameter := loggerParam(ctx.TypeChecker, constructor); parameter != nil {
+					ctx.ReportNode(parameter, buildMissingChildMessage(expected))
+				}
+			}
 		}
 
 		return rule.RuleListeners{
