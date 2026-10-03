@@ -1,0 +1,40 @@
+
+[TestPreferSuperOverThis/invalid-0 - 1]
+Diagnostic 1: preferSuper (1:61 - 1:64)
+Message: `run` comes from a base class — reach it through `super`, not `this`.
+Help: Write `super.run` so the reader can see the member is inherited.
+   1 | class A { run(): void {} } class B extends A { go(): void { this.run(); } }
+     |                                                             ~~~~
+---
+
+[TestPreferSuperOverThis/invalid-1 - 1]
+Diagnostic 1: preferSuper (1:85 - 1:88)
+Message: `run` comes from a base class — reach it through `super`, not `this`.
+Help: Write `super.run` so the reader can see the member is inherited.
+   1 | class A { run(): void {} } class B extends A { go(): void { const f = (): void => { this.run(); }; f(); } }
+     |                                                                                     ~~~~
+---
+
+[TestPreferSuperOverThis/invalid-2 - 1]
+Diagnostic 1: preferSuper (1:90 - 1:93)
+Message: `name` comes from a base class — reach it through `super`, not `this`.
+Help: Write `super.name` so the reader can see the member is inherited.
+   1 | class A { get name(): string { return 'a'; } } class B extends A { go(): string { return this.name; } }
+     |                                                                                          ~~~~
+---
+
+[TestPreferSuperOverThis/invalid-3 - 1]
+Diagnostic 1: preferSuper (1:82 - 1:85)
+Message: `run` comes from a base class — reach it through `super`, not `this`.
+Help: Write `super.run` so the reader can see the member is inherited.
+   1 | class A { run(): void {} } class B extends A {} class C extends B { go(): void { this.run(); } }
+     |                                                                                  ~~~~
+---
+
+[TestPreferSuperOverThis/invalid-4 - 1]
+Diagnostic 1: preferSuper (1:73 - 1:76)
+Message: `run` comes from a base class — reach it through `super`, not `this`.
+Help: Write `super.run` so the reader can see the member is inherited.
+   1 | class A { run(): void {} } class B extends A { constructor() { super(); this.run(); } }
+     |                                                                         ~~~~
+---
