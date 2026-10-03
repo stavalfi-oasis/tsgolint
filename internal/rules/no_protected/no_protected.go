@@ -7,22 +7,9 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rule"
 )
 
-// The files allowed to declare protected members: these are base-class surfaces
-// every subclass inherits — ADisposable's `track` and `close`, and
-// TypedClient's `parsedJson`.
-var baseClassFiles = []string{
-	"shared/libs/src/a-disposable.ts",
-	"shared/libs/src/typed-client.ts",
-}
-
-func isBaseClassFile(fileName string) bool {
-	for _, baseClassFile := range baseClassFiles {
-		if strings.HasSuffix(fileName, baseClassFile) {
-			return true
-		}
-	}
-	return false
-}
+// The one file allowed to declare protected members: ADisposable's `track` and
+// `close` are the base-class surface every subclass inherits.
+const disposableBaseFile = "shared/libs/src/a-disposable.ts"
 
 func buildProtectedMessage() rule.RuleMessage {
 	return rule.RuleMessage{
@@ -35,7 +22,7 @@ func buildProtectedMessage() rule.RuleMessage {
 var NoProtectedRule = rule.Rule{
 	Name: "no-protected",
 	Run: func(ctx rule.RuleContext, options any) rule.RuleListeners {
-		if isBaseClassFile(ctx.SourceFile.FileName()) {
+		if strings.HasSuffix(ctx.SourceFile.FileName(), disposableBaseFile) {
 			return rule.RuleListeners{}
 		}
 
