@@ -11,14 +11,17 @@ import (
 // the directory and the base VFS is cached across cases, so every other case
 // declares that name too — otherwise a leftover directory listing names a file
 // the overlay does not have.
-var exemptFile = map[string]string{disposableBaseFile: "export {};"}
+var exemptFile = map[string]string{
+	baseClassFiles[0]: "export {};",
+	baseClassFiles[1]: "export {};",
+}
 
 func TestNoProtected(t *testing.T) {
 	t.Parallel()
 	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &NoProtectedRule, []rule_tester.ValidTestCase{
 		{Code: `class A { #value = 1; }`, Files: exemptFile},
 		{
-			FileName: disposableBaseFile,
+			FileName: baseClassFiles[0],
 			Code:     `class ADisposable { protected async close(): Promise<void> {} }`,
 		},
 	}, []rule_tester.InvalidTestCase{
