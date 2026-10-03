@@ -2,7 +2,7 @@
 [TestNoClientResponseJson/invalid-0 - 1]
 Diagnostic 1: clientResponseJson (8:11 - 8:22)
 Message: 'json()' on a typed hono client response hands back the shape this build was compiled against, unchecked.
-Help: Call 'ParsedJson.of({ response, schema })' instead, so the body is validated against the schema this service expects and a service deployed at a different version fails loudly.
+Help: Call 'parsedJson({ response, schema })' from '#libs/utils.ts' instead, so the body is validated against the schema this service expects and a service deployed at a different version fails loudly.
    7 | declare const parser: { json(): Promise<unknown> };
    8 | const a = typed.json();
      |           ~~~~~~~~~~~~
@@ -11,7 +11,7 @@ Help: Call 'ParsedJson.of({ response, schema })' instead, so the body is validat
 [TestNoClientResponseJson/invalid-1 - 1]
 Diagnostic 1: clientResponseJson (8:38 - 8:49)
 Message: 'json()' on a typed hono client response hands back the shape this build was compiled against, unchecked.
-Help: Call 'ParsedJson.of({ response, schema })' instead, so the body is validated against the schema this service expects and a service deployed at a different version fails loudly.
+Help: Call 'parsedJson({ response, schema })' from '#libs/utils.ts' instead, so the body is validated against the schema this service expects and a service deployed at a different version fails loudly.
    7 | declare const parser: { json(): Promise<unknown> };
    8 | async function read() { return await typed.json(); }
      |                                      ~~~~~~~~~~~~
@@ -20,7 +20,7 @@ Help: Call 'ParsedJson.of({ response, schema })' instead, so the body is validat
 [TestNoClientResponseJson/invalid-2 - 1]
 Diagnostic 1: clientResponseJson (10:11 - 10:22)
 Message: 'json()' on a typed hono client response hands back the shape this build was compiled against, unchecked.
-Help: Call 'ParsedJson.of({ response, schema })' instead, so the body is validated against the schema this service expects and a service deployed at a different version fails loudly.
+Help: Call 'parsedJson({ response, schema })' from '#libs/utils.ts' instead, so the body is validated against the schema this service expects and a service deployed at a different version fails loudly.
    9 | declare const maybe: Response | ClientResponse<{ bytes: number }>;
   10 | const a = maybe.json();
      |           ~~~~~~~~~~~~
