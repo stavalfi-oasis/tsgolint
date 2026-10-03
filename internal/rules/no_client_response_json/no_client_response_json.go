@@ -13,7 +13,7 @@ func buildClientResponseJsonMessage() rule.RuleMessage {
 	return rule.RuleMessage{
 		Id:          "clientResponseJson",
 		Description: "'json()' on a typed hono client response hands back the shape this build was compiled against, unchecked.",
-		Help:        "Call 'this.parsedJson({ response, schema })' from 'TypedClient' instead, so the body is validated against the schema this service expects and a service deployed at a different version fails loudly.",
+		Help:        "Call 'ParsedJson.of({ response, schema })' instead, so the body is validated against the schema this service expects and a service deployed at a different version fails loudly.",
 	}
 }
 
