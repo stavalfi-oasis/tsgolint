@@ -34,6 +34,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_delete"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_banned_words"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_base_to_string"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_client_response_json"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_comments"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_confusing_void_expression"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_curl"
@@ -207,6 +208,7 @@ var allRules = []rule.Rule{
 	no_async_static_method.NoAsyncStaticMethodRule,
 	no_array_length_assignment.NoArrayLengthAssignmentRule,
 	no_banned_words.NoBannedWordsRule,
+	no_client_response_json.NoClientResponseJsonRule,
 	no_comments.NoCommentsRule,
 	no_curl.NoCurlRule,
 	no_global_functions.NoGlobalFunctionsRule,
