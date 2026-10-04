@@ -47,6 +47,22 @@ func packageDirOf(fileName string) string {
 	}
 }
 
+// Tests are free to hold as many zod-schemas.ts as they like: a test's schemas
+// describe that test's fixtures, not the package's contracts, so there is
+// nothing to merge them into. Only the production tree is held to one file.
+func isUnderTestDir(fileName string, packageDir string) bool {
+	relative, err := filepath.Rel(packageDir, fileName)
+	if err != nil {
+		return false
+	}
+	for _, segment := range strings.Split(filepath.ToSlash(relative), "/") {
+		if segment == "test" {
+			return true
+		}
+	}
+	return false
+}
+
 // zod's runtime classes are all named ZodSomething (ZodObject, ZodString, ...),
 // so the declared type identifies a schema regardless of how it was built or
 // what the binding is called.
@@ -94,7 +110,7 @@ var ZodSchemasFileOnlyRule = rule.Rule{
 		// diagnostic is visible whichever file you happen to be linting.
 		listeners[ast.KindSourceFile] = func(node *ast.Node) {
 			packageDir := packageDirOf(fileName)
-			if packageDir == "" {
+			if packageDir == "" || isUnderTestDir(fileName, packageDir) {
 				return
 			}
 
@@ -104,7 +120,7 @@ var ZodSchemasFileOnlyRule = rule.Rule{
 				if other == fileName || filepath.Base(other) != schemasFileName {
 					continue
 				}
-				if packageDirOf(other) == packageDir {
+				if packageDirOf(other) == packageDir && !isUnderTestDir(other, packageDir) {
 					siblings = append(siblings, other)
 				}
 			}
