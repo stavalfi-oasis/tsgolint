@@ -1,0 +1,40 @@
+
+[TestRequireAbortSignalInWhile/invalid-0 - 1]
+Diagnostic 1: requireAbortSignalInWhile (1:28 - 1:61)
+Message: A `while` condition must test an abort signal.
+Help: Add `!<signal>.aborted &&` to the condition so the loop ends when the signal aborts, and keep the real stop conditions alongside it.
+   1 | declare let taken: number; while (taken < 10) { taken += 1; }
+     |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireAbortSignalInWhile/invalid-1 - 1]
+Diagnostic 1: requireAbortSignalInWhile (1:1 - 1:23)
+Message: A `while` condition must test an abort signal.
+Help: Add `!<signal>.aborted &&` to the condition so the loop ends when the signal aborts, and keep the real stop conditions alongside it.
+   1 | while (true) { break; }
+     | ~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireAbortSignalInWhile/invalid-2 - 1]
+Diagnostic 1: requireAbortSignalInWhile (1:45 - 1:69)
+Message: A `while` condition must test an abort signal.
+Help: Add `!<signal>.aborted &&` to the condition so the loop ends when the signal aborts, and keep the real stop conditions alongside it.
+   1 | declare const signal: { aborted: boolean }; while (signal.aborted) {}
+     |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireAbortSignalInWhile/invalid-3 - 1]
+Diagnostic 1: requireAbortSignalInWhile (1:42 - 1:64)
+Message: A `while` condition must test an abort signal.
+Help: Add `!<signal>.aborted &&` to the condition so the loop ends when the signal aborts, and keep the real stop conditions alongside it.
+   1 | declare const state: { abort: boolean }; while (!state.abort) {}
+     |                                          ~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireAbortSignalInWhile/invalid-4 - 1]
+Diagnostic 1: requireAbortSignalInWhile (1:32 - 1:73)
+Message: A `while` condition must test an abort signal.
+Help: Add `!<signal>.aborted &&` to the condition so the loop ends when the signal aborts, and keep the real stop conditions alongside it.
+   1 | declare let draining: boolean; do { draining = false; } while (draining);
+     |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
