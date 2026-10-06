@@ -10,18 +10,21 @@ import (
 func TestRequireAbortSignalInWhile(t *testing.T) {
 	t.Parallel()
 	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &RequireAbortSignalInWhileRule, []rule_tester.ValidTestCase{
-		{Code: `declare const signal: { aborted: boolean }; while (!signal.aborted) {}`},
+		{Code: `declare const signal: AbortSignal; while (!signal.aborted) {}`},
 		// The check only has to appear in the condition; the loop keeps its own
 		// stop conditions next to it.
-		{Code: `declare const signal: { aborted: boolean }; declare let taken: number; while (!signal.aborted && taken < 10) { taken += 1; }`},
-		{Code: `declare const signal: { aborted: boolean }; declare let taken: number; while (taken < 10 && !signal.aborted) { taken += 1; }`},
+		{Code: `declare const signal: AbortSignal; declare let taken: number; while (!signal.aborted && taken < 10) { taken += 1; }`},
+		{Code: `declare const signal: AbortSignal; declare let taken: number; while (taken < 10 && !signal.aborted) { taken += 1; }`},
 		// Any receiver, however deep the chain.
-		{Code: `declare const self: { controller: { signal: { aborted: boolean } } }; while (!self.controller.signal.aborted) {}`},
-		{Code: `declare const signal: { aborted: boolean }; while (!(signal.aborted)) {}`},
-		{Code: `declare const signal: { aborted: boolean }; while (!signal?.aborted) {}`},
-		{Code: `declare const signal: { aborted: boolean }; while (!signal["aborted"]) {}`},
-		{Code: `declare const signal: { aborted: boolean }; do {} while (!signal.aborted);`},
-		// A `for` is a different statement and stays this rule's business.
+		{Code: `declare const controller: AbortController; while (!controller.signal.aborted) {}`},
+		{Code: `declare const signal: AbortSignal; while (!(signal.aborted)) {}`},
+		{Code: `declare const signal: AbortSignal; while (!signal["aborted"]) {}`},
+		// A union still carries the signal on every branch that has one.
+		{Code: `declare const signal: AbortSignal | undefined; while (!signal?.aborted) {}`},
+		// A subclass is still an AbortSignal.
+		{Code: `declare class TimeoutSignal extends AbortSignal {}; declare const signal: TimeoutSignal; while (!signal.aborted) {}`},
+		{Code: `declare const signal: AbortSignal; do {} while (!signal.aborted);`},
+		// A `for` is a different statement and is not this rule's business.
 		{Code: `for (let i = 0; i < 10; i += 1) {}`},
 	}, []rule_tester.InvalidTestCase{
 		{
@@ -35,8 +38,19 @@ func TestRequireAbortSignalInWhile(t *testing.T) {
 		{
 			// The inverse test never ends the loop on abort, so the bare member
 			// access does not count.
-			Code:   `declare const signal: { aborted: boolean }; while (signal.aborted) {}`,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireAbortSignalInWhile", Line: 1, Column: 45}},
+			Code:   `declare const signal: AbortSignal; while (signal.aborted) {}`,
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireAbortSignalInWhile", Line: 1, Column: 36}},
+		},
+		{
+			// An unrelated object carrying an `aborted` flag is not a signal —
+			// this is what the name check alone got wrong.
+			Code:   `declare const state: { aborted: boolean }; while (!state.aborted) {}`,
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireAbortSignalInWhile", Line: 1, Column: 44}},
+		},
+		{
+			// Same shape, same property name, still not an AbortSignal.
+			Code:   `declare class Job { aborted = false }; declare const job: Job; while (!job.aborted) {}`,
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireAbortSignalInWhile", Line: 1, Column: 64}},
 		},
 		{
 			// A property that merely reads like the signal is not the signal.
