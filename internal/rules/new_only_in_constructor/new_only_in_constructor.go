@@ -37,6 +37,18 @@ func constructedName(node *ast.Node) string {
 // `new` in a plain function or at module scope reaches neither and is left alone -
 // the bug this rule exists for is a class field built in `start()` and read in
 // `[Symbol.asyncDispose]()`, not construction in ordinary code.
+// `Logger.child()` returning `new Logger(...)` is a class making another of itself, not a class
+// holding a dependency - there is no field to be left undefined, so the rule has nothing to say.
+func isEnclosingClassItself(node *ast.Node, name string) bool {
+	for current := node.Parent; current != nil; current = current.Parent {
+		if ast.IsClassLike(current) {
+			className := current.Name()
+			return className != nil && className.Text() == name
+		}
+	}
+	return false
+}
+
 func isOutsideClassConstructor(node *ast.Node) bool {
 	// a property initializer runs as part of construction, so `#dep = new Dep()` is fine - unless
 	// the `new` sits in a function the initializer only stores, which runs whenever it is called.
@@ -69,6 +81,9 @@ var NewOnlyInConstructorRule = rule.Rule{
 			ast.KindNewExpression: func(node *ast.Node) {
 				name := constructedName(node)
 				if name == "" || slices.Contains(opts.Allow, name) {
+					return
+				}
+				if isEnclosingClassItself(node, name) {
 					return
 				}
 				if isOutsideClassConstructor(node) {

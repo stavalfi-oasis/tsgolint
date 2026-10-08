@@ -18,6 +18,8 @@ func TestNewOnlyInConstructor(t *testing.T) {
 		{Code: `class Dep {} const dep = new Dep();`},
 		{Code: `class Dep {} function make(): Dep { return new Dep(); }`},
 		{Code: `class Dep {} const make = (): Dep => new Dep();`},
+		// a class making another of itself holds no field that could be left undefined.
+		{Code: `class A { child(): A { return new A(); } }`},
 		// `allow` names the classes that may be constructed anywhere.
 		{
 			Code:    `class Dep {} class A { start(): Dep { return new Dep(); } }`,
