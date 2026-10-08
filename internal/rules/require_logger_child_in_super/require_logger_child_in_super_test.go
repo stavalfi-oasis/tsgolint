@@ -35,6 +35,18 @@ class Service extends ADisposable {
   }
 }
     `},
+		// A static options builder is past what a syntactic rule can read.
+		{Code: disposableStub + `
+class Service extends ADisposable {
+  constructor(options: { readonly logger: Logger }) {
+    super(Service.build(options));
+  }
+
+  static build(options: { readonly logger: Logger }): { readonly logger: Logger } {
+    return { logger: options.logger.child({ name: Service.name }) };
+  }
+}
+    `},
 		// No constructor of its own — it inherits the base's.
 		{Code: disposableStub + `
 class Service extends ADisposable {

@@ -93,8 +93,13 @@ var RequireLoggerChildInSuperRule = rule.Rule{
 						call.AsCallExpression().Expression.Kind != ast.KindSuperKeyword {
 						continue
 					}
+					// A super() handed something other than a literal — a static
+					// options builder, say — is past what a syntactic rule can read.
 					arguments := singleObjectArgument(call)
-					if arguments == nil || !isChildCallWithName(propertyValue(arguments, "logger")) {
+					if arguments == nil {
+						return
+					}
+					if !isChildCallWithName(propertyValue(arguments, "logger")) {
 						ctx.ReportNode(call, buildMissingChildMessage(className))
 					}
 					return
