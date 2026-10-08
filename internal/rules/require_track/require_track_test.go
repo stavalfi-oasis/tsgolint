@@ -79,7 +79,18 @@ class Service extends ADisposable {
   }
 }
     `},
-	}, []rule_tester.InvalidTestCase{
+			// Inside [Symbol.asyncDispose] track() is pointless — the dispose body
+		// awaits its own work and close() clears the set track() feeds — so
+		// require-async-disposable owns that method, not this rule.
+		{Code: disposableStub + `
+class Service extends ADisposable {
+  async [Symbol.asyncDispose](): Promise<void> {
+    await work();
+    await this.close();
+  }
+}
+    `},
+}, []rule_tester.InvalidTestCase{
 		{
 			Code: disposableStub + `
 class Service extends ADisposable {

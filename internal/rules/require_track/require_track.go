@@ -3,6 +3,7 @@ package require_track
 import (
 	"github.com/microsoft/typescript-go/shim/ast"
 	"github.com/microsoft/typescript-go/shim/checker"
+	"github.com/typescript-eslint/tsgolint/internal/oasis"
 	"github.com/typescript-eslint/tsgolint/internal/rule"
 	"github.com/typescript-eslint/tsgolint/internal/utils"
 )
@@ -98,6 +99,21 @@ func isAssignmentToThisProperty(expression *ast.Node) bool {
 	}
 }
 
+// Reports whether the node sits inside a `[Symbol.asyncDispose]` body. track()
+// is pointless there: the dispose body awaits its own work, and close() clears
+// the set track() feeds — require-async-disposable reports it instead.
+func inAsyncDispose(node *ast.Node) bool {
+	for current := node.Parent; current != nil; current = current.Parent {
+		if ast.IsClassLike(current) {
+			return false
+		}
+		if oasis.IsAsyncDisposeMember(current) {
+			return true
+		}
+	}
+	return false
+}
+
 func enclosingClass(node *ast.Node) *ast.Node {
 	for current := node.Parent; current != nil; current = current.Parent {
 		if ast.IsClassLike(current) {
@@ -128,6 +144,9 @@ var RequireTrackRule = rule.Rule{
 		// that the value is a promise.
 		check := func(node *ast.Node, expression *ast.Node) {
 			if expression == nil || isAllowedCall(expression) || isAssignmentToThisProperty(expression) {
+				return
+			}
+			if inAsyncDispose(node) {
 				return
 			}
 			class := enclosingClass(node)
