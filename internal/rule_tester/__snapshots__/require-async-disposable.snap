@@ -12,7 +12,7 @@ Help: Extend ADisposable, or a class that already does.
 [TestRequireAsyncDisposable/invalid-1 - 1]
 Diagnostic 1: mustClose (9:3 - 11:3)
 Message: '[Symbol.asyncDispose]' must 'await this.close()' so the AbortController is aborted and in-flight work settles.
-Help: Add 'await this.close();' as the last statement.
+Help: Add 'await this.close();' to the method.
    8 | class Service extends ADisposable {
    9 |   async [Symbol.asyncDispose](): Promise<void> {
      |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,11 +24,31 @@ Help: Add 'await this.close();' as the last statement.
 ---
 
 [TestRequireAsyncDisposable/invalid-2 - 1]
-Diagnostic 1: mustCloseLast (10:5 - 10:23)
-Message: 'await this.close()' must be the last statement of '[Symbol.asyncDispose]' so the AbortController is aborted only after everything else settled.
-Help: Move it to the end of the method.
-   9 |   async [Symbol.asyncDispose](): Promise<void> {
-  10 |     await this.close();
-     |     ~~~~~~~~~~~~~~~~~~~
+Diagnostic 1: closeOnce (12:11 - 12:22)
+Message: '[Symbol.asyncDispose]' must call 'this.close()' exactly once: the second call throws, because close() rejects a disposal that already happened.
+Help: Delete this call and keep the first one.
   11 |     await work();
+  12 |     await this.close();
+     |           ~~~~~~~~~~~~
+  13 |   }
+---
+
+[TestRequireAsyncDisposable/invalid-3 - 1]
+Diagnostic 1: noTrack (10:11 - 10:28)
+Message: 'this.track()' does nothing inside '[Symbol.asyncDispose]': the await already waits for the promise, and after close() the in-flight set is cleared, so nothing will ever drain it.
+Help: Await the promise directly, without wrapping it in track().
+   9 |   async [Symbol.asyncDispose](): Promise<void> {
+  10 |     await this.track(work());
+     |           ~~~~~~~~~~~~~~~~~~
+  11 |     await this.close();
+---
+
+[TestRequireAsyncDisposable/invalid-4 - 1]
+Diagnostic 1: noTrack (10:11 - 10:34)
+Message: 'this.track()' does nothing inside '[Symbol.asyncDispose]': the await already waits for the promise, and after close() the in-flight set is cleared, so nothing will ever drain it.
+Help: Await the promise directly, without wrapping it in track().
+   9 |   async [Symbol.asyncDispose](): Promise<void> {
+  10 |     await this.track(this.close());
+     |           ~~~~~~~~~~~~~~~~~~~~~~~~
+  11 |   }
 ---

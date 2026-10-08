@@ -25,10 +25,14 @@ class Service extends ADisposable {
   }
 }
     `},
+		// close() no longer has to be last: stopping the workers, closing, then
+		// freeing the connection is the order that actually works, because the
+		// connection is what the in-flight work close() drains still needs.
 		{Code: disposableStub + `
 class Service extends ADisposable {
   async [Symbol.asyncDispose](): Promise<void> {
-    await this.track(this.close());
+    await this.close();
+    await work();
   }
 }
     `},
@@ -80,22 +84,69 @@ class Service extends ADisposable {
 }
       `},
 		},
+		// Two closes: the second one throws at runtime, because close() rejects a
+		// second disposal.
 		{
 			Code: disposableStub + `
 class Service extends ADisposable {
   async [Symbol.asyncDispose](): Promise<void> {
     await this.close();
     await work();
+    await this.close();
   }
 }
       `,
 			Errors: []rule_tester.InvalidTestCaseError{
-				{MessageId: "mustCloseLast", Line: 10, Column: 5, EndLine: 10, EndColumn: 24},
+				{MessageId: "closeOnce", Line: 12, Column: 11, EndLine: 12, EndColumn: 23},
+			},
+			Output: []string{disposableStub + `
+class Service extends ADisposable {
+  async [Symbol.asyncDispose](): Promise<void> {
+    await this.close();
+    await work();
+  }
+}
+      `},
+		},
+		// track() inside dispose: the await already waits, and close() clears the
+		// set track() feeds, so nothing would ever drain it.
+		{
+			Code: disposableStub + `
+class Service extends ADisposable {
+  async [Symbol.asyncDispose](): Promise<void> {
+    await this.track(work());
+    await this.close();
+  }
+}
+      `,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{MessageId: "noTrack", Line: 10, Column: 11, EndLine: 10, EndColumn: 29},
 			},
 			Output: []string{disposableStub + `
 class Service extends ADisposable {
   async [Symbol.asyncDispose](): Promise<void> {
     await work();
+    await this.close();
+  }
+}
+      `},
+		},
+		// The old `await this.track(this.close())` shape: track is reported, and
+		// the close inside it still counts as the one required close.
+		{
+			Code: disposableStub + `
+class Service extends ADisposable {
+  async [Symbol.asyncDispose](): Promise<void> {
+    await this.track(this.close());
+  }
+}
+      `,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{MessageId: "noTrack", Line: 10, Column: 11, EndLine: 10, EndColumn: 35},
+			},
+			Output: []string{disposableStub + `
+class Service extends ADisposable {
+  async [Symbol.asyncDispose](): Promise<void> {
     await this.close();
   }
 }

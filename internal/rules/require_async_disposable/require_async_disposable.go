@@ -1,13 +1,12 @@
 package require_async_disposable
 
 import (
-	"strings"
-
 	"github.com/microsoft/typescript-go/shim/ast"
 	"github.com/microsoft/typescript-go/shim/core"
 	"github.com/microsoft/typescript-go/shim/scanner"
 	"github.com/typescript-eslint/tsgolint/internal/oasis"
 	"github.com/typescript-eslint/tsgolint/internal/rule"
+	"github.com/typescript-eslint/tsgolint/internal/utils"
 )
 
 func buildMustExtendMessage() rule.RuleMessage {
@@ -22,51 +21,63 @@ func buildMustCloseMessage() rule.RuleMessage {
 	return rule.RuleMessage{
 		Id:          "mustClose",
 		Description: "'[Symbol.asyncDispose]' must 'await this.close()' so the AbortController is aborted and in-flight work settles.",
-		Help:        "Add 'await this.close();' as the last statement.",
+		Help:        "Add 'await this.close();' to the method.",
 	}
 }
 
-func buildMustCloseLastMessage() rule.RuleMessage {
+func buildCloseOnceMessage() rule.RuleMessage {
 	return rule.RuleMessage{
-		Id:          "mustCloseLast",
-		Description: "'await this.close()' must be the last statement of '[Symbol.asyncDispose]' so the AbortController is aborted only after everything else settled.",
-		Help:        "Move it to the end of the method.",
+		Id:          "closeOnce",
+		Description: "'[Symbol.asyncDispose]' must call 'this.close()' exactly once: the second call throws, because close() rejects a disposal that already happened.",
+		Help:        "Delete this call and keep the first one.",
 	}
 }
 
-// Matches `await this.close()` and `await this.track(this.close())`, on `this`
-// or `super`.
-func isCloseStatement(statement *ast.Node) bool {
-	if !ast.IsExpressionStatement(statement) {
-		return false
+func buildNoTrackMessage() rule.RuleMessage {
+	return rule.RuleMessage{
+		Id:          "noTrack",
+		Description: "'this.track()' does nothing inside '[Symbol.asyncDispose]': the await already waits for the promise, and after close() the in-flight set is cleared, so nothing will ever drain it.",
+		Help:        "Await the promise directly, without wrapping it in track().",
 	}
-	expression := ast.SkipParentheses(statement.AsExpressionStatement().Expression)
-	if !ast.IsAwaitExpression(expression) {
-		return false
-	}
+}
 
-	call := ast.SkipParentheses(expression.AsAwaitExpression().Expression)
+// A call to `close`/`track` on `this` or `super`, as in `this.close()` or
+// `super.track(x)`. Returns the call node, or nil.
+func selfCall(node *ast.Node, method string) *ast.Node {
+	call := ast.SkipParentheses(node)
 	if !ast.IsCallExpression(call) {
-		return false
+		return nil
 	}
-
-	// Unwrap one layer of this.track(...).
-	if callee := call.AsCallExpression().Expression; ast.IsPropertyAccessExpression(callee) &&
-		callee.AsPropertyAccessExpression().Name().Text() == "track" {
-		args := call.AsCallExpression().Arguments
-		if args != nil && len(args.Nodes) == 1 && ast.IsCallExpression(ast.SkipParentheses(args.Nodes[0])) {
-			call = ast.SkipParentheses(args.Nodes[0])
-		}
-	}
-
 	callee := call.AsCallExpression().Expression
 	if !ast.IsPropertyAccessExpression(callee) {
-		return false
+		return nil
 	}
 	access := callee.AsPropertyAccessExpression()
 	receiver := access.Expression
-	return (receiver.Kind == ast.KindThisKeyword || receiver.Kind == ast.KindSuperKeyword) &&
-		access.Name().Text() == "close"
+	if receiver.Kind != ast.KindThisKeyword && receiver.Kind != ast.KindSuperKeyword {
+		return nil
+	}
+	if access.Name().Text() != method {
+		return nil
+	}
+	return call
+}
+
+// Every `this.close()` / `this.track()` call anywhere in the dispose body,
+// in source order. Nested functions count: a close hidden in a callback is
+// still a close this method is responsible for.
+func selfCalls(body *ast.Node, method string) []*ast.Node {
+	var found []*ast.Node
+	var walk func(node *ast.Node) bool
+	walk = func(node *ast.Node) bool {
+		if call := selfCall(node, method); call != nil {
+			found = append(found, call)
+		}
+		node.ForEachChild(walk)
+		return false
+	}
+	body.ForEachChild(walk)
+	return found
 }
 
 // The leading whitespace on the line an offset sits on, so inserted statements
@@ -99,15 +110,23 @@ func appendClose(sourceFile *ast.SourceFile, body *ast.Node, statements []*ast.N
 	)
 }
 
-// The span to delete when moving a statement: from the end of the previous
+// The span to delete when removing a statement: from the end of the previous
 // statement (or the block's opening brace) through the end of this one, so the
-// line it occupied goes with it.
-func cutRange(sourceFile *ast.SourceFile, body *ast.Node, statements []*ast.Node, index int) core.TextRange {
-	from := scanner.SkipTrivia(sourceFile.Text(), body.Pos()) + 1
-	if index > 0 {
-		from = statements[index-1].End()
+// line it occupied goes with it. Returns false when the node is not directly
+// inside the dispose block — only whole statements are safe to delete.
+func cutStatement(sourceFile *ast.SourceFile, body *ast.Node, node *ast.Node) (core.TextRange, bool) {
+	statements := body.AsBlock().Statements.Nodes
+	for index, statement := range statements {
+		if statement.Pos() > node.Pos() || node.End() > statement.End() {
+			continue
+		}
+		from := scanner.SkipTrivia(sourceFile.Text(), body.Pos()) + 1
+		if index > 0 {
+			from = statements[index-1].End()
+		}
+		return core.NewTextRange(from, statement.End()), true
 	}
-	return core.NewTextRange(from, statements[index].End())
+	return core.TextRange{}, false
 }
 
 var RequireAsyncDisposableRule = rule.Rule{
@@ -147,27 +166,38 @@ var RequireAsyncDisposableRule = rule.Rule{
 			}
 			statements := body.AsBlock().Statements.Nodes
 
-			index := -1
-			for i, statement := range statements {
-				if isCloseStatement(statement) {
-					index = i
-					break
-				}
+			// track() is never right here: the dispose body awaits its own work,
+			// and close() clears the set that track() feeds.
+			for _, call := range selfCalls(body, "track") {
+				ctx.ReportNodeWithFixes(call, buildNoTrackMessage(), func() []rule.RuleFix {
+					args := call.AsCallExpression().Arguments
+					if args == nil || len(args.Nodes) != 1 {
+						return nil
+					}
+					inner := utils.TrimNodeTextRange(ctx.SourceFile, args.Nodes[0])
+					return []rule.RuleFix{
+						rule.RuleFixReplace(ctx.SourceFile, call, ctx.SourceFile.Text()[inner.Pos():inner.End()]),
+					}
+				})
 			}
-			if index == -1 {
+
+			closes := selfCalls(body, "close")
+			if len(closes) == 0 {
 				ctx.ReportNodeWithFixes(member, buildMustCloseMessage(), func() []rule.RuleFix {
 					return []rule.RuleFix{appendClose(ctx.SourceFile, body, statements, "await this.close();")}
 				})
 				return
 			}
-			if index != len(statements)-1 {
-				statement := statements[index]
-				text := strings.TrimSpace(ctx.SourceFile.Text()[statement.Pos():statement.End()])
-				ctx.ReportNodeWithFixes(statement, buildMustCloseLastMessage(), func() []rule.RuleFix {
-					return []rule.RuleFix{
-						rule.RuleFixRemoveRange(cutRange(ctx.SourceFile, body, statements, index)),
-						appendClose(ctx.SourceFile, body, statements, text),
+			// Position is deliberately not checked: what has to hold is that the
+			// abort fires once, not that it fires on the final line. A dispose
+			// that stops its workers, closes, then frees a connection is correct.
+			for _, extra := range closes[1:] {
+				ctx.ReportNodeWithFixes(extra, buildCloseOnceMessage(), func() []rule.RuleFix {
+					cut, ok := cutStatement(ctx.SourceFile, body, extra)
+					if !ok {
+						return nil
 					}
+					return []rule.RuleFix{rule.RuleFixRemoveRange(cut)}
 				})
 			}
 		}
