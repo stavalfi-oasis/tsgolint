@@ -1,0 +1,72 @@
+
+[TestNoAsyncGlobalFunctions/invalid-0 - 1]
+Diagnostic 1: asyncGlobalFunction (1:1 - 1:10)
+Message: `setTimeout` is handed a callback, so calling it directly leaves work nothing owns.
+Help: Wrap it in a class that owns the pending work, so disposing the class disposes the work.
+   1 | setTimeout(() => {}, 1000);
+     | ~~~~~~~~~~
+---
+
+[TestNoAsyncGlobalFunctions/invalid-1 - 1]
+Diagnostic 1: asyncGlobalFunction (1:1 - 1:14)
+Message: `queueMicrotask` is handed a callback, so calling it directly leaves work nothing owns.
+Help: Wrap it in a class that owns the pending work, so disposing the class disposes the work.
+   1 | queueMicrotask(() => {});
+     | ~~~~~~~~~~~~~~
+---
+
+[TestNoAsyncGlobalFunctions/invalid-2 - 1]
+Diagnostic 1: asyncGlobalFunction (1:6 - 1:10)
+Message: `fetch` returns a promise, so calling it directly leaves work nothing owns.
+Help: Wrap it in a class that owns the pending work, so disposing the class disposes the work.
+   1 | void fetch('https://example.com');
+     |      ~~~~~
+---
+
+[TestNoAsyncGlobalFunctions/invalid-3 - 1]
+Diagnostic 1: asyncGlobalFunction (1:6 - 1:20)
+Message: `resolve` returns a promise, so calling it directly leaves work nothing owns.
+Help: Wrap it in a class that owns the pending work, so disposing the class disposes the work.
+   1 | void Promise.resolve(1);
+     |      ~~~~~~~~~~~~~~~
+---
+
+[TestNoAsyncGlobalFunctions/invalid-4 - 1]
+Diagnostic 1: asyncGlobalFunction (3:6 - 3:9)
+Message: `load` returns a promise, so calling it directly leaves work nothing owns.
+Help: Wrap it in a class that owns the pending work, so disposing the class disposes the work.
+   2 | import { load } from 'fake-async';
+   3 | void load();
+     |      ~~~~
+   4 |       
+---
+
+[TestNoAsyncGlobalFunctions/invalid-5 - 1]
+Diagnostic 1: asyncGlobalFunction (3:1 - 3:4)
+Message: `work` is handed a callback, so calling it directly leaves work nothing owns.
+Help: Wrap it in a class that owns the pending work, so disposing the class disposes the work.
+   2 | import { work } from 'fake-async';
+   3 | work(() => {});
+     | ~~~~
+   4 |       
+---
+
+[TestNoAsyncGlobalFunctions/invalid-6 - 1]
+Diagnostic 1: asyncGlobalFunction (3:1 - 3:14)
+Message: `work` is handed a callback, so calling it directly leaves work nothing owns.
+Help: Wrap it in a class that owns the pending work, so disposing the class disposes the work.
+   2 | import * as fakeAsync from 'fake-async';
+   3 | fakeAsync.work(() => {});
+     | ~~~~~~~~~~~~~~
+   4 |       
+---
+
+[TestNoAsyncGlobalFunctions/invalid-7 - 1]
+Diagnostic 1: asyncGlobalFunction (3:6 - 3:9)
+Message: `load` returns a promise, so calling it directly leaves work nothing owns.
+Help: Wrap it in a class that owns the pending work, so disposing the class disposes the work.
+   2 | import { load } from 'fake-async';
+   3 | void load();
+     |      ~~~~
+   4 |       
+---

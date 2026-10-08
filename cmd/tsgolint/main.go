@@ -32,6 +32,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_anonymous_functions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_delete"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_length_assignment"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_async_global_functions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_async_static_method"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_banned_words"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_bare_logger_outside_super"
@@ -212,6 +213,7 @@ var allRules = []rule.Rule{
 	logger_name_matches_class.LoggerNameMatchesClassRule,
 	no_anonymous_functions.NoAnonymousFunctionsRule,
 	new_only_in_constructor.NewOnlyInConstructorRule,
+	no_async_global_functions.NoAsyncGlobalFunctionsRule,
 	no_async_static_method.NoAsyncStaticMethodRule,
 	no_array_length_assignment.NoArrayLengthAssignmentRule,
 	no_banned_words.NoBannedWordsRule,
