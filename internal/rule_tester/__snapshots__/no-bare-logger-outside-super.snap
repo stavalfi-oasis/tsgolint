@@ -1,0 +1,20 @@
+
+[TestNoBareLoggerOutsideSuper/invalid-0 - 1]
+Diagnostic 1: bareLogger (19:31 - 19:36)
+Message: Use 'this.logger' here, not the constructor's 'logger': the one super() built carries this class's bindings, and the parameter does not, so anything handed the parameter logs under whoever constructed this instance.
+Help: Pass 'this.logger'. The parameter belongs inside the 'super(...)' call only.
+  18 |     super({ logger: logger.child({ name: Service.name }) });
+  19 |     this.#inner = new Inner({ logger });
+     |                               ~~~~~~
+  20 |   }
+---
+
+[TestNoBareLoggerOutsideSuper/invalid-1 - 1]
+Diagnostic 1: bareLogger (19:39 - 19:44)
+Message: Use 'this.logger' here, not the constructor's 'logger': the one super() built carries this class's bindings, and the parameter does not, so anything handed the parameter logs under whoever constructed this instance.
+Help: Pass 'this.logger'. The parameter belongs inside the 'super(...)' call only.
+  18 |     super({ logger: logger.child({ name: Service.name }) });
+  19 |     this.#inner = new Inner({ logger: logger });
+     |                                       ~~~~~~
+  20 |   }
+---

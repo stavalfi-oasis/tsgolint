@@ -1,0 +1,20 @@
+
+[TestRequireLoggerChildInSuper/invalid-0 - 1]
+Diagnostic 1: missingLoggerChild (12:5 - 12:21)
+Message: 'super()' must be passed 'logger: logger.child({ name: Service.name })': without the child binding every line this instance logs is labelled by whoever constructed it.
+Help: Pass 'logger: logger.child({ name: Service.name })'. Extra bindings, such as 'service', are fine.
+  11 |   constructor({ logger }: { readonly logger: Logger }) {
+  12 |     super({ logger });
+     |     ~~~~~~~~~~~~~~~~~
+  13 |   }
+---
+
+[TestRequireLoggerChildInSuper/invalid-1 - 1]
+Diagnostic 1: missingLoggerChild (12:5 - 12:62)
+Message: 'super()' must be passed 'logger: logger.child({ name: Service.name })': without the child binding every line this instance logs is labelled by whoever constructed it.
+Help: Pass 'logger: logger.child({ name: Service.name })'. Extra bindings, such as 'service', are fine.
+  11 |   constructor({ logger }: { readonly logger: Logger }) {
+  12 |     super({ logger: logger.child({ service: "gh-gateway" }) });
+     |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  13 |   }
+---

@@ -29,10 +29,11 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/dot_notation"
 	"github.com/typescript-eslint/tsgolint/internal/rules/logger_name_matches_class"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_anonymous_functions"
-	"github.com/typescript-eslint/tsgolint/internal/rules/no_async_static_method"
-	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_length_assignment"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_delete"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_length_assignment"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_async_static_method"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_banned_words"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_bare_logger_outside_super"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_base_to_string"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_client_response_json"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_comments"
@@ -109,6 +110,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_await"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_catch_binding"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_fs_utf8"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_logger_child_in_super"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_object_params"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_os_eol"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_track"
@@ -119,6 +121,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/return_await"
 	"github.com/typescript-eslint/tsgolint/internal/rules/strict_boolean_expressions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/strict_void_return"
+	"github.com/typescript-eslint/tsgolint/internal/rules/super_first_statement"
 	"github.com/typescript-eslint/tsgolint/internal/rules/switch_exhaustiveness_check"
 	"github.com/typescript-eslint/tsgolint/internal/rules/unbound_method"
 	"github.com/typescript-eslint/tsgolint/internal/rules/use_unknown_in_catch_callback_variable"
@@ -253,7 +256,10 @@ var allRules = []rule.Rule{
 	no_zod_defaults.NoZodDefaultsRule,
 	no_zod_passthrough.NoZodPassthroughRule,
 	require_fs_utf8.RequireFsUtf8Rule,
+	no_bare_logger_outside_super.NoBareLoggerOutsideSuperRule,
+	require_logger_child_in_super.RequireLoggerChildInSuperRule,
 	require_track.RequireTrackRule,
+	super_first_statement.SuperFirstStatementRule,
 	require_type_annotation.RequireTypeAnnotationRule,
 	no_unnecessary_boolean_literal_compare.NoUnnecessaryBooleanLiteralCompareRule,
 	no_unnecessary_condition.NoUnnecessaryConditionRule,

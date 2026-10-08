@@ -1,0 +1,10 @@
+
+[TestSuperFirstStatement/invalid-0 - 1]
+Diagnostic 1: superNotFirst (10:5 - 10:21)
+Message: 'super()' must be the first statement of the constructor: until it has run 'this' does not exist, so anything above it cannot reach the base class's state.
+Help: Move 'super()' to the top of the constructor.
+   9 |     const value = work();
+  10 |     super({ value });
+     |     ~~~~~~~~~~~~~~~~~
+  11 |   }
+---
