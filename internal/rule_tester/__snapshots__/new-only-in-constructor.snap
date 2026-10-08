@@ -1,0 +1,64 @@
+
+[TestNewOnlyInConstructor/invalid-0 - 1]
+Diagnostic 1: newOutsideConstructor (1:64 - 1:72)
+Message: `new Dep` runs outside the constructor, so the field holding it is undefined until this method runs.
+Help: Construct it in the constructor and pass whatever is only known later as an argument to this method.
+   1 | class Dep {} class A { #dep?: Dep; start(): void { this.#dep = new Dep(); } }
+     |                                                                ~~~~~~~~~
+---
+
+[TestNewOnlyInConstructor/invalid-1 - 1]
+Diagnostic 1: newOutsideConstructor (1:48 - 1:56)
+Message: `new Dep` runs outside the constructor, so the field holding it is undefined until this method runs.
+Help: Construct it in the constructor and pass whatever is only known later as an argument to this method.
+   1 | class Dep {} class A { get dep(): Dep { return new Dep(); } }
+     |                                                ~~~~~~~~~
+---
+
+[TestNewOnlyInConstructor/invalid-2 - 1]
+Diagnostic 1: newOutsideConstructor (1:54 - 1:62)
+Message: `new Dep` runs outside the constructor, so the field holding it is undefined until this method runs.
+Help: Construct it in the constructor and pass whatever is only known later as an argument to this method.
+   1 | class Dep {} class A { set dep(value: Dep) { value = new Dep(); } }
+     |                                                      ~~~~~~~~~
+---
+
+[TestNewOnlyInConstructor/invalid-3 - 1]
+Diagnostic 1: newOutsideConstructor (1:52 - 1:60)
+Message: `new Dep` runs outside the constructor, so the field holding it is undefined until this method runs.
+Help: Construct it in the constructor and pass whatever is only known later as an argument to this method.
+   1 | class Dep {} class A { static make(): Dep { return new Dep(); } }
+     |                                                    ~~~~~~~~~
+---
+
+[TestNewOnlyInConstructor/invalid-4 - 1]
+Diagnostic 1: newOutsideConstructor (1:58 - 1:66)
+Message: `new Dep` runs outside the constructor, so the field holding it is undefined until this method runs.
+Help: Construct it in the constructor and pass whatever is only known later as an argument to this method.
+   1 | class Dep {} class A { start(): () => Dep { return () => new Dep(); } }
+     |                                                          ~~~~~~~~~
+---
+
+[TestNewOnlyInConstructor/invalid-5 - 1]
+Diagnostic 1: newOutsideConstructor (1:54 - 1:62)
+Message: `new Dep` runs outside the constructor, so the field holding it is undefined until this method runs.
+Help: Construct it in the constructor and pass whatever is only known later as an argument to this method.
+   1 | class Dep {} const A = class { start(): Dep { return new Dep(); } };
+     |                                                      ~~~~~~~~~
+---
+
+[TestNewOnlyInConstructor/invalid-6 - 1]
+Diagnostic 1: newOutsideConstructor (1:61 - 1:69)
+Message: `new Dep` runs outside the constructor, so the field holding it is undefined until this method runs.
+Help: Construct it in the constructor and pass whatever is only known later as an argument to this method.
+   1 | class Dep {} class Other {} class A { start(): Dep { return new Dep(); } }
+     |                                                             ~~~~~~~~~
+---
+
+[TestNewOnlyInConstructor/invalid-7 - 1]
+Diagnostic 1: newOutsideConstructor (1:73 - 1:84)
+Message: `new Dep` runs outside the constructor, so the field holding it is undefined until this method runs.
+Help: Construct it in the constructor and pass whatever is only known later as an argument to this method.
+   1 | namespace ns { export class Dep {} } class A { start(): ns.Dep { return new ns.Dep(); } }
+     |                                                                         ~~~~~~~~~~~~
+---

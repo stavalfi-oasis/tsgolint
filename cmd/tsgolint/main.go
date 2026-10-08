@@ -28,6 +28,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/consistent_type_exports"
 	"github.com/typescript-eslint/tsgolint/internal/rules/dot_notation"
 	"github.com/typescript-eslint/tsgolint/internal/rules/logger_name_matches_class"
+	"github.com/typescript-eslint/tsgolint/internal/rules/new_only_in_constructor"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_anonymous_functions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_delete"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_length_assignment"
@@ -210,6 +211,7 @@ var allRules = []rule.Rule{
 	class_name_matches_filename.ClassNameMatchesFilenameRule,
 	logger_name_matches_class.LoggerNameMatchesClassRule,
 	no_anonymous_functions.NoAnonymousFunctionsRule,
+	new_only_in_constructor.NewOnlyInConstructorRule,
 	no_async_static_method.NoAsyncStaticMethodRule,
 	no_array_length_assignment.NoArrayLengthAssignmentRule,
 	no_banned_words.NoBannedWordsRule,
