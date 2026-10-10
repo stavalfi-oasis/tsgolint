@@ -115,6 +115,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_logger_child_in_super"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_object_params"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_os_eol"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_test_timeout"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_track"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_type_annotation"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_zod_compile"
@@ -262,6 +263,7 @@ var allRules = []rule.Rule{
 	require_fs_utf8.RequireFsUtf8Rule,
 	no_bare_logger_outside_super.NoBareLoggerOutsideSuperRule,
 	require_logger_child_in_super.RequireLoggerChildInSuperRule,
+	require_test_timeout.RequireTestTimeoutRule,
 	require_track.RequireTrackRule,
 	super_first_statement.SuperFirstStatementRule,
 	require_type_annotation.RequireTypeAnnotationRule,

@@ -1,0 +1,66 @@
+
+[TestRequireTestTimeout/invalid-0 - 1]
+Diagnostic 1: requireTestTimeout (1:1 - 1:2)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it('works', async () => {});
+     | ~~
+---
+
+[TestRequireTestTimeout/invalid-1 - 1]
+Diagnostic 1: requireTestTimeout (1:1 - 1:2)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it('works', function () {});
+     | ~~
+---
+
+[TestRequireTestTimeout/invalid-2 - 1]
+Diagnostic 1: requireTestTimeout (1:1 - 1:2)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it('works', {}, () => {});
+     | ~~
+---
+
+[TestRequireTestTimeout/invalid-3 - 1]
+Diagnostic 1: requireTestTimeout (1:1 - 1:2)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it('works', { concurrency: 1 }, () => {});
+     | ~~
+---
+
+[TestRequireTestTimeout/invalid-4 - 1]
+Diagnostic 1: requireTestTimeout (1:1 - 1:2)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it('works');
+     | ~~
+---
+
+[TestRequireTestTimeout/invalid-5 - 1]
+Diagnostic 1: requireTestTimeout (1:1 - 1:7)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it.only('works', () => {});
+     | ~~~~~~~
+---
+
+[TestRequireTestTimeout/invalid-6 - 1]
+Diagnostic 1: requireTestTimeout (1:1 - 1:7)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it.skip('works', () => {});
+     | ~~~~~~~
+---
+
+[TestRequireTestTimeout/invalid-7 - 1]
+Diagnostic 1: requireTestTimeout (4:3 - 4:4)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   3 | describe('group', () => {
+   4 |   it('works', async () => {});
+     |   ~~
+   5 | });
+---
