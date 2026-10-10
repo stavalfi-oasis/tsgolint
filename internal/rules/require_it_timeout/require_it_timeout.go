@@ -1,4 +1,4 @@
-package require_test_timeout
+package require_it_timeout
 
 import (
 	"github.com/microsoft/typescript-go/shim/ast"
@@ -17,9 +17,9 @@ var exemptModifiers = map[string]bool{
 	"todo": true,
 }
 
-func buildRequireTestTimeoutMessage() rule.RuleMessage {
+func buildRequireItTimeoutMessage() rule.RuleMessage {
 	return rule.RuleMessage{
-		Id:          "requireTestTimeout",
+		Id:          "requireItTimeout",
 		Description: "`it(...)` must declare a timeout.",
 		Help:        "Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.",
 	}
@@ -99,8 +99,8 @@ func declaresTimeout(node *ast.Node) bool {
 	return false
 }
 
-var RequireTestTimeoutRule = rule.Rule{
-	Name: "require-test-timeout",
+var RequireItTimeoutRule = rule.Rule{
+	Name: "require-it-timeout",
 	Run: func(ctx rule.RuleContext, options any) rule.RuleListeners {
 		return rule.RuleListeners{
 			ast.KindCallExpression: func(node *ast.Node) {
@@ -121,7 +121,7 @@ var RequireTestTimeoutRule = rule.Rule{
 				// Reported on the callee, not the call: the call spans the whole
 				// test body, and an editor squiggle over it hides the rest of
 				// the file's diagnostics.
-				ctx.ReportNode(call.Expression, buildRequireTestTimeoutMessage())
+				ctx.ReportNode(call.Expression, buildRequireItTimeoutMessage())
 			},
 		}
 	},

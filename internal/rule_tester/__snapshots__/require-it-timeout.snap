@@ -1,0 +1,66 @@
+
+[TestRequireItTimeout/invalid-0 - 1]
+Diagnostic 1: requireItTimeout (1:1 - 1:2)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it('works', async () => {});
+     | ~~
+---
+
+[TestRequireItTimeout/invalid-1 - 1]
+Diagnostic 1: requireItTimeout (1:1 - 1:2)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it('works', function () {});
+     | ~~
+---
+
+[TestRequireItTimeout/invalid-2 - 1]
+Diagnostic 1: requireItTimeout (1:1 - 1:2)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it('works', {}, () => {});
+     | ~~
+---
+
+[TestRequireItTimeout/invalid-3 - 1]
+Diagnostic 1: requireItTimeout (1:1 - 1:2)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it('works', { concurrency: 1 }, () => {});
+     | ~~
+---
+
+[TestRequireItTimeout/invalid-4 - 1]
+Diagnostic 1: requireItTimeout (1:1 - 1:2)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it('works');
+     | ~~
+---
+
+[TestRequireItTimeout/invalid-5 - 1]
+Diagnostic 1: requireItTimeout (1:1 - 1:7)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it.only('works', () => {});
+     | ~~~~~~~
+---
+
+[TestRequireItTimeout/invalid-6 - 1]
+Diagnostic 1: requireItTimeout (1:1 - 1:7)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   1 | it.skip('works', () => {});
+     | ~~~~~~~
+---
+
+[TestRequireItTimeout/invalid-7 - 1]
+Diagnostic 1: requireItTimeout (4:3 - 4:4)
+Message: `it(...)` must declare a timeout.
+Help: Pass an options object as the second argument: `it('name', { timeout: 5_000 }, async () => {})`.
+   3 | describe('group', () => {
+   4 |   it('works', async () => {});
+     |   ~~
+   5 | });
+---

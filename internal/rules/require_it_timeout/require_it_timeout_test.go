@@ -1,4 +1,4 @@
-package require_test_timeout
+package require_it_timeout
 
 import (
 	"testing"
@@ -7,9 +7,9 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/fixtures"
 )
 
-func TestRequireTestTimeout(t *testing.T) {
+func TestRequireItTimeout(t *testing.T) {
 	t.Parallel()
-	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &RequireTestTimeoutRule, []rule_tester.ValidTestCase{
+	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &RequireItTimeoutRule, []rule_tester.ValidTestCase{
 		{Code: `it('works', { timeout: 5_000 }, async () => {});`},
 		{Code: `it('works', { timeout }, async () => {});`},
 		{Code: `it('works', { concurrency: 1, timeout: 1 }, () => {});`},
@@ -29,31 +29,31 @@ func TestRequireTestTimeout(t *testing.T) {
 	}, []rule_tester.InvalidTestCase{
 		{
 			Code:   `it('works', async () => {});`,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireTestTimeout", Line: 1, Column: 1, EndColumn: 3}},
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireItTimeout", Line: 1, Column: 1, EndColumn: 3}},
 		},
 		{
 			Code:   `it('works', function () {});`,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireTestTimeout", Line: 1, Column: 1, EndColumn: 3}},
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireItTimeout", Line: 1, Column: 1, EndColumn: 3}},
 		},
 		{
 			Code:   `it('works', {}, () => {});`,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireTestTimeout", Line: 1, Column: 1, EndColumn: 3}},
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireItTimeout", Line: 1, Column: 1, EndColumn: 3}},
 		},
 		{
 			Code:   `it('works', { concurrency: 1 }, () => {});`,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireTestTimeout", Line: 1, Column: 1, EndColumn: 3}},
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireItTimeout", Line: 1, Column: 1, EndColumn: 3}},
 		},
 		{
 			Code:   `it('works');`,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireTestTimeout", Line: 1, Column: 1, EndColumn: 3}},
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireItTimeout", Line: 1, Column: 1, EndColumn: 3}},
 		},
 		{
 			Code:   `it.only('works', () => {});`,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireTestTimeout", Line: 1, Column: 1, EndColumn: 8}},
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireItTimeout", Line: 1, Column: 1, EndColumn: 8}},
 		},
 		{
 			Code:   `it.skip('works', () => {});`,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireTestTimeout", Line: 1, Column: 1, EndColumn: 8}},
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireItTimeout", Line: 1, Column: 1, EndColumn: 8}},
 		},
 		{
 			Code: `
@@ -62,7 +62,7 @@ describe('group', () => {
   it('works', async () => {});
 });
 			`,
-			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireTestTimeout", Line: 4, Column: 3, EndColumn: 5}},
+			Errors: []rule_tester.InvalidTestCaseError{{MessageId: "requireItTimeout", Line: 4, Column: 3, EndColumn: 5}},
 		},
 	})
 }
