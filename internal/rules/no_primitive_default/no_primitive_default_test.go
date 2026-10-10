@@ -38,45 +38,61 @@ declare const value: string | undefined;
 declare const fallback: any;
 const result = value ?? fallback;
     `},
-		// A mixed union still carries a non-primitive branch.
+		// A mixed union still carries a non-constant branch.
 		{Code: `
 declare const value: string | undefined;
-declare const fallback: string | { a: number };
+declare const fallback: "unknown" | { a: number };
 const result = value || fallback;
     `},
-		// An empty string invents no content, so it is exempt like `[]`.
+		// `""` and `0` invent no content.
 		{Code: `
 declare const value: string | undefined;
 const result = value ?? "";
     `},
 		{Code: `
-declare const value: string | undefined;
-const result = value || "";
+declare const value: number | undefined;
+const result = value || 0;
     `},
 		{Code: `
 declare let value: string | undefined;
 value ??= "";
     `},
 		{Code: `
-declare let value: string | undefined;
-value ||= "";
+declare let value: number | undefined;
+value ||= 0;
     `},
 		{Code: `
 declare const value: string | undefined;
 const result = value ?? ` + "``" + `;
+    `},
+		// Not a constant: a runtime `string` is the caller's data, not a guess.
+		{Code: `
+declare const value: string | undefined;
+declare const fallback: string;
+const result = value ?? fallback;
+    `},
+		{Code: `
+declare const value: number | undefined;
+declare const fallback: number;
+const result = value ?? fallback;
+    `},
+		{Code: `
+declare const value: string | undefined;
+declare function fallbackName(): string;
+const result = value || fallbackName();
+    `},
+		// A template whose substitution is only known at runtime is not a constant.
+		{Code: `
+declare const value: string | undefined;
+declare const owner: string;
+const result = value ?? ` + "`tenant-${owner}`" + `;
     `},
 		// `&&` is a different operator.
 		{Code: `
 declare const value: string;
 const result = value && "ready";
     `},
-		// A throw keeps the missing case explicit rather than papering over it.
-		{Code: `
-declare const value: string | undefined;
-const result = value ?? (() => { throw new Error("missing"); })();
-    `},
 	}, []rule_tester.InvalidTestCase{
-		// A non-empty string is still a made-up value.
 		{
 			Code: `
 declare const value: string | undefined;
@@ -92,26 +108,11 @@ const result = value ?? "unknown";
 				},
 			},
 		},
-		{
-			Code: `
-declare const value: number | undefined;
-const result = value ?? 0;
-      `,
-			Errors: []rule_tester.InvalidTestCaseError{
-				{
-					MessageId: "primitiveDefault",
-					Line:      3,
-					Column:    16,
-					EndLine:   3,
-					EndColumn: 26,
-				},
-			},
-		},
 		// `||` substitutes the same made-up value, and for a wider set of inputs.
 		{
 			Code: `
-declare const value: number | undefined;
-const result = value || 0;
+declare const value: string | undefined;
+const result = value || "unknown";
       `,
 			Errors: []rule_tester.InvalidTestCaseError{
 				{
@@ -119,7 +120,22 @@ const result = value || 0;
 					Line:      3,
 					Column:    16,
 					EndLine:   3,
-					EndColumn: 26,
+					EndColumn: 34,
+				},
+			},
+		},
+		{
+			Code: `
+declare const value: number | undefined;
+const result = value ?? 1000;
+      `,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{
+					MessageId: "primitiveDefault",
+					Line:      3,
+					Column:    16,
+					EndLine:   3,
+					EndColumn: 29,
 				},
 			},
 		},
@@ -138,7 +154,7 @@ const result = value ?? -1;
 				},
 			},
 		},
-		// Not a literal — the rule reads the type, so a named constant is caught too.
+		// A named constant is still a constant.
 		{
 			Code: `
 declare const value: number | undefined;
@@ -155,28 +171,11 @@ const result = value ?? DEFAULT_PORT;
 				},
 			},
 		},
-		// A call returning a string is just as made-up a default.
+		// Every substitution is known at compile time, so the whole template is.
 		{
 			Code: `
 declare const value: string | undefined;
-declare function fallbackName(): string;
-const result = value || fallbackName();
-      `,
-			Errors: []rule_tester.InvalidTestCaseError{
-				{
-					MessageId: "primitiveDefault",
-					Line:      4,
-					Column:    16,
-					EndLine:   4,
-					EndColumn: 39,
-				},
-			},
-		},
-		// Template literal with a substitution is still a string.
-		{
-			Code: `
-declare const value: string | undefined;
-declare const owner: string;
+const owner = "acme";
 const result = value ?? ` + "`tenant-${owner}`" + `;
       `,
 			Errors: []rule_tester.InvalidTestCaseError{
@@ -189,11 +188,11 @@ const result = value ?? ` + "`tenant-${owner}`" + `;
 				},
 			},
 		},
-		// A string|number union is still entirely string/number.
+		// A union of constants is still entirely made up.
 		{
 			Code: `
 declare const value: string | undefined;
-declare const fallback: string | number;
+declare const fallback: "unknown" | "n/a";
 const result = value ?? fallback;
       `,
 			Errors: []rule_tester.InvalidTestCaseError{
