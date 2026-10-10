@@ -57,6 +57,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_mixed_enums"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_passthrough_functions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_primitive_collection_key"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_primitive_nullish_default"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_private_keyword"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_process_stream_write"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_protected"
@@ -113,10 +114,10 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_await"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_catch_binding"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_fs_utf8"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_it_timeout"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_logger_child_in_super"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_object_params"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_os_eol"
-	"github.com/typescript-eslint/tsgolint/internal/rules/require_it_timeout"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_track"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_type_annotation"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_zod_compile"
@@ -226,6 +227,7 @@ var allRules = []rule.Rule{
 	no_import_side_effects.NoImportSideEffectsRule,
 	no_infinite_loop.NoInfiniteLoopRule,
 	no_primitive_collection_key.NoPrimitiveCollectionKeyRule,
+	no_primitive_nullish_default.NoPrimitiveNullishDefaultRule,
 	no_private_keyword.NoPrivateKeywordRule,
 	no_protected.NoProtectedRule,
 	no_single_use_const.NoSingleUseConstRule,
