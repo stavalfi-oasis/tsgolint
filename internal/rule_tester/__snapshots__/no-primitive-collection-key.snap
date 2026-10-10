@@ -1,0 +1,158 @@
+
+[TestNoPrimitiveCollectionKey/invalid-0 - 1]
+Diagnostic 1: primitiveKey (3:29 - 3:34)
+Message: `Map` is keyed by a bare `string`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = string` — and key on `TenantId`.
+   2 | interface Session {}
+   3 | declare const sessions: Map<string, Session>;
+     |                             ~~~~~~
+   4 |       
+---
+
+[TestNoPrimitiveCollectionKey/invalid-1 - 1]
+Diagnostic 1: primitiveKey (2:27 - 2:32)
+Message: `Map` is keyed by a bare `number`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = number` — and key on `TenantId`.
+   1 | 
+   2 | declare const counts: Map<number, string>;
+     |                           ~~~~~~
+   3 |       
+---
+
+[TestNoPrimitiveCollectionKey/invalid-2 - 1]
+Diagnostic 1: primitiveKey (2:34 - 2:40)
+Message: `ReadonlySet` is keyed by a bare `boolean`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = boolean` — and key on `TenantId`.
+   1 | 
+   2 | declare const flags: ReadonlySet<boolean>;
+     |                                  ~~~~~~~
+   3 |       
+---
+
+[TestNoPrimitiveCollectionKey/invalid-3 - 1]
+Diagnostic 1: primitiveKey (2:26 - 2:31)
+Message: `Set` is keyed by a bare `string`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = string` — and key on `TenantId`.
+   1 | 
+   2 | declare const slugs: Set<string>;
+     |                          ~~~~~~
+   3 |       
+---
+
+[TestNoPrimitiveCollectionKey/invalid-4 - 1]
+Diagnostic 1: primitiveKey (2:31 - 2:36)
+Message: `Record` is keyed by a bare `string`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = string` — and key on `TenantId`.
+   1 | 
+   2 | declare const payload: Record<string, unknown>;
+     |                               ~~~~~~
+   3 |       
+---
+
+[TestNoPrimitiveCollectionKey/invalid-5 - 1]
+Diagnostic 1: meaninglessAlias (3:29 - 3:31)
+Message: `Str` renames a primitive without naming it, so `Map` still has an anonymous key.
+Help: Rename the alias to what the key represents, such as `TenantId` or `FindingSlug`.
+   2 | type Str = string;
+   3 | declare const sessions: Map<Str, number>;
+     |                             ~~~
+   4 |       
+---
+
+[TestNoPrimitiveCollectionKey/invalid-6 - 1]
+Diagnostic 1: meaninglessAlias (3:29 - 3:33)
+Message: `Value` renames a primitive without naming it, so `Map` still has an anonymous key.
+Help: Rename the alias to what the key represents, such as `TenantId` or `FindingSlug`.
+   2 | type Value = string;
+   3 | declare const sessions: Map<Value, number>;
+     |                             ~~~~~
+   4 |       
+---
+
+[TestNoPrimitiveCollectionKey/invalid-7 - 1]
+Diagnostic 1: primitiveKey (2:29 - 2:34)
+Message: `Map` is keyed by a bare `string`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = string` — and key on `TenantId`.
+   1 | 
+   2 | declare const sessions: Map<string & { readonly __brand: 'TenantId' }, number>;
+     |                             ~~~~~~
+   3 |       
+---
+
+[TestNoPrimitiveCollectionKey/invalid-8 - 1]
+Diagnostic 1: primitiveKey (3:38 - 3:43)
+Message: `Map` is keyed by a bare `string`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = string` — and key on `TenantId`.
+   2 | type TenantId = string;
+   3 | declare const owners: Map<TenantId | string, number>;
+     |                                      ~~~~~~
+   4 |       
+---
+
+[TestNoPrimitiveCollectionKey/invalid-9 - 1]
+Diagnostic 1: primitiveKey (2:30 - 2:35)
+Message: `Map` is keyed by a bare `string`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = string` — and key on `TenantId`.
+   1 | 
+   2 | declare const sessions: Map<(string), number>;
+     |                              ~~~~~~
+   3 |       
+---
+
+[TestNoPrimitiveCollectionKey/invalid-10 - 1]
+Diagnostic 1: primitiveKey (2:26 - 2:31)
+Message: `Map` is keyed by a bare `string`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = string` — and key on `TenantId`.
+   1 | 
+   2 | const sessions = new Map<string, number>();
+     |                          ~~~~~~
+   3 | sessions.clear();
+---
+
+[TestNoPrimitiveCollectionKey/invalid-11 - 1]
+Diagnostic 1: missingTypeArguments (2:22 - 2:24)
+Message: `new Map()` leaves the key type to inference, so nothing in the source names it.
+Help: Write the type arguments explicitly with a named alias as the key — `new Map<TenantId, Session>()`.
+   1 | 
+   2 | const sessions = new Map();
+     |                      ~~~
+   3 | sessions.clear();
+---
+
+[TestNoPrimitiveCollectionKey/invalid-12 - 1]
+Diagnostic 1: missingTypeArguments (3:34 - 3:36)
+Message: `new Set()` leaves the key type to inference, so nothing in the source names it.
+Help: Write the type arguments explicitly with a named alias as the key — `new Set<TenantId, Session>()`.
+   2 | class Cache {
+   3 |   private readonly entries = new Set();
+     |                                  ~~~
+   4 | }
+---
+
+[TestNoPrimitiveCollectionKey/invalid-13 - 1]
+Diagnostic 1: primitiveKey (3:28 - 3:33)
+Message: `Map` is keyed by a bare `string`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = string` — and key on `TenantId`.
+   2 | interface Session {}
+   3 | class Sessions extends Map<string, Session> {}
+     |                            ~~~~~~
+   4 |       
+---
+
+[TestNoPrimitiveCollectionKey/invalid-14 - 1]
+Diagnostic 1: primitiveKey (2:27 - 2:32)
+Message: `Map` is keyed by a bare `string`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = string` — and key on `TenantId`.
+   1 | 
+   2 | declare const nested: Map<string, Set<number>>;
+     |                           ~~~~~~
+   3 |       
+
+Diagnostic 2: primitiveKey (2:39 - 2:44)
+Message: `Set` is keyed by a bare `number`, which says nothing about what the key holds.
+Help: Alias the key to a named type that says what it represents — `type TenantId = number` — and key on `TenantId`.
+   1 | 
+   2 | declare const nested: Map<string, Set<number>>;
+     |                                       ~~~~~~
+   3 |       
+---
