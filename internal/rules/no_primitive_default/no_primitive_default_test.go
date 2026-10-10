@@ -1,4 +1,4 @@
-package no_primitive_nullish_default
+package no_primitive_default
 
 import (
 	"testing"
@@ -7,9 +7,9 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/fixtures"
 )
 
-func TestNoPrimitiveNullishDefault(t *testing.T) {
+func TestNoPrimitiveDefault(t *testing.T) {
 	t.Parallel()
-	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &NoPrimitiveNullishDefaultRule, []rule_tester.ValidTestCase{
+	rule_tester.RunRuleTester(fixtures.GetRootDir(), "tsconfig.json", t, &NoPrimitiveDefaultRule, []rule_tester.ValidTestCase{
 		// Containers are the whole point of the exemption.
 		{Code: `
 declare const value: { a: number } | undefined;
@@ -17,7 +17,7 @@ const result = value ?? {};
     `},
 		{Code: `
 declare const value: number[] | undefined;
-const result = value ?? [];
+const result = value || [];
     `},
 		// Booleans, null and undefined are not strings or numbers.
 		{Code: `
@@ -30,7 +30,7 @@ const result = value ?? undefined;
     `},
 		{Code: `
 declare const value: string | undefined;
-const result = value ?? null;
+const result = value || null;
     `},
 		// `any` carries no information, so reporting it would be guesswork.
 		{Code: `
@@ -42,31 +42,53 @@ const result = value ?? fallback;
 		{Code: `
 declare const value: string | undefined;
 declare const fallback: string | { a: number };
-const result = value ?? fallback;
+const result = value || fallback;
     `},
-		// `||` and `&&` are a different operator.
+		// An empty string invents no content, so it is exempt like `[]`.
 		{Code: `
-declare const value: string;
+declare const value: string | undefined;
+const result = value ?? "";
+    `},
+		{Code: `
+declare const value: string | undefined;
 const result = value || "";
     `},
-		// A throw keeps the nullish case explicit rather than papering over it.
+		{Code: `
+declare let value: string | undefined;
+value ??= "";
+    `},
+		{Code: `
+declare let value: string | undefined;
+value ||= "";
+    `},
+		{Code: `
+declare const value: string | undefined;
+const result = value ?? ` + "``" + `;
+    `},
+		// `&&` is a different operator.
+		{Code: `
+declare const value: string;
+const result = value && "ready";
+    `},
+		// A throw keeps the missing case explicit rather than papering over it.
 		{Code: `
 declare const value: string | undefined;
 const result = value ?? (() => { throw new Error("missing"); })();
     `},
 	}, []rule_tester.InvalidTestCase{
+		// A non-empty string is still a made-up value.
 		{
 			Code: `
 declare const value: string | undefined;
-const result = value ?? "";
+const result = value ?? "unknown";
       `,
 			Errors: []rule_tester.InvalidTestCaseError{
 				{
-					MessageId: "primitiveNullishDefault",
+					MessageId: "primitiveDefault",
 					Line:      3,
 					Column:    16,
 					EndLine:   3,
-					EndColumn: 27,
+					EndColumn: 34,
 				},
 			},
 		},
@@ -77,11 +99,42 @@ const result = value ?? 0;
       `,
 			Errors: []rule_tester.InvalidTestCaseError{
 				{
-					MessageId: "primitiveNullishDefault",
+					MessageId: "primitiveDefault",
 					Line:      3,
 					Column:    16,
 					EndLine:   3,
 					EndColumn: 26,
+				},
+			},
+		},
+		// `||` substitutes the same made-up value, and for a wider set of inputs.
+		{
+			Code: `
+declare const value: number | undefined;
+const result = value || 0;
+      `,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{
+					MessageId: "primitiveDefault",
+					Line:      3,
+					Column:    16,
+					EndLine:   3,
+					EndColumn: 26,
+				},
+			},
+		},
+		{
+			Code: `
+declare const value: number | undefined;
+const result = value ?? -1;
+      `,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{
+					MessageId: "primitiveDefault",
+					Line:      3,
+					Column:    16,
+					EndLine:   3,
+					EndColumn: 27,
 				},
 			},
 		},
@@ -94,7 +147,7 @@ const result = value ?? DEFAULT_PORT;
       `,
 			Errors: []rule_tester.InvalidTestCaseError{
 				{
-					MessageId: "primitiveNullishDefault",
+					MessageId: "primitiveDefault",
 					Line:      4,
 					Column:    16,
 					EndLine:   4,
@@ -107,11 +160,11 @@ const result = value ?? DEFAULT_PORT;
 			Code: `
 declare const value: string | undefined;
 declare function fallbackName(): string;
-const result = value ?? fallbackName();
+const result = value || fallbackName();
       `,
 			Errors: []rule_tester.InvalidTestCaseError{
 				{
-					MessageId: "primitiveNullishDefault",
+					MessageId: "primitiveDefault",
 					Line:      4,
 					Column:    16,
 					EndLine:   4,
@@ -128,7 +181,7 @@ const result = value ?? ` + "`tenant-${owner}`" + `;
       `,
 			Errors: []rule_tester.InvalidTestCaseError{
 				{
-					MessageId: "primitiveNullishDefault",
+					MessageId: "primitiveDefault",
 					Line:      4,
 					Column:    16,
 					EndLine:   4,
@@ -145,7 +198,7 @@ const result = value ?? fallback;
       `,
 			Errors: []rule_tester.InvalidTestCaseError{
 				{
-					MessageId: "primitiveNullishDefault",
+					MessageId: "primitiveDefault",
 					Line:      4,
 					Column:    16,
 					EndLine:   4,
@@ -153,19 +206,34 @@ const result = value ?? fallback;
 				},
 			},
 		},
-		// `??=` hides the same substitution behind an assignment.
+		// `??=` and `||=` hide the same substitution behind an assignment.
 		{
 			Code: `
 declare let value: string | undefined;
-value ??= "";
+value ??= "unknown";
       `,
 			Errors: []rule_tester.InvalidTestCaseError{
 				{
-					MessageId: "primitiveNullishDefault",
+					MessageId: "primitiveDefault",
 					Line:      3,
 					Column:    1,
 					EndLine:   3,
-					EndColumn: 13,
+					EndColumn: 20,
+				},
+			},
+		},
+		{
+			Code: `
+declare let value: number | undefined;
+value ||= 1;
+      `,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{
+					MessageId: "primitiveDefault",
+					Line:      3,
+					Column:    1,
+					EndLine:   3,
+					EndColumn: 12,
 				},
 			},
 		},

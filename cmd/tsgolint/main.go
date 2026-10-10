@@ -57,7 +57,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_mixed_enums"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_passthrough_functions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_primitive_collection_key"
-	"github.com/typescript-eslint/tsgolint/internal/rules/no_primitive_nullish_default"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_primitive_default"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_private_keyword"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_process_stream_write"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_protected"
@@ -227,7 +227,7 @@ var allRules = []rule.Rule{
 	no_import_side_effects.NoImportSideEffectsRule,
 	no_infinite_loop.NoInfiniteLoopRule,
 	no_primitive_collection_key.NoPrimitiveCollectionKeyRule,
-	no_primitive_nullish_default.NoPrimitiveNullishDefaultRule,
+	no_primitive_default.NoPrimitiveDefaultRule,
 	no_private_keyword.NoPrivateKeywordRule,
 	no_protected.NoProtectedRule,
 	no_single_use_const.NoSingleUseConstRule,
