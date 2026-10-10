@@ -98,7 +98,7 @@ const result = value && "ready";
 declare const value: string | undefined;
 const result = value ?? "local";
     `,
-			Options: NoPrimitiveDefaultOptions{Allow: []string{"local"}},
+			Options: NoPrimitiveDefaultOptions{Allow: []any{"local"}},
 		},
 		{
 			Code: `
@@ -106,7 +106,22 @@ declare const value: string | undefined;
 const OWNER = "local";
 const result = value ?? OWNER;
     `,
-			Options: NoPrimitiveDefaultOptions{Allow: []string{"local"}},
+			Options: NoPrimitiveDefaultOptions{Allow: []any{"local"}},
+		},
+		// `allow` takes numbers too, for the sentinels a codebase owns.
+		{
+			Code: `
+declare const value: number | undefined;
+const result = value ?? -1;
+    `,
+			Options: NoPrimitiveDefaultOptions{Allow: []any{float64(-1)}},
+		},
+		{
+			Code: `
+declare const value: number | undefined;
+const result = value || 1;
+    `,
+			Options: NoPrimitiveDefaultOptions{Allow: []any{float64(1)}},
 		},
 	}, []rule_tester.InvalidTestCase{
 		// `allow` exempts the value it names, not every other constant.
@@ -115,7 +130,7 @@ const result = value ?? OWNER;
 declare const value: string | undefined;
 const result = value ?? "unknown";
       `,
-			Options: NoPrimitiveDefaultOptions{Allow: []string{"local"}},
+			Options: NoPrimitiveDefaultOptions{Allow: []any{"local", float64(-1)}},
 			Errors: []rule_tester.InvalidTestCaseError{
 				{
 					MessageId: "primitiveDefault",

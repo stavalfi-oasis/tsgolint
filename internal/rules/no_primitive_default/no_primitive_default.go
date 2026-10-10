@@ -10,8 +10,16 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/utils"
 )
 
+// Entries are string or number constants. JSON numbers arrive as float64, so
+// the number branch compares against that rather than against jsnum.Number.
 type NoPrimitiveDefaultOptions struct {
-	Allow []string `json:"allow"`
+	Allow []any `json:"allow"`
+}
+
+func isAllowed(allow []any, value any) bool {
+	return slices.ContainsFunc(allow, func(allowed any) bool {
+		return allowed == value
+	})
 }
 
 // Only a compile-time constant. A value computed at runtime — `string`,
@@ -31,7 +39,7 @@ func buildPrimitiveDefaultMessage(operator string, text string) rule.RuleMessage
 // sum being built, the same way `[]` is. Every other constant is a guess, apart
 // from the ones `allow` names: the string values a codebase has already decided
 // are its own vocabulary rather than a stand-in for missing data.
-func isBannedConstant(t *checker.Type, allow []string) bool {
+func isBannedConstant(t *checker.Type, allow []any) bool {
 	if !utils.IsTypeFlagSet(t, constantFlags) {
 		return false
 	}
@@ -43,9 +51,9 @@ func isBannedConstant(t *checker.Type, allow []string) bool {
 
 	switch value := literal.Value().(type) {
 	case string:
-		return value != "" && !slices.Contains(allow, value)
+		return value != "" && !isAllowed(allow, value)
 	case jsnum.Number:
-		return value != 0
+		return value != 0 && !isAllowed(allow, float64(value))
 	default:
 		return false
 	}
