@@ -55,6 +55,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_misused_promises"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_misused_spread"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_mixed_enums"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_object_destructuring"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_passthrough_functions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_primitive_collection_key"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_primitive_default"
@@ -91,6 +92,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_zod_passthrough"
 	"github.com/typescript-eslint/tsgolint/internal/rules/non_nullable_type_assertion_style"
 	"github.com/typescript-eslint/tsgolint/internal/rules/only_throw_error"
+	"github.com/typescript-eslint/tsgolint/internal/rules/pino_error_key"
 	"github.com/typescript-eslint/tsgolint/internal/rules/prefer_find"
 	"github.com/typescript-eslint/tsgolint/internal/rules/prefer_includes"
 	"github.com/typescript-eslint/tsgolint/internal/rules/prefer_nullish_coalescing"
@@ -226,6 +228,7 @@ var allRules = []rule.Rule{
 	no_global_functions.NoGlobalFunctionsRule,
 	no_import_side_effects.NoImportSideEffectsRule,
 	no_infinite_loop.NoInfiniteLoopRule,
+	no_object_destructuring.NoObjectDestructuringRule,
 	no_primitive_collection_key.NoPrimitiveCollectionKeyRule,
 	no_primitive_default.NoPrimitiveDefaultRule,
 	no_private_keyword.NoPrivateKeywordRule,
@@ -258,6 +261,7 @@ var allRules = []rule.Rule{
 	no_redundant_type_constituents.NoRedundantTypeConstituentsRule,
 	no_static_with_this_args.NoStaticWithThisArgsRule,
 	no_string_error.NoStringErrorRule,
+	pino_error_key.PinoErrorKeyRule,
 	no_passthrough_functions.NoPassthroughFunctionsRule,
 	no_process_stream_write.NoProcessStreamWriteRule,
 	no_single_use_interface.NoSingleUseInterfaceRule,

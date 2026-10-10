@@ -1,0 +1,80 @@
+
+[TestNoObjectDestructuring/invalid-0 - 1]
+Diagnostic 1: objectDestructuring (1:58 - 1:64)
+Message: Object destructuring of an already-named value is banned.
+Help: Read through the owner instead: `testHelper.etl.repo(name)`, `this.logger`. Destructuring a call result (`const { tenantId } = await testHelper.newTenant()`), parameters and `for (const { x } of xs)` stay allowed.
+   1 | declare const testHelper: { etl: { id: string } }; const { etl } = testHelper;
+     |                                                          ~~~~~~~
+---
+
+[TestNoObjectDestructuring/invalid-1 - 1]
+Diagnostic 1: objectDestructuring (1:60 - 1:67)
+Message: Object destructuring of an already-named value is banned.
+Help: Read through the owner instead: `testHelper.etl.repo(name)`, `this.logger`. Destructuring a call result (`const { tenantId } = await testHelper.newTenant()`), parameters and `for (const { x } of xs)` stay allowed.
+   1 | declare const testHelper: { etl: { repo: string } }; const { repo } = testHelper.etl;
+     |                                                            ~~~~~~~~
+---
+
+[TestNoObjectDestructuring/invalid-2 - 1]
+Diagnostic 1: objectDestructuring (1:53 - 1:60)
+Message: Object destructuring of an already-named value is banned.
+Help: Read through the owner instead: `testHelper.etl.repo(name)`, `this.logger`. Destructuring a call result (`const { tenantId } = await testHelper.newTenant()`), parameters and `for (const { x } of xs)` stay allowed.
+   1 | class C { #logger = { name: "" }; m(): void { const { name } = this.#logger; console.log(name); } }
+     |                                                     ~~~~~~~~
+---
+
+[TestNoObjectDestructuring/invalid-3 - 1]
+Diagnostic 1: objectDestructuring (1:70 - 1:76)
+Message: Object destructuring of an already-named value is banned.
+Help: Read through the owner instead: `testHelper.etl.repo(name)`, `this.logger`. Destructuring a call result (`const { tenantId } = await testHelper.newTenant()`), parameters and `for (const { x } of xs)` stay allowed.
+   1 | declare const testHelper: { etl: { id: string } } | undefined; const { etl } = testHelper!;
+     |                                                                      ~~~~~~~
+---
+
+[TestNoObjectDestructuring/invalid-4 - 1]
+Diagnostic 1: objectDestructuring (1:42 - 1:48)
+Message: Object destructuring of an already-named value is banned.
+Help: Read through the owner instead: `testHelper.etl.repo(name)`, `this.logger`. Destructuring a call result (`const { tenantId } = await testHelper.newTenant()`), parameters and `for (const { x } of xs)` stay allowed.
+   1 | declare const testHelper: unknown; const { etl } = testHelper as { etl: string };
+     |                                          ~~~~~~~
+---
+
+[TestNoObjectDestructuring/invalid-5 - 1]
+Diagnostic 1: objectDestructuring (1:58 - 1:64)
+Message: Object destructuring of an already-named value is banned.
+Help: Read through the owner instead: `testHelper.etl.repo(name)`, `this.logger`. Destructuring a call result (`const { tenantId } = await testHelper.newTenant()`), parameters and `for (const { x } of xs)` stay allowed.
+   1 | declare const helpers: readonly { etl: string }[]; const { etl } = helpers[0];
+     |                                                          ~~~~~~~
+---
+
+[TestNoObjectDestructuring/invalid-6 - 1]
+Diagnostic 1: objectDestructuring (1:60 - 1:76)
+Message: Object destructuring of an already-named value is banned.
+Help: Read through the owner instead: `testHelper.etl.repo(name)`, `this.logger`. Destructuring a call result (`const { tenantId } = await testHelper.newTenant()`), parameters and `for (const { x } of xs)` stay allowed.
+   1 | declare const testHelper: { etl: { repo: string } }; const { etl: { repo } } = testHelper;
+     |                                                            ~~~~~~~~~~~~~~~~~
+---
+
+[TestNoObjectDestructuring/invalid-7 - 1]
+Diagnostic 1: objectDestructuring (1:15 - 1:25)
+Message: Object destructuring of an already-named value is banned.
+Help: Read through the owner instead: `testHelper.etl.repo(name)`, `this.logger`. Destructuring a call result (`const { tenantId } = await testHelper.newTenant()`), parameters and `for (const { x } of xs)` stay allowed.
+   1 | try {} catch ({ message }) { console.log(message); }
+     |               ~~~~~~~~~~~
+---
+
+[TestNoObjectDestructuring/invalid-8 - 1]
+Diagnostic 1: objectDestructuring (1:49 - 1:53)
+Message: Object destructuring of an already-named value is banned.
+Help: Read through the owner instead: `testHelper.etl.repo(name)`, `this.logger`. Destructuring a call result (`const { tenantId } = await testHelper.newTenant()`), parameters and `for (const { x } of xs)` stay allowed.
+   1 | declare const b: { a: string }; let a: string; ({ a } = b);
+     |                                                 ~~~~~
+---
+
+[TestNoObjectDestructuring/invalid-9 - 1]
+Diagnostic 1: objectDestructuring (1:57 - 1:61)
+Message: Object destructuring of an already-named value is banned.
+Help: Read through the owner instead: `testHelper.etl.repo(name)`, `this.logger`. Destructuring a call result (`const { tenantId } = await testHelper.newTenant()`), parameters and `for (const { x } of xs)` stay allowed.
+   1 | declare function load(): { a: string }; let a: string; ({ a } = load());
+     |                                                         ~~~~~
+---
