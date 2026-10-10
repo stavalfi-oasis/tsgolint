@@ -92,12 +92,30 @@ const result = value ?? ` + "`tenant-${owner}`" + `;
 declare const value: string;
 const result = value && "ready";
     `},
+		// `allow` names the values this codebase treats as its own vocabulary.
+		{
+			Code: `
+declare const value: string | undefined;
+const result = value ?? "local";
+    `,
+			Options: NoPrimitiveDefaultOptions{Allow: []string{"local"}},
+		},
+		{
+			Code: `
+declare const value: string | undefined;
+const OWNER = "local";
+const result = value ?? OWNER;
+    `,
+			Options: NoPrimitiveDefaultOptions{Allow: []string{"local"}},
+		},
 	}, []rule_tester.InvalidTestCase{
+		// `allow` exempts the value it names, not every other constant.
 		{
 			Code: `
 declare const value: string | undefined;
 const result = value ?? "unknown";
       `,
+			Options: NoPrimitiveDefaultOptions{Allow: []string{"local"}},
 			Errors: []rule_tester.InvalidTestCaseError{
 				{
 					MessageId: "primitiveDefault",

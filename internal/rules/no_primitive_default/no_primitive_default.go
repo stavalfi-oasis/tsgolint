@@ -1,12 +1,18 @@
 package no_primitive_default
 
 import (
+	"slices"
+
 	"github.com/microsoft/typescript-go/shim/ast"
 	"github.com/microsoft/typescript-go/shim/checker"
 	"github.com/microsoft/typescript-go/shim/jsnum"
 	"github.com/typescript-eslint/tsgolint/internal/rule"
 	"github.com/typescript-eslint/tsgolint/internal/utils"
 )
+
+type NoPrimitiveDefaultOptions struct {
+	Allow []string `json:"allow"`
+}
 
 // Only a compile-time constant. A value computed at runtime — `string`,
 // `number`, a call, a template whose substitutions are not themselves known —
@@ -17,13 +23,15 @@ func buildPrimitiveDefaultMessage(operator string, text string) rule.RuleMessage
 	return rule.RuleMessage{
 		Id:          "primitiveDefault",
 		Description: "`" + operator + " " + text + "` substitutes a made-up string/number for a missing value.",
-		Help:        "Let the missing value through and handle it where the meaning of \"missing\" is known, or make the source non-nullable. `{}`, `[]`, `\"\"` and `0` are fine.",
+		Help:        "Let the missing value through and handle it where the meaning of \"missing\" is known, or make the source non-nullable. `{}`, `[]`, `\"\"` and `0` are fine, as is any value listed in the rule's `allow` option.",
 	}
 }
 
 // `""` and `0` invent no content — they are the identity of the string or the
-// sum being built, the same way `[]` is. Every other constant is a guess.
-func isBannedConstant(t *checker.Type) bool {
+// sum being built, the same way `[]` is. Every other constant is a guess, apart
+// from the ones `allow` names: the string values a codebase has already decided
+// are its own vocabulary rather than a stand-in for missing data.
+func isBannedConstant(t *checker.Type, allow []string) bool {
 	if !utils.IsTypeFlagSet(t, constantFlags) {
 		return false
 	}
@@ -35,7 +43,7 @@ func isBannedConstant(t *checker.Type) bool {
 
 	switch value := literal.Value().(type) {
 	case string:
-		return value != ""
+		return value != "" && !slices.Contains(allow, value)
 	case jsnum.Number:
 		return value != 0
 	default:
@@ -46,12 +54,14 @@ func isBannedConstant(t *checker.Type) bool {
 var NoPrimitiveDefaultRule = rule.Rule{
 	Name: "no-primitive-default",
 	Run: func(ctx rule.RuleContext, options any) rule.RuleListeners {
+		opts := utils.UnmarshalOptions[NoPrimitiveDefaultOptions](options, "no-primitive-default")
+
 		// A union only counts when every member is a banned constant —
 		// `"unknown" | string` carries a runtime branch, and `any` carries no
 		// information at all, so reporting either would be guesswork.
 		isBanned := func(t *checker.Type) bool {
 			return !utils.SomeUnionTypePart(t, func(part *checker.Type) bool {
-				return !isBannedConstant(part)
+				return !isBannedConstant(part, opts.Allow)
 			})
 		}
 
