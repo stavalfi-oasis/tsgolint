@@ -54,10 +54,15 @@ func buildMeaninglessAliasMessage(container string, name string) rule.RuleMessag
 }
 
 func buildMissingTypeArgumentsMessage(container string) rule.RuleMessage {
+	// `Set` and `WeakSet` take the key alone; `Map` and `WeakMap` take a value too.
+	example := "<TenantId, Session>"
+	if strings.HasSuffix(container, "Set") {
+		example = "<TenantId>"
+	}
 	return rule.RuleMessage{
 		Id:          "missingTypeArguments",
 		Description: "`new " + container + "()` leaves the key type to inference, so nothing in the source names it.",
-		Help:        "Write the type arguments explicitly with a named alias as the key — `new " + container + "<TenantId, Session>()`.",
+		Help:        "Write the type arguments explicitly with a named alias as the key — `new " + container + example + "()`.",
 	}
 }
 

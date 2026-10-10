@@ -122,7 +122,7 @@ Help: Write the type arguments explicitly with a named alias as the key — `new
 [TestNoPrimitiveCollectionKey/invalid-12 - 1]
 Diagnostic 1: missingTypeArguments (3:34 - 3:36)
 Message: `new Set()` leaves the key type to inference, so nothing in the source names it.
-Help: Write the type arguments explicitly with a named alias as the key — `new Set<TenantId, Session>()`.
+Help: Write the type arguments explicitly with a named alias as the key — `new Set<TenantId>()`.
    2 | class Cache {
    3 |   private readonly entries = new Set();
      |                                  ~~~
