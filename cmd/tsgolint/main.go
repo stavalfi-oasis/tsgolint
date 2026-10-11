@@ -115,6 +115,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_async_queue"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_await"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_catch_binding"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_constant_env_key"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_fs_utf8"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_it_timeout"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_logger_child_in_super"
@@ -238,6 +239,7 @@ var allRules = []rule.Rule{
 	no_tracked_close.NoTrackedCloseRule,
 	require_access_modifiers.RequireAccessModifiersRule,
 	require_catch_binding.RequireCatchBindingRule,
+	require_constant_env_key.RequireConstantEnvKeyRule,
 	require_object_params.RequireObjectParamsRule,
 	require_os_eol.RequireOsEolRule,
 	await_thenable.AwaitThenableRule,

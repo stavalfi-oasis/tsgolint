@@ -1,0 +1,32 @@
+
+[TestRequireConstantEnvKey/invalid-0 - 1]
+Diagnostic 1: constantEnvKey (1:54 - 1:57)
+Message: Env var names must be a plain string literal: process.env["MY_VAR"] or process.env.MY_VAR.
+Help: A template literal or a variable hides the name from plain text search, so `find . -type f -name '*.ts' -exec grep -l MY_VAR {} +` no longer lists every place the env var is used. Inline the literal name.
+   1 | declare const name: string; const port = process.env[name];
+     |                                                      ~~~~
+---
+
+[TestRequireConstantEnvKey/invalid-1 - 1]
+Diagnostic 1: constantEnvKey (1:56 - 1:71)
+Message: Env var names must be a plain string literal: process.env["MY_VAR"] or process.env.MY_VAR.
+Help: A template literal or a variable hides the name from plain text search, so `find . -type f -name '*.ts' -exec grep -l MY_VAR {} +` no longer lists every place the env var is used. Inline the literal name.
+   1 | declare const prefix: string; const port = process.env[`${prefix}_PORT`];
+     |                                                        ~~~~~~~~~~~~~~~~
+---
+
+[TestRequireConstantEnvKey/invalid-2 - 1]
+Diagnostic 1: constantEnvKey (1:26 - 1:31)
+Message: Env var names must be a plain string literal: process.env["MY_VAR"] or process.env.MY_VAR.
+Help: A template literal or a variable hides the name from plain text search, so `find . -type f -name '*.ts' -exec grep -l MY_VAR {} +` no longer lists every place the env var is used. Inline the literal name.
+   1 | const port = process.env[`PORT`];
+     |                          ~~~~~~
+---
+
+[TestRequireConstantEnvKey/invalid-3 - 1]
+Diagnostic 1: constantEnvKey (1:89 - 1:92)
+Message: Env var names must be a plain string literal: process.env["MY_VAR"] or process.env.MY_VAR.
+Help: A template literal or a variable hides the name from plain text search, so `find . -type f -name '*.ts' -exec grep -l MY_VAR {} +` no longer lists every place the env var is used. Inline the literal name.
+   1 | declare const env: Record<string, string>; declare const name: string; const port = env[name];
+     |                                                                                         ~~~~
+---
