@@ -16,3 +16,39 @@ Help: Add `signal` to the options object.
    5 | fetch("https://x", {});
      | ~~~~~~~~~~~~~~~~~~~~~~
 ---
+
+[TestRequireAbortSignal/invalid-2 - 1]
+Diagnostic 1: requireAbortSignal (15:1 - 15:24)
+Message: Pass a signal so this is cancellable.
+Help: Add `signal` to the options object.
+  14 | declare const schema: { execute(): Promise<void> };
+  15 | query.executeTakeFirst();
+     | ~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireAbortSignal/invalid-3 - 1]
+Diagnostic 1: requireAbortSignal (15:1 - 15:17)
+Message: Pass a signal so this is cancellable.
+Help: Add `signal` to the options object.
+  14 | declare const schema: { execute(): Promise<void> };
+  15 | query.execute({});
+     | ~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireAbortSignal/invalid-4 - 1]
+Diagnostic 1: requireAbortSignal (15:1 - 15:19)
+Message: Pass a signal so this is cancellable.
+Help: Add `signal` to the options object.
+  14 | declare const schema: { execute(): Promise<void> };
+  15 | db.executeQuery({});
+     | ~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireAbortSignal/invalid-5 - 1]
+Diagnostic 1: requireAbortSignal (15:1 - 15:39)
+Message: Pass a signal so this is cancellable.
+Help: Add `signal` to the options object.
+  14 | declare const schema: { execute(): Promise<void> };
+  15 | db.transaction().execute(async () => 1);
+     | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---

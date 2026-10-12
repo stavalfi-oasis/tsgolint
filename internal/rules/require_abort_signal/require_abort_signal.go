@@ -7,31 +7,36 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/utils"
 )
 
-type cancellableCall struct {
-	optionName   string
-	optionsIndex int
+// One watched call shape, as `.oxlintrc.json` spells it. A name can carry more
+// than one entry: kysely spells both `execute(options)` (every query builder)
+// and `execute(callback, options)` (a transaction).
+type CancellableCall struct {
+	Name         string `json:"name"`
+	OptionName   string `json:"optionName"`
+	OptionsIndex int    `json:"optionsIndex"`
+	// A name shared with unrelated APIs — kysely's `execute`, which every query
+	// builder, schema builder and transaction also spells — only counts when the
+	// resolved signature really declares the option. A shorter or parameterless
+	// signature there is a different function, not an untyped one.
+	RequireDeclaredOption bool `json:"requireDeclaredOption"`
+}
+
+type RequireAbortSignalOptions struct {
+	Calls []CancellableCall `json:"calls"`
 }
 
 // The JS rule keyed purely on the method name, which both over- and under-fired:
 // any `.send(...)`/`.on(...)`/`.wait(...)` on any object was reported, and it
 // carried a `requiresBareCallee` flag to paper over the worst of it. Here the
 // name only narrows the candidates; the signature decides.
-var cancellable = map[string]cancellableCall{
-	"appendFile":      {optionName: "signal", optionsIndex: 2},
-	"createInterface": {optionName: "signal", optionsIndex: 0},
-	"exec":            {optionName: "signal", optionsIndex: 1},
-	"execAsync":       {optionName: "signal", optionsIndex: 1},
-	"execFile":        {optionName: "signal", optionsIndex: 2},
-	"execFileAsync":   {optionName: "signal", optionsIndex: 2},
-	"fetch":           {optionName: "signal", optionsIndex: 1},
-	"on":              {optionName: "signal", optionsIndex: 2},
-	"once":            {optionName: "signal", optionsIndex: 2},
-	"readFile":        {optionName: "signal", optionsIndex: 1},
-	"send":            {optionName: "abortSignal", optionsIndex: 1},
-	"spawn":           {optionName: "signal", optionsIndex: 2},
-	"wait":            {optionName: "signal", optionsIndex: 1},
-	"watch":           {optionName: "signal", optionsIndex: 1},
-	"writeFile":       {optionName: "signal", optionsIndex: 2},
+// The config is the whole list: a call this codebase has to be able to cancel
+// is a fact about the codebase, not about the rule.
+func cancellableByName(calls []CancellableCall) map[string][]CancellableCall {
+	byName := make(map[string][]CancellableCall, len(calls))
+	for _, call := range calls {
+		byName[call.Name] = append(byName[call.Name], call)
+	}
+	return byName
 }
 
 func buildAbortSignalMessage(optionName string) rule.RuleMessage {
@@ -61,25 +66,26 @@ func calleeName(expression *ast.Node) string {
 // narrow with, so the name match stands and coverage is unchanged. Suppressing
 // on unresolved types would make the rule quietly weaker on exactly the loose
 // code that needs it most.
-func acceptsSignalOption(typeChecker *checker.Checker, call *ast.Node, index int, optionName string) bool {
+func acceptsSignalOption(typeChecker *checker.Checker, call *ast.Node, match CancellableCall) bool {
+	index := match.OptionsIndex
 	signature := checker.Checker_getResolvedSignature(typeChecker, call, nil, checker.CheckModeNormal)
 	if signature == nil {
-		return true
+		return !match.RequireDeclaredOption
 	}
 	parameters := checker.Signature_parameters(signature)
 	if index >= len(parameters) {
 		// A resolved signature that is simply shorter than the options index is
 		// real evidence this is not the API we mean.
-		return len(parameters) == 0
+		return !match.RequireDeclaredOption && len(parameters) == 0
 	}
 
 	parameterType := typeChecker.GetTypeOfSymbolAtLocation(parameters[index], call)
 	if parameterType == nil || utils.IsIntrinsicErrorType(parameterType) ||
 		utils.IsTypeFlagSet(parameterType, checker.TypeFlagsAny|checker.TypeFlagsUnknown) {
-		return true
+		return !match.RequireDeclaredOption
 	}
 	return utils.SomeUnionTypePart(parameterType, func(part *checker.Type) bool {
-		return checker.Checker_getPropertyOfType(typeChecker, part, optionName) != nil
+		return checker.Checker_getPropertyOfType(typeChecker, part, match.OptionName) != nil
 	})
 }
 
@@ -120,15 +126,13 @@ func isDetached(node *ast.Node) bool {
 var RequireAbortSignalRule = rule.Rule{
 	Name: "require-abort-signal",
 	Run: func(ctx rule.RuleContext, options any) rule.RuleListeners {
+		opts := utils.UnmarshalOptions[RequireAbortSignalOptions](options, "require-abort-signal")
+		cancellable := cancellableByName(opts.Calls)
 		return rule.RuleListeners{
 			ast.KindCallExpression: func(node *ast.Node) {
 				call := node.AsCallExpression()
-				match, watched := cancellable[calleeName(call.Expression)]
+				candidates, watched := cancellable[calleeName(call.Expression)]
 				if !watched {
-					return
-				}
-
-				if !acceptsSignalOption(ctx.TypeChecker, node, match.optionsIndex, match.optionName) {
 					return
 				}
 
@@ -142,14 +146,26 @@ var RequireAbortSignalRule = rule.Rule{
 					}
 				}
 
-				if match.optionsIndex < len(args) {
-					given := args[match.optionsIndex]
-					if declaresOption(given, match.optionName) || isDetached(given) {
-						return
+				missing, found := CancellableCall{}, false
+				for _, match := range candidates {
+					if !acceptsSignalOption(ctx.TypeChecker, node, match) {
+						continue
+					}
+					if match.OptionsIndex < len(args) {
+						given := args[match.OptionsIndex]
+						if declaresOption(given, match.OptionName) || isDetached(given) {
+							return
+						}
+					}
+					if !found {
+						missing, found = match, true
 					}
 				}
+				if !found {
+					return
+				}
 
-				ctx.ReportNode(node, buildAbortSignalMessage(match.optionName))
+				ctx.ReportNode(node, buildAbortSignalMessage(missing.OptionName))
 			},
 		}
 	},
