@@ -34,6 +34,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_array_length_assignment"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_async_global_functions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_async_static_method"
+	"github.com/typescript-eslint/tsgolint/internal/rules/no_banned_types_in_exports"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_banned_words"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_bare_logger_outside_super"
 	"github.com/typescript-eslint/tsgolint/internal/rules/no_base_to_string"
@@ -222,6 +223,7 @@ var allRules = []rule.Rule{
 	no_async_global_functions.NoAsyncGlobalFunctionsRule,
 	no_async_static_method.NoAsyncStaticMethodRule,
 	no_array_length_assignment.NoArrayLengthAssignmentRule,
+	no_banned_types_in_exports.NoBannedTypesInExportsRule,
 	no_banned_words.NoBannedWordsRule,
 	no_client_response_json.NoClientResponseJsonRule,
 	no_comments.NoCommentsRule,

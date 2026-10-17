@@ -1,0 +1,36 @@
+
+[TestNoBannedTypesInExports/invalid-0 - 1]
+Diagnostic 1: bannedTypeInExport (2:17 - 2:43)
+Message: 'DeepReadonly' must not be used in an exported type.
+Help: Spell the exported type out explicitly, or apply 'DeepReadonly' at the use site instead.
+   1 | type DeepReadonly<T> = { readonly [K in keyof T]: DeepReadonly<T[K]> };
+   2 | export type A = DeepReadonly<{ a: string }>;
+     |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoBannedTypesInExports/invalid-1 - 1]
+Diagnostic 1: bannedTypeInExport (2:43 - 2:69)
+Message: 'DeepReadonly' must not be used in an exported type.
+Help: Spell the exported type out explicitly, or apply 'DeepReadonly' at the use site instead.
+   1 | type DeepReadonly<T> = { readonly [K in keyof T]: DeepReadonly<T[K]> };
+   2 | export interface A { readonly a: readonly DeepReadonly<{ b: string }>[] }
+     |                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoBannedTypesInExports/invalid-2 - 1]
+Diagnostic 1: bannedTypeInExport (2:35 - 2:61)
+Message: 'DeepReadonly' must not be used in an exported type.
+Help: Spell the exported type out explicitly, or apply 'DeepReadonly' at the use site instead.
+   1 | type DeepReadonly<T> = { readonly [K in keyof T]: DeepReadonly<T[K]> };
+   2 | export type A = { readonly f: (a: DeepReadonly<{ b: string }>) => void };
+     |                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestNoBannedTypesInExports/invalid-3 - 1]
+Diagnostic 1: bannedTypeInExport (2:47 - 2:63)
+Message: 'DR' must not be used in an exported type.
+Help: Spell the exported type out explicitly, or apply 'DR' at the use site instead.
+   1 | type DeepReadonly<T> = { readonly [K in keyof T]: DeepReadonly<T[K]> };
+   2 | type DR<T> = DeepReadonly<T>; export type A = DR<{ a: string }>;
+     |                                               ~~~~~~~~~~~~~~~~~
+---
