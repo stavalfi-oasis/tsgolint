@@ -38,23 +38,36 @@ func buildFsUtf8Message() rule.RuleMessage {
 	return rule.RuleMessage{
 		Id:          "fsUtf8",
 		Description: `Pass "utf8" explicitly: without an encoding this returns a Buffer, or writes one.`,
-		Help:        `Add "utf8" as the encoding argument, or { encoding: "utf8" } in the options object.`,
+		Help:        `Add { encoding: "utf8" } as the options object.`,
 	}
 }
 
 // An options object that already names `encoding` is fine; so is a bare string
-// or template literal, which is the encoding itself.
+// or template literal, which is the encoding itself. `null` and `undefined`, in
+// the slot or as the `encoding` value, mean no encoding: node returns a Buffer.
 func declaresEncoding(node *ast.Node) bool {
+	if isNullish(node) {
+		return false
+	}
 	if !ast.IsObjectLiteralExpression(node) {
 		return true
 	}
 	for _, property := range node.AsObjectLiteralExpression().Properties.Nodes {
-		name := property.Name()
-		if name != nil && name.Text() == "encoding" {
+		if property.Kind == ast.KindSpreadAssignment {
 			return true
 		}
+		name := property.Name()
+		if name == nil || name.Text() != "encoding" {
+			continue
+		}
+		initializer := property.Initializer()
+		return initializer == nil || !isNullish(initializer)
 	}
 	return false
+}
+
+func isNullish(node *ast.Node) bool {
+	return node.Kind == ast.KindNullKeyword || (ast.IsIdentifier(node) && node.Text() == "undefined")
 }
 
 func calleeName(expression *ast.Node) string {
@@ -101,7 +114,7 @@ var RequireFsUtf8Rule = rule.Rule{
 
 				anchor := args[index-1]
 				ctx.ReportNodeWithFixes(node, buildFsUtf8Message(), func() []rule.RuleFix {
-					return []rule.RuleFix{rule.RuleFixInsertAfter(anchor, `, "utf8"`)}
+					return []rule.RuleFix{rule.RuleFixInsertAfter(anchor, `, { encoding: "utf8" }`)}
 				})
 			},
 		}

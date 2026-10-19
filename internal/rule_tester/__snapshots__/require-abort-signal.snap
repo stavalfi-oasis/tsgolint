@@ -52,3 +52,21 @@ Help: Add `signal` to the options object.
   15 | db.transaction().execute(async () => 1);
      | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ---
+
+[TestRequireAbortSignal/invalid-6 - 1]
+Diagnostic 1: requireAbortSignal (6:1 - 6:25)
+Message: Pass a signal so this is cancellable.
+Help: Add `signal` to the options object.
+   5 | declare function readFile(path: string, options?: "utf8" | null | { encoding?: "utf8"; signal?: AbortSignal }): Promise<string>;
+   6 | readFile("a.txt", "utf8");
+     | ~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireAbortSignal/invalid-7 - 1]
+Diagnostic 1: requireAbortSignal (6:1 - 6:23)
+Message: Pass a signal so this is cancellable.
+Help: Add `signal` to the options object.
+   5 | declare function readFile(path: string, options?: "utf8" | null | { encoding?: "utf8"; signal?: AbortSignal }): Promise<string>;
+   6 | readFile("a.txt", null);
+     | ~~~~~~~~~~~~~~~~~~~~~~~
+---

@@ -33,11 +33,21 @@ declare const db: {
 declare const schema: { execute(): Promise<void> };
 `
 
+// node's fs/promises readFile: the options slot takes an encoding string or an
+// options object, and only the object can carry the signal.
+const readFileStub = `
+interface AbortSignal {}
+declare const signal: AbortSignal;
+declare const options: { encoding: "utf8"; signal: AbortSignal };
+declare function readFile(path: string, options?: "utf8" | null | { encoding?: "utf8"; signal?: AbortSignal }): Promise<string>;
+`
+
 // The rule carries no built-in list, so every case states the calls it watches.
 var options = RequireAbortSignalOptions{Calls: []CancellableCall{
 	{Name: "fetch", OptionName: "signal", OptionsIndex: 1},
 	{Name: "on", OptionName: "signal", OptionsIndex: 2},
 	{Name: "send", OptionName: "abortSignal", OptionsIndex: 1},
+	{Name: "readFile", OptionName: "signal", OptionsIndex: 1},
 	{Name: "execute", OptionName: "signal", OptionsIndex: 0, RequireDeclaredOption: true},
 	{Name: "execute", OptionName: "signal", OptionsIndex: 1, RequireDeclaredOption: true},
 	{Name: "executeQuery", OptionName: "signal", OptionsIndex: 1, RequireDeclaredOption: true},
@@ -70,6 +80,8 @@ emitter.on("data", () => {});
 		{Options: options, Code: kyselyStub + `db.transaction().execute(async () => 1, { signal });`},
 		// A signature that declares no options at all is a different `execute`.
 		{Options: options, Code: kyselyStub + `schema.execute();`},
+		{Options: options, Code: readFileStub + `readFile("a.txt", { encoding: "utf8", signal });`},
+		{Options: options, Code: readFileStub + `readFile("a.txt", options);`},
 	}, []rule_tester.InvalidTestCase{
 		{
 			Options: options,
@@ -111,6 +123,20 @@ emitter.on("data", () => {});
 			Code: kyselyStub + `db.transaction().execute(async () => 1);`,
 			Errors: []rule_tester.InvalidTestCaseError{
 				{MessageId: "requireAbortSignal", Line: 15, Column: 1, EndLine: 15, EndColumn: 40},
+			},
+		},
+		{
+			Options: options,
+			Code:    readFileStub + `readFile("a.txt", "utf8");`,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{MessageId: "requireAbortSignal", Line: 6, Column: 1, EndLine: 6, EndColumn: 26},
+			},
+		},
+		{
+			Options: options,
+			Code:    readFileStub + `readFile("a.txt", null);`,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{MessageId: "requireAbortSignal", Line: 6, Column: 1, EndLine: 6, EndColumn: 24},
 			},
 		},
 	})

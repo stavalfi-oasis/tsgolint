@@ -89,9 +89,13 @@ func acceptsSignalOption(typeChecker *checker.Checker, call *ast.Node, match Can
 	})
 }
 
-// A literal options object already naming the option is fine; so is anything
-// that is not an object literal, since its contents are unknowable here.
+// A literal options object already naming the option is fine; so is a
+// variable or call, since its contents are unknowable here. A primitive literal
+// in the options slot (`readFile(path, "utf8")`, `null`) can never carry one.
 func declaresOption(node *ast.Node, optionName string) bool {
+	if isPrimitiveLiteral(node) {
+		return false
+	}
 	if !ast.IsObjectLiteralExpression(node) {
 		return true
 	}
@@ -104,6 +108,15 @@ func declaresOption(node *ast.Node, optionName string) bool {
 		}
 	}
 	return false
+}
+
+func isPrimitiveLiteral(node *ast.Node) bool {
+	switch node.Kind {
+	case ast.KindStringLiteral, ast.KindNoSubstitutionTemplateLiteral, ast.KindTemplateExpression,
+		ast.KindNumericLiteral, ast.KindBigIntLiteral, ast.KindNullKeyword, ast.KindTrueKeyword, ast.KindFalseKeyword:
+		return true
+	}
+	return ast.IsIdentifier(node) && node.Text() == "undefined"
 }
 
 // `{ detached: true }` opts out deliberately — the child outlives this process.
