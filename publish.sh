@@ -10,6 +10,13 @@ export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-minioadmin}"
 export AWS_REGION="${AWS_REGION:-us-east-1}"
 unset AWS_PROFILE
 
+# bun install fetches the tarballs unsigned, so the bucket must be public-read.
+if ! aws --endpoint-url "$S3_ENDPOINT" s3api head-bucket --bucket "$S3_BUCKET" >/dev/null 2>&1; then
+  echo ">> creating bucket ${S3_BUCKET}"
+  aws --endpoint-url "$S3_ENDPOINT" s3api create-bucket --bucket "$S3_BUCKET" >/dev/null
+  aws --endpoint-url "$S3_ENDPOINT" s3api put-bucket-policy --bucket "$S3_BUCKET" --policy "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":[\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::${S3_BUCKET}/*\"]}]}"
+fi
+
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$repo_root"
 
