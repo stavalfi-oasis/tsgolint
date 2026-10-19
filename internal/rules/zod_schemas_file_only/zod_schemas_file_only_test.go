@@ -1,6 +1,8 @@
 package zod_schemas_file_only
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/typescript-eslint/tsgolint/internal/rule_tester"
@@ -55,4 +57,31 @@ const viaHelper = make();
 			},
 		},
 	})
+}
+
+// subPackageDirs makes a matching directory its own package, so a command folder
+// can hold its own zod-schemas.ts next to the package-level one.
+func TestPackageDirOfSubPackageDirs(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "tsconfig.json"), []byte("{}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	command := filepath.Join(root, "src", "commands", "start-backends")
+	cases := []struct {
+		file           string
+		subPackageDirs []string
+		want           string
+	}{
+		{filepath.Join(root, "src", "zod-schemas.ts"), []string{"src/commands/*"}, root},
+		{filepath.Join(command, "zod-schemas.ts"), nil, root},
+		{filepath.Join(command, "zod-schemas.ts"), []string{"src/commands/*"}, command},
+		{filepath.Join(command, "nested", "zod-schemas.ts"), []string{"src/commands/*"}, command},
+		{filepath.Join(command, "zod-schemas.ts"), []string{"src/other/*"}, root},
+	}
+	for _, c := range cases {
+		if got := packageDirOf(c.file, c.subPackageDirs); got != c.want {
+			t.Errorf("packageDirOf(%q, %v) = %q, want %q", c.file, c.subPackageDirs, got, c.want)
+		}
+	}
 }

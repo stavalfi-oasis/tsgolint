@@ -14,6 +14,13 @@ import (
 
 const schemasFileName = "zod-schemas.ts"
 
+type ZodSchemasFileOnlyOptions struct {
+	// Globs (filepath.Match), relative to a tsconfig.json directory, naming
+	// directories that count as their own package and so may hold their own
+	// zod-schemas.ts — e.g. "src/commands/*" gives each command its own file.
+	SubPackageDirs []string `json:"subPackageDirs"`
+}
+
 func buildWrongFileMessage(name string) rule.RuleMessage {
 	return rule.RuleMessage{
 		Id:          "schemaOutsideSchemasFile",
@@ -26,18 +33,21 @@ func buildDuplicateFileMessage(packageDir string, other string) rule.RuleMessage
 	return rule.RuleMessage{
 		Id:          "duplicateSchemasFile",
 		Description: "Package '" + packageDir + "' has more than one " + schemasFileName + "; also found at '" + other + "'.",
-		Help:        "A package is the directory of its tsconfig.json, and may hold exactly one " + schemasFileName + ". Merge them.",
+		Help:        "A package is the directory of its tsconfig.json (or a subPackageDirs match), and may hold exactly one " + schemasFileName + ". Merge them.",
 	}
 }
 
-// A package is the nearest ancestor directory holding a tsconfig.json. Returns
-// "" when there is none, which leaves the file unattributed and unchecked for
-// duplicates.
-func packageDirOf(fileName string) string {
-	dir := filepath.Dir(fileName)
-	for {
+// A package is the nearest ancestor directory holding a tsconfig.json, unless a
+// directory between the file and that tsconfig.json matches one of
+// subPackageDirs — then the nearest such directory is the package. Returns ""
+// when there is no tsconfig.json, which leaves the file unattributed and
+// unchecked for duplicates.
+func packageDirOf(fileName string, subPackageDirs []string) string {
+	tsconfigDir := ""
+	for dir := filepath.Dir(fileName); ; {
 		if _, err := os.Stat(filepath.Join(dir, "tsconfig.json")); err == nil {
-			return dir
+			tsconfigDir = dir
+			break
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
@@ -45,6 +55,18 @@ func packageDirOf(fileName string) string {
 		}
 		dir = parent
 	}
+	for dir := filepath.Dir(fileName); dir != tsconfigDir; dir = filepath.Dir(dir) {
+		relative, err := filepath.Rel(tsconfigDir, dir)
+		if err != nil {
+			break
+		}
+		for _, pattern := range subPackageDirs {
+			if matched, _ := filepath.Match(pattern, filepath.ToSlash(relative)); matched {
+				return dir
+			}
+		}
+	}
+	return tsconfigDir
 }
 
 // Tests are free to hold as many zod-schemas.ts as they like: a test's schemas
@@ -77,6 +99,7 @@ func isZodSchemaType(typeChecker *checker.Checker, node *ast.Node) bool {
 var ZodSchemasFileOnlyRule = rule.Rule{
 	Name: "zod-schemas-file-only",
 	Run: func(ctx rule.RuleContext, options any) rule.RuleListeners {
+		opts := utils.UnmarshalOptions[ZodSchemasFileOnlyOptions](options, "zod-schemas-file-only")
 		fileName := ctx.SourceFile.FileName()
 		isSchemasFile := filepath.Base(fileName) == schemasFileName
 
@@ -109,7 +132,7 @@ var ZodSchemasFileOnlyRule = rule.Rule{
 		// holds another one. Every zod-schemas.ts in the package reports, so the
 		// diagnostic is visible whichever file you happen to be linting.
 		listeners[ast.KindSourceFile] = func(node *ast.Node) {
-			packageDir := packageDirOf(fileName)
+			packageDir := packageDirOf(fileName, opts.SubPackageDirs)
 			if packageDir == "" || isUnderTestDir(fileName, packageDir) {
 				return
 			}
@@ -120,7 +143,7 @@ var ZodSchemasFileOnlyRule = rule.Rule{
 				if other == fileName || filepath.Base(other) != schemasFileName {
 					continue
 				}
-				if packageDirOf(other) == packageDir && !isUnderTestDir(other, packageDir) {
+				if packageDirOf(other, opts.SubPackageDirs) == packageDir && !isUnderTestDir(other, packageDir) {
 					siblings = append(siblings, other)
 				}
 			}
