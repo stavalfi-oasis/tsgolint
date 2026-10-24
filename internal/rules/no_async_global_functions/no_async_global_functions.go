@@ -2,6 +2,7 @@ package no_async_global_functions
 
 import (
 	"slices"
+	"strings"
 
 	"github.com/microsoft/typescript-go/shim/ast"
 	"github.com/microsoft/typescript-go/shim/checker"
@@ -44,9 +45,11 @@ func rootIdentifier(expression *ast.Node) *ast.Node {
 }
 
 // The text of the callee as written, used for `fs.readFile`-style excludes.
+// Whitespace is dropped so a callee the formatter split across lines
+// (`z\n  .preprocess`) still matches `z.preprocess`.
 func calleeText(sourceFile *ast.SourceFile, callee *ast.Node) string {
 	textRange := utils.TrimNodeTextRange(sourceFile, callee)
-	return sourceFile.Text()[textRange.Pos():textRange.End()]
+	return strings.Join(strings.Fields(sourceFile.Text()[textRange.Pos():textRange.End()]), "")
 }
 
 // The name actually being called: the last identifier of the chain.

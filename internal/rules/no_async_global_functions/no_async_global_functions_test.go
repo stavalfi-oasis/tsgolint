@@ -55,6 +55,11 @@ class Service {
 			Code:    `Promise.resolve(1);`,
 			Options: NoAsyncGlobalFunctionsOptions{ExcludeFunctions: []string{"Promise.resolve"}},
 		},
+		// A callee split across lines still matches its dotted exclude.
+		{
+			Code:    "Promise\n  .resolve(1);",
+			Options: NoAsyncGlobalFunctionsOptions{ExcludeFunctions: []string{"Promise.resolve"}},
+		},
 		// excludeModules exempts every export of the module at once.
 		{
 			Code: `
