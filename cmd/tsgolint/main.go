@@ -125,6 +125,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_track"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_type_annotation"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_zod_compile"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_zod_describe"
 	"github.com/typescript-eslint/tsgolint/internal/rules/restrict_plus_operands"
 	"github.com/typescript-eslint/tsgolint/internal/rules/restrict_template_expressions"
 	"github.com/typescript-eslint/tsgolint/internal/rules/return_await"
@@ -320,6 +321,7 @@ var allRules = []rule.Rule{
 	require_async_queue.RequireAsyncQueueRule,
 	require_await.RequireAwaitRule,
 	require_zod_compile.RequireZodCompileRule,
+	require_zod_describe.RequireZodDescribeRule,
 	restrict_plus_operands.RestrictPlusOperandsRule,
 	restrict_template_expressions.RestrictTemplateExpressionsRule,
 	return_await.ReturnAwaitRule,
