@@ -30,3 +30,51 @@ Help: Use a single object parameter instead, so every call site names what it pa
    1 | class A { public constructor(a: number, b: number) {} }
      |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ---
+
+[TestRequireObjectParams/invalid-4 - 1]
+Diagnostic 1: missingSignal (1:1 - 1:39)
+Message: Function 'none' is async but its object parameter has no required `AbortSignal` property.
+Help: Take `{ signal }: { readonly signal: AbortSignal }` so every caller can cancel it.
+   1 | async function none(): Promise<void> {}
+     | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireObjectParams/invalid-5 - 1]
+Diagnostic 1: missingSignal (1:18 - 1:76)
+Message: Function 'noSignal' is async but its object parameter has no required `AbortSignal` property.
+Help: Take `{ signal }: { readonly signal: AbortSignal }` so every caller can cancel it.
+   1 | const noSignal = async ({ n }: { readonly n: number }): Promise<number> => n;
+     |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireObjectParams/invalid-6 - 1]
+Diagnostic 1: missingSignal (1:1 - 1:67)
+Message: Function 'promised' is async but its object parameter has no required `AbortSignal` property.
+Help: Take `{ signal }: { readonly signal: AbortSignal }` so every caller can cancel it.
+   1 | function promised(): Promise<number> { return Promise.resolve(1); }
+     | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireObjectParams/invalid-7 - 1]
+Diagnostic 1: missingSignal (1:11 - 1:91)
+Message: Method is async but its object parameter has no required `AbortSignal` property.
+Help: Take `{ signal }: { readonly signal: AbortSignal }` so every caller can cancel it.
+   1 | class A { public async run({ signal }: { readonly signal?: AbortSignal }): Promise<void> {} }
+     |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireObjectParams/invalid-8 - 1]
+Diagnostic 1: missingSignal (1:11 - 1:62)
+Message: Method is async but its object parameter has no required `AbortSignal` property.
+Help: Take `{ signal }: { readonly signal: AbortSignal }` so every caller can cancel it.
+   1 | class A { async #run(n: number): Promise<number> { return n; } }
+     |           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireObjectParams/invalid-9 - 1]
+Diagnostic 1: missingSignal (1:69 - 1:105)
+Message: Method is async but its object parameter has no required `AbortSignal` property.
+Help: Take `{ signal }: { readonly signal: AbortSignal }` so every caller can cancel it.
+   1 | interface Ours { init(): Promise<void>; } class A implements Ours { public async init(): Promise<void> {} }
+     |                                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
