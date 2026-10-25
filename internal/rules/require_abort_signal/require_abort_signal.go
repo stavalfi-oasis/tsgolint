@@ -1,6 +1,8 @@
 package require_abort_signal
 
 import (
+	"strings"
+
 	"github.com/microsoft/typescript-go/shim/ast"
 	"github.com/microsoft/typescript-go/shim/checker"
 	"github.com/typescript-eslint/tsgolint/internal/rule"
@@ -11,7 +13,9 @@ import (
 // than one entry: kysely spells both `execute(options)` (every query builder)
 // and `execute(callback, options)` (a transaction).
 type CancellableCall struct {
-	Name         string `json:"name"`
+	Name string `json:"name"`
+	// A dotted path reaches a nested option: hono's client takes the signal as
+	// `$get(args, { init: { signal } })`, spelled `init.signal`.
 	OptionName   string `json:"optionName"`
 	OptionsIndex int    `json:"optionsIndex"`
 	// A name shared with unrelated APIs — kysely's `execute`, which every query
@@ -84,8 +88,19 @@ func acceptsSignalOption(typeChecker *checker.Checker, call *ast.Node, match Can
 		utils.IsTypeFlagSet(parameterType, checker.TypeFlagsAny|checker.TypeFlagsUnknown) {
 		return !match.RequireDeclaredOption
 	}
-	return utils.SomeUnionTypePart(parameterType, func(part *checker.Type) bool {
-		return checker.Checker_getPropertyOfType(typeChecker, part, match.OptionName) != nil
+	return hasPropertyPath(typeChecker, call, parameterType, strings.Split(match.OptionName, "."))
+}
+
+func hasPropertyPath(typeChecker *checker.Checker, call *ast.Node, t *checker.Type, path []string) bool {
+	return utils.SomeUnionTypePart(t, func(part *checker.Type) bool {
+		property := checker.Checker_getPropertyOfType(typeChecker, part, path[0])
+		if property == nil {
+			return false
+		}
+		if len(path) == 1 {
+			return true
+		}
+		return hasPropertyPath(typeChecker, call, typeChecker.GetTypeOfSymbolAtLocation(property, call), path[1:])
 	})
 }
 
@@ -93,6 +108,10 @@ func acceptsSignalOption(typeChecker *checker.Checker, call *ast.Node, match Can
 // variable or call, since its contents are unknowable here. A primitive literal
 // in the options slot (`readFile(path, "utf8")`, `null`) can never carry one.
 func declaresOption(node *ast.Node, optionName string) bool {
+	return declaresOptionPath(node, strings.Split(optionName, "."))
+}
+
+func declaresOptionPath(node *ast.Node, path []string) bool {
 	if isPrimitiveLiteral(node) {
 		return false
 	}
@@ -103,8 +122,11 @@ func declaresOption(node *ast.Node, optionName string) bool {
 		if property.Kind == ast.KindSpreadAssignment {
 			return true
 		}
-		if name := property.Name(); name != nil && name.Text() == optionName {
-			return true
+		if name := property.Name(); name != nil && name.Text() == path[0] {
+			if len(path) == 1 || property.Kind != ast.KindPropertyAssignment {
+				return true
+			}
+			return declaresOptionPath(property.Initializer(), path[1:])
 		}
 	}
 	return false

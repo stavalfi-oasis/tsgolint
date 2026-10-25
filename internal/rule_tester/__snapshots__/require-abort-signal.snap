@@ -70,3 +70,21 @@ Help: Add `signal` to the options object.
    6 | readFile("a.txt", null);
      | ~~~~~~~~~~~~~~~~~~~~~~~
 ---
+
+[TestRequireAbortSignal/invalid-8 - 1]
+Diagnostic 1: requireAbortSignal (7:1 - 7:27)
+Message: Pass a signal so this is cancellable.
+Help: Add `init.signal` to the options object.
+   6 | declare const other: { $get(args: { query: string }): Promise<unknown> };
+   7 | client.$get({ query: "a" });
+     | ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireAbortSignal/invalid-9 - 1]
+Diagnostic 1: requireAbortSignal (7:1 - 7:41)
+Message: Pass a signal so this is cancellable.
+Help: Add `init.signal` to the options object.
+   6 | declare const other: { $get(args: { query: string }): Promise<unknown> };
+   7 | client.$get({ query: "a" }, { init: {} });
+     | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---

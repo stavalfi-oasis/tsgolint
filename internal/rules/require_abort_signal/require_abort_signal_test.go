@@ -42,6 +42,15 @@ declare const options: { encoding: "utf8"; signal: AbortSignal };
 declare function readFile(path: string, options?: "utf8" | null | { encoding?: "utf8"; signal?: AbortSignal }): Promise<string>;
 `
 
+// hono's client takes the signal nested in its options: `$get(args, { init: { signal } })`.
+const honoStub = `
+interface AbortSignal {}
+declare const signal: AbortSignal;
+interface ClientRequestOptions { fetch?: unknown; init?: { signal?: AbortSignal } }
+declare const client: { $get(args: { query: string }, options?: ClientRequestOptions): Promise<unknown> };
+declare const other: { $get(args: { query: string }): Promise<unknown> };
+`
+
 // The rule carries no built-in list, so every case states the calls it watches.
 var options = RequireAbortSignalOptions{Calls: []CancellableCall{
 	{Name: "fetch", OptionName: "signal", OptionsIndex: 1},
@@ -53,6 +62,7 @@ var options = RequireAbortSignalOptions{Calls: []CancellableCall{
 	{Name: "executeQuery", OptionName: "signal", OptionsIndex: 1, RequireDeclaredOption: true},
 	{Name: "executeTakeFirst", OptionName: "signal", OptionsIndex: 0, RequireDeclaredOption: true},
 	{Name: "executeTakeFirstOrThrow", OptionName: "signal", OptionsIndex: 0, RequireDeclaredOption: true},
+	{Name: "$get", OptionName: "init.signal", OptionsIndex: 1, RequireDeclaredOption: true},
 }}
 
 func TestRequireAbortSignal(t *testing.T) {
@@ -82,6 +92,9 @@ emitter.on("data", () => {});
 		{Options: options, Code: kyselyStub + `schema.execute();`},
 		{Options: options, Code: readFileStub + `readFile("a.txt", { encoding: "utf8", signal });`},
 		{Options: options, Code: readFileStub + `readFile("a.txt", options);`},
+		{Options: options, Code: honoStub + `client.$get({ query: "a" }, { init: { signal } });`},
+		{Options: options, Code: honoStub + `client.$get({ query: "a" }, { init: { signal: signal } });`},
+		{Options: options, Code: honoStub + `other.$get({ query: "a" });`},
 	}, []rule_tester.InvalidTestCase{
 		{
 			Options: options,
@@ -137,6 +150,20 @@ emitter.on("data", () => {});
 			Code:    readFileStub + `readFile("a.txt", null);`,
 			Errors: []rule_tester.InvalidTestCaseError{
 				{MessageId: "requireAbortSignal", Line: 6, Column: 1, EndLine: 6, EndColumn: 24},
+			},
+		},
+		{
+			Options: options,
+			Code:    honoStub + `client.$get({ query: "a" });`,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{MessageId: "requireAbortSignal", Line: 7, Column: 1, EndLine: 7, EndColumn: 28},
+			},
+		},
+		{
+			Options: options,
+			Code:    honoStub + `client.$get({ query: "a" }, { init: {} });`,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{MessageId: "requireAbortSignal", Line: 7, Column: 1, EndLine: 7, EndColumn: 42},
 			},
 		},
 	})
