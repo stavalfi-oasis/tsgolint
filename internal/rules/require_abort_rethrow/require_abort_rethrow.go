@@ -47,22 +47,34 @@ func isThrowOf(node *ast.Node, name string) bool {
 	return node.Kind == ast.KindThrowStatement && isIdentifierNamed(node.AsThrowStatement().Expression, name)
 }
 
+func isGuardCall(node *ast.Node, guard string, name string) bool {
+	if node == nil || !ast.IsCallExpression(node) {
+		return false
+	}
+	call := node.AsCallExpression()
+	return isIdentifierNamed(call.Expression, guard) &&
+		call.Arguments != nil &&
+		len(call.Arguments.Nodes) == 1 &&
+		isIdentifierNamed(call.Arguments.Nodes[0], name)
+}
+
 // `if (isAbortError(name)) { throw name; }` — with or without the braces, and
-// nothing else in it: an else branch or extra statements mean the abort can
-// still be handled instead of propagated.
-func isAbortRethrow(statement *ast.Node, guard string, name string) bool {
+// no else branch, since that could still handle the abort. A first statement
+// testing `!isAbortError(name)` is a deliberate decision about aborts too
+// (shutdown loops swallow them on purpose), so it also counts.
+func isAbortHandled(statement *ast.Node, guard string, name string) bool {
 	if statement.Kind != ast.KindIfStatement {
 		return false
 	}
 	ifStatement := statement.AsIfStatement()
-	if ifStatement.ElseStatement != nil || !ast.IsCallExpression(ifStatement.Expression) {
-		return false
+	condition := ifStatement.Expression
+	if condition.Kind == ast.KindPrefixUnaryExpression {
+		unary := condition.AsPrefixUnaryExpression()
+		return unary.Operator == ast.KindExclamationToken && isGuardCall(unary.Operand, guard, name)
 	}
-	call := ifStatement.Expression.AsCallExpression()
-	if !isIdentifierNamed(call.Expression, guard) || call.Arguments == nil || len(call.Arguments.Nodes) != 1 {
-		return false
-	}
-	return isIdentifierNamed(call.Arguments.Nodes[0], name) && isThrowOf(ifStatement.ThenStatement, name)
+	return ifStatement.ElseStatement == nil &&
+		isGuardCall(condition, guard, name) &&
+		isThrowOf(ifStatement.ThenStatement, name)
 }
 
 // The whitespace a line starts with, for the line holding `position`.
@@ -188,7 +200,7 @@ var RequireAbortRethrowRule = rule.Rule{
 					name = binding.Text()
 				}
 
-				if len(statements) > 0 && isAbortRethrow(statements[0], guard, name) {
+				if len(statements) > 0 && isAbortHandled(statements[0], guard, name) {
 					return
 				}
 

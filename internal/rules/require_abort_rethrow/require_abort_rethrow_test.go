@@ -25,6 +25,9 @@ try {
 }`},
 		{Code: header + `
 try { work(); } catch (e) { if (isAbortError(e)) throw e; }`},
+		// Swallowing aborts on purpose is still a decision about them.
+		{Code: header + `
+try { work(); } catch (e) { if (!isAbortError(e)) { throw e; } }`},
 		// An aliased import is still the guard.
 		{Code: `import { isAbortError as aborted } from "@poc/libs/utils.ts";
 try { work(); } catch (e) { if (aborted(e)) { throw e; } }`},
