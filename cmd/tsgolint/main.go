@@ -110,6 +110,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/related_getter_setter_pairs"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_abort_signal"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_abort_signal_in_while"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_link_signal"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_access_modifiers"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_array_sort_compare"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_async_disposable"
@@ -316,6 +317,7 @@ var allRules = []rule.Rule{
 	related_getter_setter_pairs.RelatedGetterSetterPairsRule,
 	require_abort_signal.RequireAbortSignalRule,
 	require_abort_signal_in_while.RequireAbortSignalInWhileRule,
+	require_link_signal.RequireLinkSignalRule,
 	require_array_sort_compare.RequireArraySortCompareRule,
 	require_async_disposable.RequireAsyncDisposableRule,
 	require_async_queue.RequireAsyncQueueRule,
