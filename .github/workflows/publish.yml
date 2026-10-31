@@ -1,0 +1,40 @@
+# Publishes @stavalfi/tsgolint to npm through trusted publishing (OIDC) — no
+# token, no 2FA. npm trusts this exact repo + workflow file name, configured on
+# npmjs.com -> @stavalfi/tsgolint -> Settings -> Trusted Publisher.
+name: publish
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - oasis-rules
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # tsgolint has no cgo, so one Linux runner cross-compiles every platform.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # publish.sh derives the version from the latest `v*` tag.
+          fetch-depth: 0
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm >= 11.5.1.
+      - run: npm install -g npm@12.2.1
+      # publish.sh applies the typescript-go patches with `git am`, which needs a committer.
+      - run: git config --global user.name "github-actions" && git config --global user.email "github-actions@users.noreply.github.com"
+      - run: ./publish.sh

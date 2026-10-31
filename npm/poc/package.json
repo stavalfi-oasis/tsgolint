@@ -3,7 +3,10 @@
   "version": "0.0.0-set-by-publish-sh-at-pack-time",
   "description": "Oasis fork of tsgolint — bundles every supported platform binary.",
   "license": "MIT",
-  "repository": "github:stavalfi-oasis/tsgolint",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stavalfi-oasis/tsgolint.git"
+  },
   "bin": {
     "tsgolint": "./bin/tsgolint.js"
   },

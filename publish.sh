@@ -38,7 +38,10 @@ done
 
 out="$(dirname "$stage")/${tarball}"
 tar -czf "$out" -C "$(dirname "$stage")" package
-# Every version is a `<tag>-<sha>` prerelease, which npm refuses without an explicit tag.
+# Runs in .github/workflows/publish.yml: npm authenticates through trusted
+# publishing (OIDC), so there is no token and no 2FA. From a laptop npm rejects
+# it with 403. Every version is a `<tag>-<sha>` prerelease, which npm refuses
+# without an explicit tag.
 npm publish "$out" --access public --tag latest
 
 echo
