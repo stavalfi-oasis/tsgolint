@@ -1,21 +1,7 @@
 #!/usr/bin/env bash
-# publish.sh — build this fork and publish the npm/poc package as a tarball to
-# the Oasis rustfs bucket, consumed by the poc monorepo as a tarball-URL dependency.
+# publish.sh — build this fork and publish the npm/poc package to npm as
+# @stavalfi/tsgolint, consumed by the poc monorepo through an npm alias.
 set -euo pipefail
-
-S3_ENDPOINT="${S3_ENDPOINT:-http://127.0.0.1:9100}"
-S3_BUCKET="${S3_BUCKET:-oasis-npm}"
-export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-minioadmin}"
-export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-minioadmin}"
-export AWS_REGION="${AWS_REGION:-us-east-1}"
-unset AWS_PROFILE
-
-# bun install fetches the tarballs unsigned, so the bucket must be public-read.
-if ! aws --endpoint-url "$S3_ENDPOINT" s3api head-bucket --bucket "$S3_BUCKET" >/dev/null 2>&1; then
-  echo ">> creating bucket ${S3_BUCKET}"
-  aws --endpoint-url "$S3_ENDPOINT" s3api create-bucket --bucket "$S3_BUCKET" >/dev/null
-  aws --endpoint-url "$S3_ENDPOINT" s3api put-bucket-policy --bucket "$S3_BUCKET" --policy "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":[\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::${S3_BUCKET}/*\"]}]}"
-fi
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$repo_root"
@@ -32,7 +18,7 @@ if [[ ! -f typescript-go/go.mod ]]; then
 fi
 
 version="$(git describe --tags --abbrev=0 --match 'v*' | sed 's/^v//')-$(git rev-parse HEAD)"
-tarball="oxlint-tsgolint-${version}.tgz"
+tarball="stavalfi-tsgolint-${version}.tgz"
 
 stage="$(mktemp -d)/package"
 trap 'rm -rf "$(dirname "$stage")"' EXIT
@@ -52,7 +38,8 @@ done
 
 out="$(dirname "$stage")/${tarball}"
 tar -czf "$out" -C "$(dirname "$stage")" package
-aws --endpoint-url "$S3_ENDPOINT" s3 cp "$out" "s3://${S3_BUCKET}/${tarball}" --no-progress
+# Every version is a `<tag>-<sha>` prerelease, which npm refuses without an explicit tag.
+npm publish "$out" --access public --tag latest
 
 echo
-echo "poc package.json -> \"oxlint-tsgolint\": \"${S3_ENDPOINT}/${S3_BUCKET}/${tarball}\""
+echo "poc package.json -> \"oxlint-tsgolint\": \"npm:@stavalfi/tsgolint@${version}\""

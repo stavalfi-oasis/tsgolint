@@ -1,5 +1,5 @@
 {
-  "name": "oxlint-tsgolint",
+  "name": "@stavalfi/tsgolint",
   "version": "0.0.0-set-by-publish-sh-at-pack-time",
   "description": "Oasis fork of tsgolint — bundles every supported platform binary.",
   "license": "MIT",
