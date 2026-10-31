@@ -39,7 +39,8 @@ done
 out="$(dirname "$stage")/${tarball}"
 tar -czf "$out" -C "$(dirname "$stage")" package
 # Every version is a `<tag>-<sha>` prerelease, which npm refuses without an explicit tag.
-npm publish "$out" --access public --tag latest
+# Run from a terminal and npm prompts for the 2FA code; NPM_OTP passes it non-interactively.
+npm publish "$out" --access public --tag latest ${NPM_OTP:+--otp="$NPM_OTP"}
 
 echo
 echo "poc package.json -> \"oxlint-tsgolint\": \"npm:@stavalfi/tsgolint@${version}\""
