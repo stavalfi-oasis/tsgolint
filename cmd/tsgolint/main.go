@@ -109,6 +109,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/prefer_super_over_this"
 	"github.com/typescript-eslint/tsgolint/internal/rules/promise_function_async"
 	"github.com/typescript-eslint/tsgolint/internal/rules/related_getter_setter_pairs"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_abort_rethrow"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_abort_signal"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_abort_signal_in_while"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_access_modifiers"
@@ -231,6 +232,7 @@ var allRules = []rule.Rule{
 	no_client_response_json.NoClientResponseJsonRule,
 	no_comments.NoCommentsRule,
 	no_curl.NoCurlRule,
+	require_abort_rethrow.RequireAbortRethrowRule,
 	prefer_await_to_callbacks.PreferAwaitToCallbacksRule,
 	no_global_functions.NoGlobalFunctionsRule,
 	no_import_side_effects.NoImportSideEffectsRule,

@@ -1,0 +1,60 @@
+
+[TestRequireAbortRethrow/invalid-0 - 1]
+Diagnostic 1: missingAbortRethrow (7:5 - 9:3)
+Message: The first statement of a catch block must rethrow abort errors, or an abort is silently swallowed.
+Help: Start the block with `if (isAbortError(error)) { throw error; }`.
+   6 |     work();
+   7 |   } catch (error: unknown) {
+     |     ~~~~~~~~~~~~~~~~~~~~~~~~
+   8 |     work();
+     | ~~~~~~~~~~~
+   9 |   }
+     | ~~~
+  10 | }
+---
+
+[TestRequireAbortRethrow/invalid-1 - 1]
+Diagnostic 1: missingAbortRethrow (6:3 - 11:1)
+Message: The first statement of a catch block must rethrow abort errors, or an abort is silently swallowed.
+Help: Start the block with `if (isAbortError(e)) { throw e; }`.
+   5 |   work();
+   6 | } catch (e) {
+     |   ~~~~~~~~~~~
+   7 |   work();
+     | ~~~~~~~~~
+   8 |   if (isAbortError(e)) {
+     | ~~~~~~~~~~~~~~~~~~~~~~~~
+   9 |     throw e;
+     | ~~~~~~~~~~~~
+  10 |   }
+     | ~~~
+  11 | }
+     | ~
+---
+
+[TestRequireAbortRethrow/invalid-2 - 1]
+Diagnostic 1: missingAbortRethrow (4:3 - 4:10)
+Message: The first statement of a catch block must rethrow abort errors, or an abort is silently swallowed.
+Help: Start the block with `if (isAbortError(error)) { throw error; }`.
+   3 |   work();
+   4 | } catch {}
+     |   ~~~~~~~~
+---
+
+[TestRequireAbortRethrow/invalid-3 - 1]
+Diagnostic 1: missingAbortRethrow (4:17 - 4:80)
+Message: The first statement of a catch block must rethrow abort errors, or an abort is silently swallowed.
+Help: Start the block with `if (isAbortError(e)) { throw e; }`.
+   3 | 
+   4 | try { work(); } catch (e) { if (isAbortError(e)) { throw e; } else { work(); } }
+     |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+
+[TestRequireAbortRethrow/invalid-4 - 1]
+Diagnostic 1: missingAbortRethrow (4:17 - 4:47)
+Message: The first statement of a catch block must rethrow abort errors, or an abort is silently swallowed.
+Help: Start the block with `if (isAbortError(error)) { throw error; }`.
+   3 | 
+   4 | try { work(); } catch ({ message }) { work(); }
+     |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
