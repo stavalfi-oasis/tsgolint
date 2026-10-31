@@ -47,6 +47,10 @@ function run({ signal }: { signal: AbortSignal }) { return fetch("x", { signal }
 class A extends Base {
   run({ signal }: { signal: AbortSignal }) { return fetch("x", { signal }); }
 }`,
+			Output: []string{stub + `
+class A extends Base {
+  run({ signal }: { signal: AbortSignal }) { return fetch("x", { signal: super.linkSignal({ signal }) }); }
+}`},
 			Errors: []rule_tester.InvalidTestCaseError{
 				{MessageId: "requireLinkSignal", Line: 9, Column: 66, EndLine: 9, EndColumn: 72},
 			},
@@ -56,6 +60,10 @@ class A extends Base {
 class A extends Base {
   run({ signal: renamed }: { signal: AbortSignal }) { return fetch("x", { signal: renamed }); }
 }`,
+			Output: []string{stub + `
+class A extends Base {
+  run({ signal: renamed }: { signal: AbortSignal }) { return fetch("x", { signal: super.linkSignal({ signal: renamed }) }); }
+}`},
 			Errors: []rule_tester.InvalidTestCaseError{
 				{MessageId: "requireLinkSignal", Line: 9, Column: 83, EndLine: 9, EndColumn: 90},
 			},
@@ -65,6 +73,10 @@ class A extends Base {
 class A extends Base {
   run(abort: AbortSignal) { const alias = abort; return fetch("x", { signal: alias }); }
 }`,
+			Output: []string{stub + `
+class A extends Base {
+  run(abort: AbortSignal) { const alias = super.linkSignal({ signal: abort }); return fetch("x", { signal: alias }); }
+}`},
 			Errors: []rule_tester.InvalidTestCaseError{
 				{MessageId: "requireLinkSignal", Line: 9, Column: 43, EndLine: 9, EndColumn: 48},
 			},
@@ -74,8 +86,23 @@ class A extends Base {
 class A extends Base {
   run(options: { signal: AbortSignal }) { return fetch("x", { signal: options.signal }); }
 }`,
+			Output: []string{stub + `
+class A extends Base {
+  run(options: { signal: AbortSignal }) { return fetch("x", { signal: super.linkSignal({ signal: options.signal }) }); }
+}`},
 			Errors: []rule_tester.InvalidTestCaseError{
 				{MessageId: "requireLinkSignal", Line: 9, Column: 71, EndLine: 9, EndColumn: 85},
+			},
+		},
+
+		// A nested `function` has no `super`: reported, not fixed.
+		{
+			Code: stub + `
+class A extends Base {
+  run(abort: AbortSignal) { return function () { return fetch("x", { signal: abort }); }; }
+}`,
+			Errors: []rule_tester.InvalidTestCaseError{
+				{MessageId: "requireLinkSignal", Line: 9, Column: 78, EndLine: 9, EndColumn: 83},
 			},
 		},
 	})

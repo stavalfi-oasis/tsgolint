@@ -38,3 +38,13 @@ Help: Use `super.linkSignal({ signal: options.signal })` instead.
      |                                                                       ~~~~~~~~~~~~~~
   10 | }
 ---
+
+[TestRequireLinkSignal/invalid-4 - 1]
+Diagnostic 1: requireLinkSignal (9:78 - 9:82)
+Message: `abort` is the caller's signal only — it ignores this instance being closed.
+Help: Use `super.linkSignal({ signal: abort })` instead.
+   8 | class A extends Base {
+   9 |   run(abort: AbortSignal) { return function () { return fetch("x", { signal: abort }); }; }
+     |                                                                              ~~~~~
+  10 | }
+---

@@ -29,6 +29,10 @@ func isLinkableParameter(typeChecker *checker.Checker, declaration *ast.Node) bo
 	default:
 		return false
 	}
+	// `linkSignal` is an instance member; a static method has no `super` to reach it.
+	if ast.IsStatic(function) {
+		return false
+	}
 	classNode := function.Parent
 	if classNode == nil || !ast.IsClassLike(classNode) || ast.GetExtendsHeritageClauseElement(classNode) == nil {
 		return false
@@ -77,6 +81,20 @@ func isLinkSignalArgument(node *ast.Node) bool {
 	return access.Expression.Kind == ast.KindSuperKeyword && access.Name().Text() == "linkSignal"
 }
 
+// `super` is only valid up to the nearest non-arrow function, so the fix stops
+// being safe inside a nested `function` of the method.
+func canReachSuper(node *ast.Node) bool {
+	for current := node.Parent; current != nil; current = current.Parent {
+		switch current.Kind {
+		case ast.KindMethodDeclaration, ast.KindConstructor, ast.KindGetAccessor, ast.KindSetAccessor:
+			return true
+		case ast.KindFunctionExpression, ast.KindFunctionDeclaration:
+			return false
+		}
+	}
+	return false
+}
+
 // The identifier a `a.b.c` chain starts from, or nil.
 func rootIdentifier(node *ast.Node) *ast.Node {
 	for ast.IsPropertyAccessExpression(node) {
@@ -99,7 +117,22 @@ var RequireLinkSignalRule = rule.Rule{
 				return
 			}
 			textRange := utils.TrimNodeTextRange(ctx.SourceFile, node)
-			ctx.ReportNode(node, buildRequireLinkSignalMessage(ctx.SourceFile.Text()[textRange.Pos():textRange.End()]))
+			text := ctx.SourceFile.Text()[textRange.Pos():textRange.End()]
+			message := buildRequireLinkSignalMessage(text)
+			if !canReachSuper(node) {
+				ctx.ReportNode(node, message)
+				return
+			}
+			ctx.ReportNodeWithFixes(node, message, func() []rule.RuleFix {
+				linked := "super.linkSignal({ signal: " + text + " })"
+				if text == "signal" {
+					linked = "super.linkSignal({ signal })"
+				}
+				if parent := node.Parent; parent.Kind == ast.KindShorthandPropertyAssignment {
+					return []rule.RuleFix{rule.RuleFixReplace(ctx.SourceFile, parent, text+": "+linked)}
+				}
+				return []rule.RuleFix{rule.RuleFixReplaceRange(textRange, linked)}
+			})
 		}
 
 		return rule.RuleListeners{
