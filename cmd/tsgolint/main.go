@@ -94,6 +94,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/non_nullable_type_assertion_style"
 	"github.com/typescript-eslint/tsgolint/internal/rules/only_throw_error"
 	"github.com/typescript-eslint/tsgolint/internal/rules/pino_error_key"
+	"github.com/typescript-eslint/tsgolint/internal/rules/prefer_await_to_callbacks"
 	"github.com/typescript-eslint/tsgolint/internal/rules/prefer_find"
 	"github.com/typescript-eslint/tsgolint/internal/rules/prefer_includes"
 	"github.com/typescript-eslint/tsgolint/internal/rules/prefer_nullish_coalescing"
@@ -110,7 +111,6 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/related_getter_setter_pairs"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_abort_signal"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_abort_signal_in_while"
-	"github.com/typescript-eslint/tsgolint/internal/rules/require_link_signal"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_access_modifiers"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_array_sort_compare"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_async_disposable"
@@ -120,6 +120,7 @@ import (
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_constant_env_key"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_fs_utf8"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_it_timeout"
+	"github.com/typescript-eslint/tsgolint/internal/rules/require_link_signal"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_logger_child_in_super"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_object_params"
 	"github.com/typescript-eslint/tsgolint/internal/rules/require_os_eol"
@@ -230,6 +231,7 @@ var allRules = []rule.Rule{
 	no_client_response_json.NoClientResponseJsonRule,
 	no_comments.NoCommentsRule,
 	no_curl.NoCurlRule,
+	prefer_await_to_callbacks.PreferAwaitToCallbacksRule,
 	no_global_functions.NoGlobalFunctionsRule,
 	no_import_side_effects.NoImportSideEffectsRule,
 	no_infinite_loop.NoInfiniteLoopRule,
