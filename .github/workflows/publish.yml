@@ -33,8 +33,7 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-      # Trusted publishing needs npm >= 11.5.1.
-      - run: npm install -g npm@12.2.1
+          package-manager-cache: false
       # publish.sh applies the typescript-go patches with `git am`, which needs a committer.
       - run: git config --global user.name "github-actions" && git config --global user.email "github-actions@users.noreply.github.com"
       - run: ./publish.sh
