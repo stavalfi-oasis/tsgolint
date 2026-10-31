@@ -41,6 +41,15 @@ class A extends B {
 		{Code: stub + `
 function run({ signal }: { signal: AbortSignal }) { return fetch("x", { signal }); }
 `},
+		// Private methods get an already-linked signal from the public ones.
+		{Code: stub + `
+class A extends Base {
+  private run({ signal }: { signal: AbortSignal }) { return fetch("x", { signal }); }
+}`},
+		{Code: stub + `
+class A extends Base {
+  #run({ signal }: { signal: AbortSignal }) { return fetch("x", { signal }); }
+}`},
 	}, []rule_tester.InvalidTestCase{
 		{
 			Code: stub + `

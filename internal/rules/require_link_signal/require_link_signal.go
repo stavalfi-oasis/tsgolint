@@ -33,6 +33,11 @@ func isLinkableParameter(typeChecker *checker.Checker, declaration *ast.Node) bo
 	if ast.IsStatic(function) {
 		return false
 	}
+	// A private method is only reached from this class's own methods, which
+	// already hand it a linked signal — linking again would wrap it twice.
+	if ast.HasSyntacticModifier(function, ast.ModifierFlagsPrivate) || (function.Name() != nil && ast.IsPrivateIdentifier(function.Name())) {
+		return false
+	}
 	classNode := function.Parent
 	if classNode == nil || !ast.IsClassLike(classNode) || ast.GetExtendsHeritageClauseElement(classNode) == nil {
 		return false
