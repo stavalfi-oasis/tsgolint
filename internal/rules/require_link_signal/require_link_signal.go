@@ -15,6 +15,24 @@ func buildRequireLinkSignalMessage(text string) rule.RuleMessage {
 	}
 }
 
+func buildNoLinkSignalInPrivateMessage() rule.RuleMessage {
+	return rule.RuleMessage{
+		Id:          "noLinkSignalInPrivate",
+		Description: "A private method already gets a linked signal from the public method that calls it.",
+		Help:        "Pass the signal through as-is instead of calling `super.linkSignal` again.",
+	}
+}
+
+// A private method is only reached from this class's own methods, which
+// already hand it a linked signal — linking again would wrap it twice.
+func isPrivateMethod(function *ast.Node) bool {
+	if ast.HasSyntacticModifier(function, ast.ModifierFlagsPrivate) {
+		return true
+	}
+	name := function.Name()
+	return name != nil && ast.IsPrivateIdentifier(name)
+}
+
 // Whether declaration is a parameter — or a binding inside one — of a method
 // whose class inherits `linkSignal`. The base class that declares it extends
 // nothing, so it is not checked against itself.
@@ -33,9 +51,7 @@ func isLinkableParameter(typeChecker *checker.Checker, declaration *ast.Node) bo
 	if ast.IsStatic(function) {
 		return false
 	}
-	// A private method is only reached from this class's own methods, which
-	// already hand it a linked signal — linking again would wrap it twice.
-	if ast.HasSyntacticModifier(function, ast.ModifierFlagsPrivate) || (function.Name() != nil && ast.IsPrivateIdentifier(function.Name())) {
+	if isPrivateMethod(function) {
 		return false
 	}
 	classNode := function.Parent
@@ -71,14 +87,22 @@ func isLinkSignalArgument(node *ast.Node) bool {
 	}
 	object := property.Parent
 	call := object.Parent
-	if call == nil || !ast.IsCallExpression(call) {
+	if call == nil || !isSuperLinkSignalCall(call) {
 		return false
 	}
-	arguments := call.AsCallExpression().Arguments
-	if arguments == nil || len(arguments.Nodes) == 0 || arguments.Nodes[0] != object {
+	return call.AsCallExpression().Arguments.Nodes[0] == object
+}
+
+// `super.linkSignal(<at least one argument>)`.
+func isSuperLinkSignalCall(node *ast.Node) bool {
+	if !ast.IsCallExpression(node) {
 		return false
 	}
-	callee := call.AsCallExpression().Expression
+	arguments := node.AsCallExpression().Arguments
+	if arguments == nil || len(arguments.Nodes) == 0 {
+		return false
+	}
+	callee := node.AsCallExpression().Expression
 	if !ast.IsPropertyAccessExpression(callee) {
 		return false
 	}
@@ -86,18 +110,48 @@ func isLinkSignalArgument(node *ast.Node) bool {
 	return access.Expression.Kind == ast.KindSuperKeyword && access.Name().Text() == "linkSignal"
 }
 
-// `super` is only valid up to the nearest non-arrow function, so the fix stops
-// being safe inside a nested `function` of the method.
-func canReachSuper(node *ast.Node) bool {
+// The method `super` binds to at node, or nil inside a nested `function`,
+// where `super` is not valid.
+func enclosingMethod(node *ast.Node) *ast.Node {
 	for current := node.Parent; current != nil; current = current.Parent {
 		switch current.Kind {
 		case ast.KindMethodDeclaration, ast.KindConstructor, ast.KindGetAccessor, ast.KindSetAccessor:
-			return true
+			return current
 		case ast.KindFunctionExpression, ast.KindFunctionDeclaration:
-			return false
+			return nil
 		}
 	}
-	return false
+	return nil
+}
+
+// `super` is only valid up to the nearest non-arrow function, so the fix stops
+// being safe inside a nested `function` of the method.
+func canReachSuper(node *ast.Node) bool {
+	return enclosingMethod(node) != nil
+}
+
+// The signal expression inside `{ signal }` / `{ signal: <expr> }`, or nil when
+// the argument has any other shape.
+func linkedSignalExpression(argument *ast.Node) *ast.Node {
+	if !ast.IsObjectLiteralExpression(argument) {
+		return nil
+	}
+	properties := argument.AsObjectLiteralExpression().Properties
+	if properties == nil || len(properties.Nodes) != 1 {
+		return nil
+	}
+	property := properties.Nodes[0]
+	switch property.Kind {
+	case ast.KindShorthandPropertyAssignment:
+		if property.Name().Text() == "signal" {
+			return property.Name()
+		}
+	case ast.KindPropertyAssignment:
+		if name := property.Name(); ast.IsIdentifier(name) && name.Text() == "signal" {
+			return property.Initializer()
+		}
+	}
+	return nil
 }
 
 // The identifier a `a.b.c` chain starts from, or nil.
@@ -141,6 +195,26 @@ var RequireLinkSignalRule = rule.Rule{
 		}
 
 		return rule.RuleListeners{
+			// `super.linkSignal(...)` inside a private method wraps an already-linked signal.
+			ast.KindCallExpression: func(node *ast.Node) {
+				if !isSuperLinkSignalCall(node) {
+					return
+				}
+				method := enclosingMethod(node)
+				if method == nil || !isPrivateMethod(method) {
+					return
+				}
+				signal := linkedSignalExpression(node.AsCallExpression().Arguments.Nodes[0])
+				if signal == nil {
+					ctx.ReportNode(node, buildNoLinkSignalInPrivateMessage())
+					return
+				}
+				ctx.ReportNodeWithFixes(node, buildNoLinkSignalInPrivateMessage(), func() []rule.RuleFix {
+					signalRange := utils.TrimNodeTextRange(ctx.SourceFile, signal)
+					text := ctx.SourceFile.Text()[signalRange.Pos():signalRange.End()]
+					return []rule.RuleFix{rule.RuleFixReplaceRange(utils.TrimNodeTextRange(ctx.SourceFile, node), text)}
+				})
+			},
 			ast.KindIdentifier: func(node *ast.Node) {
 				parent := node.Parent
 				if parent != nil && parent.Kind == ast.KindShorthandPropertyAssignment && parent.Name() == node {

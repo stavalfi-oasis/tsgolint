@@ -48,3 +48,23 @@ Help: Use `super.linkSignal({ signal: abort })` instead.
      |                                                                              ~~~~~
   10 | }
 ---
+
+[TestRequireLinkSignal/invalid-5 - 1]
+Diagnostic 1: noLinkSignalInPrivate (9:82 - 9:109)
+Message: A private method already gets a linked signal from the public method that calls it.
+Help: Pass the signal through as-is instead of calling `super.linkSignal` again.
+   8 | class A extends Base {
+   9 |   private run({ signal }: { signal: AbortSignal }) { return fetch("x", { signal: super.linkSignal({ signal }) }); }
+     |                                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  10 | }
+---
+
+[TestRequireLinkSignal/invalid-6 - 1]
+Diagnostic 1: noLinkSignalInPrivate (9:59 - 9:102)
+Message: A private method already gets a linked signal from the public method that calls it.
+Help: Pass the signal through as-is instead of calling `super.linkSignal` again.
+   8 | class A extends Base {
+   9 |   #run(options: { signal: AbortSignal }) { const linked = super.linkSignal({ signal: options.signal }); return fetch("x", { signal: linked }); }
+     |                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  10 | }
+---

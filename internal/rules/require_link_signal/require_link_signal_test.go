@@ -114,5 +114,33 @@ class A extends Base {
 				{MessageId: "requireLinkSignal", Line: 9, Column: 78, EndLine: 9, EndColumn: 83},
 			},
 		},
+
+		// A private method already gets a linked signal: linking again is reported and unwrapped.
+		{
+			Code: stub + `
+class A extends Base {
+  private run({ signal }: { signal: AbortSignal }) { return fetch("x", { signal: super.linkSignal({ signal }) }); }
+}`,
+			Output: []string{stub + `
+class A extends Base {
+  private run({ signal }: { signal: AbortSignal }) { return fetch("x", { signal: signal }); }
+}`},
+			Errors: []rule_tester.InvalidTestCaseError{
+				{MessageId: "noLinkSignalInPrivate", Line: 9, Column: 82, EndLine: 9, EndColumn: 110},
+			},
+		},
+		{
+			Code: stub + `
+class A extends Base {
+  #run(options: { signal: AbortSignal }) { const linked = super.linkSignal({ signal: options.signal }); return fetch("x", { signal: linked }); }
+}`,
+			Output: []string{stub + `
+class A extends Base {
+  #run(options: { signal: AbortSignal }) { const linked = options.signal; return fetch("x", { signal: linked }); }
+}`},
+			Errors: []rule_tester.InvalidTestCaseError{
+				{MessageId: "noLinkSignalInPrivate", Line: 9, Column: 59, EndLine: 9, EndColumn: 103},
+			},
+		},
 	})
 }
