@@ -212,6 +212,12 @@ var RequireLinkSignalRule = rule.Rule{
 				ctx.ReportNodeWithFixes(node, buildNoLinkSignalInPrivateMessage(), func() []rule.RuleFix {
 					signalRange := utils.TrimNodeTextRange(ctx.SourceFile, signal)
 					text := ctx.SourceFile.Text()[signalRange.Pos():signalRange.End()]
+					// `{ signal: super.linkSignal({ signal }) }` becomes `{ signal }`, not `{ signal: signal }`.
+					if parent := node.Parent; parent.Kind == ast.KindPropertyAssignment && parent.Initializer() == node {
+						if name := parent.Name(); ast.IsIdentifier(name) && name.Text() == text {
+							return []rule.RuleFix{rule.RuleFixReplace(ctx.SourceFile, parent, text)}
+						}
+					}
 					return []rule.RuleFix{rule.RuleFixReplaceRange(utils.TrimNodeTextRange(ctx.SourceFile, node), text)}
 				})
 			},

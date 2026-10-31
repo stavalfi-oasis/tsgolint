@@ -123,7 +123,7 @@ class A extends Base {
 }`,
 			Output: []string{stub + `
 class A extends Base {
-  private run({ signal }: { signal: AbortSignal }) { return fetch("x", { signal: signal }); }
+  private run({ signal }: { signal: AbortSignal }) { return fetch("x", { signal }); }
 }`},
 			Errors: []rule_tester.InvalidTestCaseError{
 				{MessageId: "noLinkSignalInPrivate", Line: 9, Column: 82, EndLine: 9, EndColumn: 110},
